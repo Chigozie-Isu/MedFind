@@ -2,7 +2,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(32);
+select plan(36);
 
 create function pg_temp.as_user(p_user uuid) returns void language sql as $$
   select set_config('role', 'authenticated', true),
@@ -64,6 +64,14 @@ select lives_ok($$ select save_pharmacy_details('{"name":"Fuasi Pharmacy","phone
 select is(my_pharmacy_application() -> 'pharmacy' ->> 'application_status', 'draft', 'the new pharmacy is a draft');
 select is(my_pharmacy_application() -> 'pharmacy' ->> 'pcn_number', '00814472', 'the PCN number is stored without spaces');
 select is(my_staff_state() ->> 'has_passcode', 'false', 'no passcode until the application is submitted');
+select lives_ok($$ insert into storage.objects (bucket_id, name, owner_id)
+  values ('pharmacy-documents', (my_pharmacy_application() -> 'pharmacy' ->> 'id') || '/premises_licence/scan.pdf', auth.uid()::text) $$,
+  'the owner can upload a file into their draft pharmacy''s folder');
+select throws_ok($$ insert into storage.objects (bucket_id, name)
+  values ('pharmacy-documents', 'a0000000-0000-4000-8000-000000000001/premises_licence/scan.pdf') $$,
+  '42501', null, 'the owner cannot upload into another pharmacy''s folder');
+create temp table fuasi as select (my_pharmacy_application() -> 'pharmacy' ->> 'id') as id;
+grant select on fuasi to authenticated;
 select throws_ok($$ select submit_pharmacy_application() $$, '22023', 'Upload all 3 required documents first', 'cannot submit without documents');
 
 select lives_ok($$
@@ -82,6 +90,13 @@ select is(save_verified_payout_account('d0000000-0000-4000-8000-000000000001', '
 select pg_temp.as_user('d0000000-0000-4000-8000-000000000001');
 select ok(submit_pharmacy_application() ~ '^\d{5}$', 'submitting returns a 5-digit staff passcode once');
 select is(my_staff_state() ->> 'application_status', 'submitted', 'the application is waiting for review');
+
+select throws_ok($$ insert into storage.objects (bucket_id, name)
+  values ('pharmacy-documents', (select id from fuasi) || '/shop_front/late.jpg') $$,
+  '42501', null, 'once submitted, the owner cannot add files');
+select pg_temp.as_user('c0000000-0000-4000-8000-000000000001');
+select is((select count(*) from storage.objects where bucket_id = 'pharmacy-documents'), 0::bigint,
+  'other people cannot see a pharmacy''s documents');
 
 select pg_temp.as_service();
 select is((review_pharmacy_application((select id from pharmacies where pcn_number = '00814472'), true)).is_live, true,

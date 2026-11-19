@@ -26,6 +26,23 @@ pnpm typecheck
 pnpm test
 ```
 
+## Environment
+
+Copy each app's `.env.example` to `.env.local` and fill it in (never commit these files):
+
+- Customer: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+- Pharmacy: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Edge functions: `PAYSTACK_SECRET_KEY` (leave it out locally for test mode).
+
+For a local database, `pnpm db:start` prints the URL and anon key. Before going live, Supabase needs an SMS provider (Termii or Twilio) and an email sender (for example Resend) set up in the dashboard.
+
+## Sign in screens
+
+Each app has a hidden gallery of every sign-in and sign-up state from Figma, without calling Supabase:
+
+- Customer: http://localhost:8081/dev/auth
+- Pharmacy: http://localhost:3000/dev/auth
+
 ## Components screens
 
 Each app has a hidden screen that shows every shared component in light and dark, side by side, to compare with Figma. Nothing links to it.

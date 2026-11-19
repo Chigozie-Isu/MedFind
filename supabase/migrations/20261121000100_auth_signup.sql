@@ -86,17 +86,23 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 on conflict (id) do nothing;
 
 -- Files live under <pharmacy_id>/<kind>/<file>. Owners add and remove them while the application is a draft.
+-- The check runs as security definer so it doesn't depend on which pharmacy columns the caller may read.
+create function private.owns_pharmacy_path(p_name text, p_draft_only boolean) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.pharmacies p
+                 where p.id::text = (storage.foldername(p_name))[1]
+                   and (not p_draft_only or p.application_status = 'draft')
+                   and private.is_owner_user(p.id))
+$$;
+revoke all on function private.owns_pharmacy_path from public;
+grant execute on function private.owns_pharmacy_path to authenticated;
+
 create policy "owners upload pharmacy documents" on storage.objects for insert to authenticated
-  with check (bucket_id = 'pharmacy-documents' and exists (
-    select 1 from public.pharmacies p where p.id::text = (storage.foldername(name))[1]
-      and p.application_status = 'draft' and private.is_owner_user(p.id)));
+  with check (bucket_id = 'pharmacy-documents' and private.owns_pharmacy_path(name, true));
 create policy "owners read pharmacy documents" on storage.objects for select to authenticated
-  using (bucket_id = 'pharmacy-documents' and exists (
-    select 1 from public.pharmacies p where p.id::text = (storage.foldername(name))[1] and private.is_owner_user(p.id)));
+  using (bucket_id = 'pharmacy-documents' and private.owns_pharmacy_path(name, false));
 create policy "owners remove draft pharmacy documents" on storage.objects for delete to authenticated
-  using (bucket_id = 'pharmacy-documents' and exists (
-    select 1 from public.pharmacies p where p.id::text = (storage.foldername(name))[1]
-      and p.application_status = 'draft' and private.is_owner_user(p.id)));
+  using (bucket_id = 'pharmacy-documents' and private.owns_pharmacy_path(name, true));
 
 -- ---------- sign-in lockout ----------
 create table private.sign_in_attempts (

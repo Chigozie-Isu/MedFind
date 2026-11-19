@@ -8,7 +8,7 @@ developer's quick reference.
 ```
 pnpm db:start     # starts local Supabase in Docker
 pnpm db:reset     # rebuilds the database from migrations and loads the Lagos seed data
-pnpm db:test      # 54 pgTAP tests: who can see what, and the reservation rules
+pnpm db:test      # 103 pgTAP tests: who can see what, sign up, and the reservation rules
 pnpm db:types     # regenerates packages/core/src/database.types.ts after a schema change
 ```
 
@@ -58,3 +58,14 @@ pg_cron runs the expiry and pickup-warning jobs every minute, and payouts every 
 ## Customer location (Location access)
 
 `customer_locations` keeps one current location per customer, saved from the Location access screens: a label ("GRA Phase 2"), the line under it, lat/lng, GPS accuracy in metres (empty for a typed address), where it came from (`gps` or `address`) and `updated_at`. A map point (`location`) is worked out from lat/lng for nearby-pharmacy searches. Only the customer can read or change their row. Added in its own migration, `20261120000100_customer_locations.sql`; tests are in `supabase/tests/customer_locations.test.sql`. The seed gives Ada a saved location; the other customers have none, so they see the Location access screens.
+
+## Sign in and pharmacy sign up
+
+Migration `20261121000100_auth_signup.sql`, tests in `supabase/tests/auth_signup.test.sql`.
+
+- **Sign-in lockout:** `sign_in_precheck`, `record_sign_in_failure` and `clear_sign_in_failures` count wrong passwords per email or phone in `private.sign_in_attempts`. 5 wrong tries lock it for 5 minutes.
+- **Sign-up checks:** `sign_up_precheck(email, phone)` says whether the email or phone is already used, without exposing who owns it.
+- **Pharmacy applications:** `pharmacies.application_status` is `draft`, `submitted`, `approved` or `rejected`. Owners call `save_pharmacy_details`, `my_pharmacy_application`, `add_pharmacy_document`, `remove_pharmacy_document` and `submit_pharmacy_application` (returns the owner's 5-digit passcode once). MedFind calls `review_pharmacy_application(pharmacy_id, approve)`; approving puts the pharmacy live.
+- **Documents:** `pharmacy_documents` records each file. Files live in the private `pharmacy-documents` storage bucket under `<pharmacy_id>/<kind>/<file>`. Only the owner (and MedFind) can open them, and the owner can add or remove files only while the application is a draft.
+- **Payout account:** `pharmacy_payout_accounts`, written only by the `paystack-resolve-account` edge function through `save_verified_payout_account`, which refuses an account whose name doesn't match the pharmacy.
+- **Edge functions:** `paystack-banks` (bank list) and `paystack-resolve-account`. Without `PAYSTACK_SECRET_KEY` they run in test mode (see CLAUDE.md). Run them locally with `supabase functions serve`.
