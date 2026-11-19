@@ -158,6 +158,16 @@ export function approvalDeadline(placedAt: Date): Date {
   return new Date(placedAt.getTime() + APPROVAL_WINDOW_MINUTES * 60_000);
 }
 
+/** Milliseconds the pharmacy has left to approve or decline (0 once the window has passed). */
+export function approvalMsLeft(placedAt: Date, now: Date): number {
+  return Math.max(0, approvalDeadline(placedAt).getTime() - now.getTime());
+}
+
+/** An unanswered reservation expires (and is refunded) once the approval window has passed. */
+export function isApprovalExpired(placedAt: Date, now: Date): boolean {
+  return now.getTime() >= approvalDeadline(placedAt).getTime();
+}
+
 export function pickupDeadline(readyAt: Date): Date {
   return new Date(readyAt.getTime() + PICKUP_WINDOW_MINUTES * 60_000);
 }

@@ -79,7 +79,8 @@ export const inventory: DemoInventory[] = [
 
 export const LOW_STOCK_THRESHOLD = 5;
 
-export const customer = { firstName: 'Grace' };
+/** `fullName` is how the pharmacy screens show her (Figma "Review Grace"). */
+export const customer = { firstName: 'Grace', fullName: 'Grace Mary' };
 
 export const medicineName = (m: DemoMedicine) => m.name;
 export const findPharmacy = (id: string) => pharmacies.find((p) => p.id === id)!;

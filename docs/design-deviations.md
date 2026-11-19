@@ -96,4 +96,22 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Pickup code header | Map with route | Plain header with the pharmacy pin | No map library approved for the customer app. |
 | Pickup code | "AB-145", copy button | 6-digit code ("199 364"), no copy button | The schema uses 6-digit codes; copying needs a new library. |
 | Pickup code buttons | Cancel | My reservations | Happy path only; links the screens in order. |
-| Waiting → ready | Pharmacy confirms | Confirms by itself after 4 seconds | Demo stands in for the pharmacy. |
+| Waiting → ready | Pharmacy confirms | Changes the moment the pharmacy approves or declines (Supabase Realtime broadcast). Falls back to confirming after 4 seconds when Supabase isn't set up | Live link to the pharmacy demo. |
+| Pickup code – declined / expired | Not in the linked frames | Simple card with the pharmacy's reason (or "didn't reply in 10 mins") and Find another pharmacy | Needed for the live link; happy-path copy only. |
+
+## Pharmacy reservation approval demo (Dashboard 167:2472, Reservations 196:3840, Review Grace 456:15464, Decline reason 2620:124268, Grace confirmed 473:10835)
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Payment badges and details | "Paid online · ₦3,450", "card charged" | "Pay in person · ₦3,450", "₦3,450 to pay at the counter" | Demo scope: pay at pharmacy only. |
+| Pickup code (confirmed) | "AB-145" | Grace's 6-digit code (e.g. "482 915"); AB-145 stays as the reference in the breadcrumb | The pharmacy must check the same code Grace's phone shows. |
+| Expiry note (confirmed) | "Grace gets her money back and the bottle goes back into stock" | "It expires on its own and the bottle goes back into stock" | Nothing to refund when paying at the pharmacy. |
+| Dashboard waiting card | Illustration on the right | Not shown | Illustration asset not exported for this demo. |
+| Dashboard and side nav | MedChat button | Not built | MedChat is out of scope. |
+| Insight cards | Raised card with shadow | Existing `InsightCard` (muted background) | Reuses the shared component. |
+| Trending / Running low images | Product photos | Box icon placeholders | No product photos in the repo. |
+| Prescription photo tools | Zoom in, zoom out, full screen icons | Search, minus and grid icons (not wired) | The icon set has no zoom or expand icons; happy path only. |
+| Review timer | Under the bell, right of the name | Same place, laid out with a negative margin | Keeps the shared header. |
+| Notifications badge | 5 | Waiting reservations + 2 | Sample number that moves with the demo. |
+| Sample cards | Bob Mackie, Ned Mackie (Review), Annie Oak, Tunde Yomi ×2 (Ready) | Bob Mackie (Review), Annie Oak and Tunde Yomi (Ready) | Fewer samples; Grace's card is the live one. |
+| Prescription photo | Grace uploads a photo | The Figma photo is bundled (`public/demo/grace-prescription.png`) | No scanning or uploads in the demo. |

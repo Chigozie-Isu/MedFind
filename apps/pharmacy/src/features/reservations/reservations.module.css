@@ -1,0 +1,75 @@
+/* Pharmacy Dashboard and Reservations screens (Figma 1440 x 1024 frames). Colours come from
+   the theme variables, so dark mode follows the sun/moon toggle. */
+
+.layout { display: flex; min-height: 100vh; background: var(--mf-surface-default); }
+.main { flex: 1; min-width: 0; padding: 24px 24px 32px; display: flex; flex-direction: column; gap: 32px; box-sizing: border-box; }
+.topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.headingBlock { display: flex; flex-direction: column; gap: 8px; }
+.actions { display: flex; align-items: center; gap: 16px; }
+.bell { position: relative; width: 44px; height: 44px; display: grid; place-items: center; color: var(--mf-icon-default); }
+.bellBadge { position: absolute; top: 2px; left: 26px; min-width: 18px; height: 18px; border-radius: 9px; border: 2px solid var(--mf-surface-default); background: var(--mf-text-error); color: var(--mf-text-on-brand); display: grid; place-items: center; box-sizing: border-box; }
+.staffCard { border: 1px solid var(--mf-text-secondary); border-radius: 16px; padding: 8px 16px; display: flex; flex-direction: column; gap: 8px; background: var(--mf-surface-raised); }
+
+/* Dashboard */
+.insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.alert { background: var(--mf-brand-subtle); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.columns { display: grid; grid-template-columns: minmax(0, 566fr) minmax(0, 448fr); gap: 24px; align-items: start; }
+.panel { background: var(--mf-surface-raised); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.panelBordered { composes: panel; border: 1px solid var(--mf-surface-border); }
+.row { display: flex; align-items: center; gap: 16px; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.thumb { width: 42px; height: 42px; border-radius: 16px; background: var(--mf-surface-muted); display: grid; place-items: center; color: var(--mf-text-secondary); flex: none; }
+.grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+/* Reservations board */
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.column { background: var(--mf-surface-border); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.activity { background: var(--mf-surface-raised); border-radius: 24px; display: flex; flex-direction: column; }
+.activityHead { padding: 16px; border-bottom: 1px solid var(--mf-surface-border); }
+.activityRow { padding: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.count { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 16px; display: grid; place-items: center; box-sizing: border-box; }
+.resCard { background: var(--mf-surface-raised); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.avatar { width: 72px; height: 72px; border-radius: 36px; background: var(--mf-surface-default); color: var(--mf-text-brand); display: grid; place-items: center; flex: none; }
+.tags { display: flex; flex-wrap: wrap; gap: 16px; }
+.track { height: 4px; border-radius: 4px; background: var(--mf-surface-border); overflow: hidden; }
+.fill { height: 100%; border-radius: 4px; background: var(--mf-brand-default); }
+.fillWarning { composes: fill; background: var(--mf-tone-warning-dot); }
+.fillError { composes: fill; background: var(--mf-text-error); }
+
+/* Review and confirmed */
+.crumbs { display: flex; align-items: center; gap: 8px; color: var(--mf-text-secondary); }
+.crumbLink { display: inline-flex; align-items: center; gap: 8px; color: var(--mf-text-brand); text-decoration: none; }
+.reviewHead { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.timer { width: 266px; display: flex; flex-direction: column; gap: 16px; }
+.reviewGrid { display: grid; grid-template-columns: minmax(0, 566fr) minmax(0, 448fr); gap: 24px; align-items: start; }
+.photoPanel { background: var(--mf-surface-raised); border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; }
+.photoHead { padding: 24px 16px; display: flex; justify-content: space-between; align-items: center; }
+.photoTools { display: flex; gap: 40px; color: var(--mf-text-brand); }
+.photoBox { background: var(--mf-surface-border); padding: 16px; }
+.photo { width: 100%; height: auto; display: block; border-radius: 16px; }
+.photoFoot { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.checklist { background: var(--mf-surface-raised); border-radius: 24px; display: flex; flex-direction: column; }
+.checklistHead { padding: 16px; display: flex; flex-direction: column; gap: 24px; border-bottom: 1px solid var(--mf-surface-border); }
+.checklistItems { padding: 16px; display: flex; flex-direction: column; gap: 40px; }
+.buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+
+.tick { width: 64px; height: 64px; border-radius: 32px; background: var(--mf-tone-success-bg); color: var(--mf-text-success); display: grid; place-items: center; }
+.details { background: var(--mf-surface-raised); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.codeRow { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 4px; border-bottom: 1px solid var(--mf-text-tertiary); }
+.code { letter-spacing: 1px; color: var(--mf-text-heading); }
+.detailRow { display: grid; grid-template-columns: 118px 1fr; gap: 0; }
+.note { background: var(--mf-surface-muted); border-radius: 24px; padding: 16px; display: flex; gap: 24px; align-items: center; }
+.tips { background: var(--mf-surface-raised); border-radius: 24px; display: flex; flex-direction: column; }
+.tip { display: flex; gap: 24px; align-items: flex-start; color: var(--mf-text-brand); }
+.footer { display: flex; justify-content: flex-end; align-items: center; gap: 24px; margin-top: auto; }
+
+/* Decline reason popup (Figma 2620:124268) */
+.scrim { position: fixed; inset: 0; background: rgba(0, 9, 20, 0.6); display: grid; place-items: center; z-index: 10; }
+.dialog { width: 520px; max-width: calc(100vw - 32px); background: var(--mf-surface-raised); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.textareaBox { position: relative; }
+.textarea { width: 100%; min-height: 130px; resize: vertical; box-sizing: border-box; border-radius: 16px; border: 1px solid var(--mf-input-border); background: var(--mf-input-background); color: var(--mf-input-value); padding: 16px 16px 32px; }
+.textarea::placeholder { color: var(--mf-input-placeholder); }
+.textarea:focus { outline: none; border-color: var(--mf-input-border-focus); }
+.counter { position: absolute; left: 16px; bottom: 12px; }
+.helper { display: flex; gap: 8px; align-items: center; color: var(--mf-text-secondary); }
