@@ -14,4 +14,5 @@ Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, 
 - Icons use a 1.5px stroke. Use chevrons, not arrows, for back and forward.
 - Light and dark mode: the customer app switches in Settings > Appearance; the pharmacy app uses a sun/moon toggle.
 - Take colours, text styles, spacing and radii from `@medfind/ui`, never hard-code them in screens. Follow the Figma text styles, not the Typescale page labels.
+- Where the code differs from Figma, record it in `docs/design-deviations.md`.
 - Keep this file updated when new rules are agreed.

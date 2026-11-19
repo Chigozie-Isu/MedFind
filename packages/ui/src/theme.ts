@@ -63,7 +63,7 @@ export interface ThemeColors {
     onInverse: string;
     /** Links and brand-coloured text. */
     brand: string;
-    /** Required-field asterisk. */
+    /** Required-field asterisk. Darker (light) / lighter (dark) than Figma's #FF6B5A to pass 4.5:1. */
     required: string;
     success: string;
     error: string;
@@ -156,7 +156,7 @@ export const lightColors: ThemeColors = {
     onBrand: p.surfaceLight.raised,
     onInverse: p.neutral[25],
     brand: p.primary[600],
-    required: p.accent.default,
+    required: p.accent.pressed,
     success: p.success.default,
     error: p.error.default,
   },
@@ -248,7 +248,7 @@ export const darkColors: ThemeColors = {
     onBrand: p.surfaceLight.raised,
     onInverse: p.neutral[25],
     brand: p.primary.darkModeText,
-    required: p.accent.default,
+    required: p.accent[500],
     success: p.success[400],
     error: p.error.disabled,
   },

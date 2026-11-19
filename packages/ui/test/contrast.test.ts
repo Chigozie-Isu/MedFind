@@ -48,6 +48,7 @@ function pairsFor(c: ThemeColors): Pair[] {
   onSurfaces('input.value', c.input.value, 12, 500, inputBgs);
   onSurfaces('input.placeholder', c.input.placeholder, 12, 500, inputBgs);
   onSurfaces('input.label', c.input.label, 14, 500, inputBgs);
+  onSurfaces('required asterisk', c.text.required, 14, 500, inputBgs);
   onSurfaces('input.helper', c.input.helper, 11, 500, inputBgs);
   onSurfaces('input.helperError', c.input.helperError, 11, 500, inputBgs);
 
