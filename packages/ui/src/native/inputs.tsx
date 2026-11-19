@@ -14,6 +14,17 @@ export function withAlpha(hex: string, alpha: number): string {
   return `${hex}${a}`;
 }
 
+const nativeAutoComplete = {
+  email: 'email',
+  username: 'username',
+  'current-password': 'current-password',
+  'new-password': 'new-password',
+  tel: 'tel',
+  'one-time-code': 'one-time-code',
+  name: 'name',
+  off: 'off',
+} as const;
+
 const keyboardType = { default: 'default', email: 'email-address', phone: 'phone-pad', number: 'number-pad' } as const;
 
 /** Input field (Figma 199:4251): label, 16px-radius box, helper or error text. */
@@ -30,6 +41,8 @@ export function TextField({
   secure,
   size = 'mobile',
   keyboard = 'default',
+  autoComplete,
+  onSubmitEditing,
   forceState,
 }: TextFieldProps) {
   const { colors } = useTheme();
@@ -76,6 +89,10 @@ export function TextField({
           editable={!disabled}
           secureTextEntry={secure && !revealed}
           keyboardType={keyboardType[keyboard]}
+          autoComplete={autoComplete ? nativeAutoComplete[autoComplete] : undefined}
+          autoCapitalize={keyboard === 'email' || secure || autoComplete === 'username' ? 'none' : undefined}
+          autoCorrect={keyboard === 'email' || secure ? false : undefined}
+          onSubmitEditing={onSubmitEditing}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           accessibilityLabel={label}

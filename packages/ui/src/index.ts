@@ -17,3 +17,5 @@ export type { IconName, IconDef, IconPath } from './icons/icons.ts';
 export { contrastRatio, relativeLuminance, requiredContrast } from './contrast.ts';
 export type * from './types.ts';
 export { buttonColors, buttonVariants, isOutlined } from './buttonColors.ts';
+export { logoPaths, logoFill, LOGO_VIEWBOX, LOGO_MARK_VIEWBOX, LOGO_BLUE, LOGO_CORAL } from './logo.ts';
+export type { LogoTone, LogoPath } from './logo.ts';

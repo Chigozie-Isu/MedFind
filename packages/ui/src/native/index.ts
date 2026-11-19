@@ -25,3 +25,5 @@ export {
   Toast,
 } from './display.tsx';
 export { TabBar, customerTabs } from './TabBar.tsx';
+export { Logo } from './Logo.tsx';
+export type { LogoProps } from './Logo.tsx';

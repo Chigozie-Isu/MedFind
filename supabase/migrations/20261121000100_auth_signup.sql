@@ -386,7 +386,11 @@ create table private.dev_sms_outbox (
 create function private.dev_send_sms_hook(event jsonb) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 begin
-  insert into private.dev_sms_outbox (phone, otp) values (coalesce(nullif(event -> 'user' ->> 'phone', ''), event -> 'user' ->> 'phone_change'), event -> 'sms' ->> 'otp');
+  -- A phone change carries the new number as user.new_phone; sign-in codes use user.phone.
+  insert into private.dev_sms_outbox (phone, otp)
+  values (coalesce(nullif(event -> 'sms' ->> 'phone', ''), nullif(event -> 'user' ->> 'new_phone', ''),
+                   nullif(event -> 'user' ->> 'phone', ''), 'unknown'),
+          event -> 'sms' ->> 'otp');
   return '{}'::jsonb;
 end $$;
 grant usage on schema private to supabase_auth_admin;

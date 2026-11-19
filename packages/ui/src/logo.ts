@@ -49,12 +49,14 @@ export const logoPaths: readonly LogoPath[] = [
   },
 ];
 
-export type LogoTone = 'colour' | 'white';
+/** `reversed`: white "Med", coral "find", for photos (customer Splash). */
+export type LogoTone = 'colour' | 'white' | 'reversed';
 
 /** The fill for each slot. `white` keeps the mark's colours and whitens the wordmark. */
 export function logoFill(slot: LogoPath['fill'], tone: LogoTone): string {
   if (slot === 'markBlue') return LOGO_BLUE;
   if (slot === 'markCoral') return LOGO_CORAL;
   if (tone === 'white') return '#FFFFFF';
+  if (tone === 'reversed') return slot === 'wordFirst' ? '#FFFFFF' : LOGO_CORAL;
   return slot === 'wordFirst' ? LOGO_BLUE : LOGO_CORAL;
 }
