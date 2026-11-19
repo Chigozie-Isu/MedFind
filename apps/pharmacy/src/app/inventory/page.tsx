@@ -1,5 +1,10 @@
-import { Workspace } from '../../features/workspace/Workspace';
+import { Suspense } from 'react';
+import { Inventory } from '../../features/inventory/Inventory';
 
 export default function Page() {
-  return <Workspace section="inventory" />;
+  return (
+    <Suspense>
+      <Inventory />
+    </Suspense>
+  );
 }
