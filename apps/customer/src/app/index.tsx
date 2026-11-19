@@ -4,23 +4,20 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { radii, sizes, space } from '@medfind/ui';
 import { Button, Icon, SearchField, Text, useTheme } from '@medfind/ui/native';
 import { currentCustomerId } from '../lib/supabase';
-import { hasSeenOnboarding } from '../lib/onboarding';
 import { customer } from '../features/demo/data';
 import { ReservationRow, TabScreen, useComingSoon } from '../features/demo/parts';
 import { useReservations } from '../features/demo/store';
 
-type Gate = 'checking' | 'signed_in' | 'onboarding' | 'welcome';
+type Gate = 'checking' | 'signed_in' | 'welcome';
 
 /**
- * Signed-out customers go to Onboarding (first launch) or the Splash.
+ * Signed-out customers start at the Splash (then Onboarding the first time, as in Figma).
  * Without Supabase settings, Log in and Sign up accept anything and sign in as Grace.
  */
 function useAuthGate(): Gate {
   const [gate, setGate] = useState<Gate>('checking');
   useEffect(() => {
-    Promise.all([currentCustomerId(), hasSeenOnboarding()]).then(([id, seen]) =>
-      setGate(id ? 'signed_in' : seen ? 'welcome' : 'onboarding'),
-    );
+    currentCustomerId().then((id) => setGate(id ? 'signed_in' : 'welcome'));
   }, []);
   return gate;
 }
@@ -42,7 +39,6 @@ export default function Home() {
   const gate = useAuthGate();
   const [soonToast, showSoon] = useComingSoon();
   if (gate === 'checking') return null;
-  if (gate === 'onboarding') return <Redirect href="/onboarding" />;
   if (gate === 'welcome') return <Redirect href="/welcome" />;
 
   const search = (q: string) => q.trim() && router.push({ pathname: '/search', params: { q: q.trim() } });
