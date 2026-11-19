@@ -14,5 +14,4 @@ Supabase settings: `--environment preview` uses only EAS environment variables a
 `.env` files. With none set, the shared app runs the full local demo (sign-in as Grace), which is
 what we want for demos. Never put secrets in `eas.json` or `app.json`.
 
-The first `eas init` writes the Expo project id (`extra.eas.projectId`) and `updates.url` into
-`app.json`; commit those so later pulls don't clash.
+The Expo project id (`extra.eas.projectId`) and `updates.url` are committed in `app.json`.
