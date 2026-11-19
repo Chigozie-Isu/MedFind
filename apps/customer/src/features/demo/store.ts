@@ -6,7 +6,8 @@
  * Realtime broadcast channel (see `@medfind/core` demoChannel). Without Supabase
  * settings the demo falls back to confirming after a few seconds.
  */
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import {
   DEMO_CHANNEL,
@@ -81,8 +82,39 @@ let reservations: DemoReservation[] = [
   make('mediguy:paracetamol', 1, 'pickup', 'collected', new Date(now - 4 * day)),
 ];
 
+const STORAGE_KEY = 'medfind.demo.reservations.v1';
+let hydrated = false;
+let hydration: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
+const persist = () => { void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(reservations)).catch(() => {}); };
+export function hydrateReservations(): Promise<void> {
+  if (hydrated) return Promise.resolve();
+  if (hydration) return hydration;
+  hydration = (async () => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const values: unknown = JSON.parse(raw);
+        if (Array.isArray(values)) {
+          const restored = values.filter((r): r is DemoReservation => !!r && typeof r === 'object' && typeof r.id === 'string' && typeof r.medicineId === 'string' && typeof r.status === 'string').map((r) => ({ ...r, placedAt: new Date(r.placedAt), readyAt: r.readyAt ? new Date(r.readyAt) : undefined }));
+          reservations = restored;
+          counter = Math.max(counter, ...restored.map((r) => Number(/^r(\\d+)$/.exec(r.id)?.[1] ?? 0)));
+        }
+      }
+    } catch { /* Use seed reservations if storage is unavailable. */ }
+    hydrated = true;
+    emit();
+  })();
+  return hydration;
+}
+export async function resetDemoReservations(): Promise<void> {
+  await hydrateReservations();
+  reservations = [];
+  counter = 0;
+  persist();
+  emit();
+}
 const subscribe = (l: () => void) => {
   listeners.add(l);
   return () => listeners.delete(l);
@@ -90,6 +122,7 @@ const subscribe = (l: () => void) => {
 
 function update(id: string, change: Partial<DemoReservation>): void {
   reservations = reservations.map((r) => (r.id === id && r.status === 'waiting' ? { ...r, ...change } : r));
+  persist();
   emit();
 }
 
@@ -149,6 +182,7 @@ const OFFLINE_CONFIRM_MS = 4000;
 export function placeReservation(inventoryId: string, quantity: number, fulfilment: Fulfilment): DemoReservation {
   const r = make(inventoryId, quantity, fulfilment, 'waiting', new Date());
   reservations = [r, ...reservations];
+  persist();
   emit();
   const live = connect();
   if (live) live.then(() => send(DEMO_EVENTS.placed, placedPayload(r)));
@@ -161,6 +195,7 @@ setInterval(() => {
   const now = new Date();
   if (reservations.some((r) => r.status === 'waiting' && isApprovalExpired(r.placedAt, now))) {
     reservations = reservations.map((r) => (r.status === 'waiting' && isApprovalExpired(r.placedAt, now) ? { ...r, status: 'expired' } : r));
+    persist();
     emit();
   }
 }, 1000);
@@ -168,7 +203,26 @@ setInterval(() => {
 connect();
 
 export function useReservations(): DemoReservation[] {
+  useEffect(() => { void hydrateReservations(); }, []);
   return useSyncExternalStore(subscribe, () => reservations);
+}
+
+export function cancelReservation(id: string): boolean {
+  const r = reservations.find((item) => item.id === id);
+  if (!r || (r.status !== 'waiting' && r.status !== 'ready')) return false;
+  reservations = reservations.map((item) => item.id === id ? { ...item, status: 'cancelled' as const } : item);
+  persist();
+  emit();
+  return true;
+}
+
+export function markCollected(id: string): boolean {
+  const r = reservations.find((item) => item.id === id);
+  if (!r || r.status !== 'ready') return false;
+  reservations = reservations.map((item) => item.id === id ? { ...item, status: 'collected' as const } : item);
+  persist();
+  emit();
+  return true;
 }
 
 export function useReservation(id: string | undefined): DemoReservation | undefined {
