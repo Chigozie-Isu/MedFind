@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore, type CSSProperties, type FormEvent } from 'react';
 import { Shell } from '../reservations/Shell';
 import { useReservations } from '../reservations/store';
 
@@ -57,10 +57,10 @@ export function useWorkspace() {
   return useSyncExternalStore(subscribe, snapshot, serverSnapshot);
 }
 
-const panel: React.CSSProperties = { background: 'var(--mf-surface-raised)', border: '1px solid var(--mf-surface-border)', borderRadius: 20, padding: 24 };
-const field: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--mf-surface-border)', background: 'var(--mf-surface-default)', color: 'var(--mf-text-primary)', boxSizing: 'border-box' };
-const button: React.CSSProperties = { padding: '10px 18px', borderRadius: 10, border: 0, background: 'var(--mf-brand-default)', color: 'white', cursor: 'pointer', fontWeight: 700 };
-const subtle: React.CSSProperties = { ...button, background: 'var(--mf-surface-muted)', color: 'var(--mf-text-primary)' };
+const panel: CSSProperties = { background: 'var(--mf-surface-raised)', border: '1px solid var(--mf-surface-border)', borderRadius: 20, padding: 24 };
+const field: CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--mf-surface-border)', background: 'var(--mf-surface-default)', color: 'var(--mf-text-primary)', boxSizing: 'border-box' };
+const button: CSSProperties = { padding: '10px 18px', borderRadius: 10, border: 0, background: 'var(--mf-brand-default)', color: 'white', cursor: 'pointer', fontWeight: 700 };
+const subtle: CSSProperties = { ...button, background: 'var(--mf-surface-muted)', color: 'var(--mf-text-primary)' };
 const money = (n: number) => '₦' + n.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function Workspace({ section }: { section: Section }) {
@@ -73,7 +73,7 @@ export function Workspace({ section }: { section: Section }) {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const title = { inventory: 'Inventory', activity: 'Activity', earnings: 'Earnings', profile: 'Profile and hours' }[section];
-  const saveItem = (e: React.FormEvent) => {
+  const saveItem = (e: FormEvent) => {
     e.preventDefault();
     const quantity = Number(qty), amount = Number(price);
     if (!name.trim() || !Number.isInteger(quantity) || quantity < 0 || !Number.isFinite(amount) || amount < 0) {
