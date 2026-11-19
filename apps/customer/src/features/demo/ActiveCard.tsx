@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { formatNaira } from '@medfind/core';
 import { radii, space } from '@medfind/ui';
 import { Badge, Button, Text, useTheme } from '@medfind/ui/native';
-import { Thumb } from './parts';
+import { PressCard, Thumb } from './parts';
 import { deadlineOf, type DemoReservation } from './store';
 
 export function minsLeft(r: DemoReservation, now = Date.now()): string {
@@ -24,25 +24,27 @@ export function ActiveCard({ r }: { r: DemoReservation }) {
   }, []);
   const ready = r.status === 'ready';
   return (
-    <Pressable
+    <PressCard
       onPress={() => router.push(`/reservation/${r.id}`)}
-      accessibilityRole="button"
+      label={`${r.medicineName}, open code`}
       style={[styles.active, { backgroundColor: colors.surface.raised }]}
     >
-      <View style={styles.activeTop}>
-        <Thumb medicineId={r.medicineId} />
-        <View style={styles.flex}>
-          <View style={styles.row}>
+      <View style={styles.activeTop} pointerEvents="box-none">
+        <View pointerEvents="none">
+          <Thumb medicineId={r.medicineId} />
+        </View>
+        <View style={styles.flex} pointerEvents="box-none">
+          <View style={styles.row} pointerEvents="none">
             <Text variant="h5" style={styles.flex} numberOfLines={1}>
               {r.medicineName}
             </Text>
             <Badge label={ready ? (r.fulfilment === 'delivery' ? 'On the way' : 'Ready') : 'Waiting'} tone={ready ? 'success' : 'info'} dot="left" />
           </View>
-          <Text variant="caption1" color="secondary">
+          <Text variant="caption1" color="secondary" pointerEvents="none">
             {r.pharmacyName} · Code {r.pickupCode}
           </Text>
-          <View style={styles.row}>
-            <Text variant="caption1" color="tertiary" style={styles.flex}>
+          <View style={styles.row} pointerEvents="box-none">
+            <Text variant="caption1" color="tertiary" style={styles.flex} pointerEvents="none">
               {minsLeft(r, now)}
             </Text>
             <Button label="View code" size="small" onPress={() => router.push(`/reservation/${r.id}`)} />
@@ -50,7 +52,7 @@ export function ActiveCard({ r }: { r: DemoReservation }) {
         </View>
       </View>
       {r.payment === 'pharmacy' && ready && (
-        <View style={[styles.payStrip, { backgroundColor: colors.tone.warning.bg }]}>
+        <View style={[styles.payStrip, { backgroundColor: colors.tone.warning.bg }]} pointerEvents="none">
           <Text variant="caption1" style={{ color: colors.tone.warning.text }}>
             Pay at pickup
           </Text>
@@ -59,7 +61,7 @@ export function ActiveCard({ r }: { r: DemoReservation }) {
           </Text>
         </View>
       )}
-    </Pressable>
+    </PressCard>
   );
 }
 

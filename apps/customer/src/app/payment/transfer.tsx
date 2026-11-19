@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { formatNaira } from '@medfind/core';
@@ -24,8 +24,7 @@ export default function Transfer() {
     return () => clearInterval(i);
   }, []);
   if (!t) {
-    router.replace('/');
-    return null;
+    return <Redirect href="/" />;
   }
   const amount = formatNaira(t.totals.totalKobo);
   const copy = async () => {

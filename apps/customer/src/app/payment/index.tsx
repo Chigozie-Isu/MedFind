@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { formatNaira } from '@medfind/core';
 import { boxShadow, radii, space } from '@medfind/ui';
@@ -18,8 +18,7 @@ export default function Payment() {
   const account = useAccount();
   const t = checkoutTotals();
   if (!t) {
-    router.replace('/');
-    return null;
+    return <Redirect href="/" />;
   }
   const { med, totals, c } = t;
   const method = account.method ?? (account.walletFirst ? 'wallet' : null);

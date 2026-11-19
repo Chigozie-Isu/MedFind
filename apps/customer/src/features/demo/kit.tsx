@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   steps: { flexDirection: 'row', gap: space.xs, paddingHorizontal: space.md, paddingBottom: space.xs },
   stepSeg: { flex: 1, height: 3, borderRadius: radii.pill },
   content: { padding: space.md, gap: space.md, paddingBottom: space.xl },
-  footer: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.md, gap: space.xs },
+  footer: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.md, gap: space.xs, alignItems: 'center' },
   dim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 9, 20, 0.45)' },
   sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, maxHeight: '90%' },
   handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radii.pill, marginTop: space.sm, opacity: 0.6 },

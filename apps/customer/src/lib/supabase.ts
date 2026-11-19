@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@medfind/core';
 
@@ -19,6 +20,12 @@ export const supabase: SupabaseClient<Database> | null =
 
 const DEMO_SIGNED_IN = 'medfind.demoSignedIn';
 
+/**
+ * Sign-in runs in demo mode (any details work, signs in as Grace) when Supabase isn't set up,
+ * and always in the hosted web demo, which has Supabase only for the live pharmacy channel.
+ */
+export const demoAuth = !supabase || Platform.OS === 'web';
+
 /** Without Supabase (the hosted web demo), logging in or signing up signs in as Grace. */
 export async function setDemoSignedIn(on: boolean): Promise<void> {
   try {
@@ -33,7 +40,7 @@ let demoSignedIn = false;
 
 /** The signed-in customer's id, or null when signed out. */
 export async function currentCustomerId(): Promise<string | null> {
-  if (!supabase) {
+  if (demoAuth || !supabase) {
     let stored: string | null = null;
     try {
       stored = await AsyncStorage.getItem(DEMO_SIGNED_IN);

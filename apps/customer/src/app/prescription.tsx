@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { radii, sizes, space } from '@medfind/ui';
@@ -21,8 +21,7 @@ export default function Prescription() {
   const checkout = account.checkout;
   const [state, setState] = useState<Upload>(checkout?.prescriptionAttached ? 'uploaded' : 'none');
   if (!checkout) {
-    router.replace('/');
-    return null;
+    return <Redirect href="/" />;
   }
   const pharmacy = findPharmacy(findInventory(checkout.inventoryId).pharmacyId);
 

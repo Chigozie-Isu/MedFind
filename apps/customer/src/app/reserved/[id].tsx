@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { PICKUP_WINDOW_MINUTES, formatNaira } from '@medfind/core';
 import { radii, space } from '@medfind/ui';
@@ -15,8 +15,7 @@ export default function Reserved() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const r = useReservation(id);
   if (!r) {
-    router.replace('/reservations');
-    return null;
+    return <Redirect href="/reservations" />;
   }
   const p = findPharmacy(r.pharmacyId);
   const deadline = deadlineOf(r) ?? new Date(r.placedAt.getTime() + PICKUP_WINDOW_MINUTES * 60_000);

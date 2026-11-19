@@ -20,8 +20,10 @@ export default function Payments() {
           {formatNaira(account.walletKobo)}
         </Text>
         <View style={styles.walletRow}>
-          <Button label="Add money" variant="secondary" size="small" iconLeft="add" onPress={() => router.push('/wallet/top-up')} />
-          <Button label="View wallet" variant="secondary" size="small" onPress={() => router.push('/wallet')} />
+          <Button label="Add money" size="small" iconLeft="add" onPress={() => router.push('/wallet/top-up')} />
+          <View style={[styles.chip, { backgroundColor: colors.surface.raised }]}>
+            <Button label="View wallet" variant="secondary" size="small" onPress={() => router.push('/wallet')} />
+          </View>
         </View>
       </View>
       <Text variant="label1" color="secondary">
@@ -53,5 +55,7 @@ export default function Payments() {
 
 const styles = StyleSheet.create({
   wallet: { padding: space.md, borderRadius: radii.xl, gap: space.xs },
+  // White chip keeps the brand-blue label readable on the dark wallet card.
+  chip: { borderRadius: radii.pill, overflow: 'hidden' },
   walletRow: { flexDirection: 'row', gap: space.xs, marginTop: space.xs },
 });

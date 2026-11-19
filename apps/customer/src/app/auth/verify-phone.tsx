@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { formatPhoneInternational } from '@medfind/core';
 import { VerifyPhoneFlow } from '../../features/auth/VerifyPhoneFlow';
 import { signedUpEmail } from '../../features/auth/authApi';
@@ -8,8 +8,7 @@ import { hrefAfterAuth } from '../../lib/afterAuth';
 export default function VerifyPhone() {
   const { phone } = useLocalSearchParams<{ phone?: string }>();
   if (!phone) {
-    router.replace('/auth/sign-up');
-    return null;
+    return <Redirect href="/auth/sign-up" />;
   }
   return (
     <VerifyPhoneFlow

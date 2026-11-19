@@ -25,7 +25,7 @@ export default function Wallet() {
           <View style={styles.flex}>
             <Button label="Add money" iconLeft="add" fullWidth onPress={() => router.push('/wallet/top-up')} />
           </View>
-          <View style={styles.flex}>
+          <View style={[styles.flex, styles.light, { backgroundColor: colors.surface.raised }]}>
             <Button label="Withdraw" variant="secondary" fullWidth onPress={() => router.push('/wallet/withdraw')} />
           </View>
         </View>
@@ -52,6 +52,8 @@ export default function Wallet() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  // Withdraw sits on a white chip so its brand-blue label keeps contrast on the dark card.
+  light: { borderRadius: radii.pill, overflow: 'hidden' },
   card: { padding: space.md, borderRadius: radii.xl, gap: space.sm },
   row: { flexDirection: 'row', gap: space.xs, marginTop: space.xs },
 });

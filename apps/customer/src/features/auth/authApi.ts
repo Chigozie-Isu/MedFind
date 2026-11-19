@@ -8,7 +8,10 @@
  * uses an SMS sign-in code. All codes last 10 minutes (supabase/config.toml).
  */
 import { parseLoginIdentifier, type LoginIdentifier } from '@medfind/core';
-import { setDemoSignedIn, supabase } from '../../lib/supabase';
+import { demoAuth, setDemoSignedIn, supabase as realSupabase } from '../../lib/supabase';
+
+/** Null in demo mode, so every call below takes its demo path. */
+const supabase = demoAuth ? null : realSupabase;
 
 export type ApiResult<T = void> = { ok: true; value: T } | { ok: false; reason: string; lockedSeconds?: number };
 

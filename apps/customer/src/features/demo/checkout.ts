@@ -17,9 +17,12 @@ export function checkoutTotals() {
  * Places the reservation once payment is done. Wallet payments come off the balance now;
  * card and transfer are only "held" until the pharmacy confirms (the copy says so).
  */
+let last: { r: DemoReservation; at: number } | null = null;
+
 export function placeFromCheckout(payment: DemoPaymentMethod): DemoReservation | null {
   const t = checkoutTotals();
-  if (!t) return null;
+  // React may render twice (StrictMode): hand back the reservation just placed instead of nothing.
+  if (!t) return last && Date.now() - last.at < 3000 ? last.r : null;
   const a = getAccount();
   const address = a.addresses.find((x) => x.id === t.c.addressId) ?? defaultAddress(a);
   if (payment === 'wallet') walletMove(t.med.name, -t.totals.totalKobo, 'payment');
@@ -29,5 +32,6 @@ export function placeFromCheckout(payment: DemoPaymentMethod): DemoReservation |
     addressLine: t.c.fulfilment === 'delivery' ? address.line : undefined,
   });
   setAccount({ checkout: null, method: null });
+  last = { r, at: Date.now() };
   return r;
 }

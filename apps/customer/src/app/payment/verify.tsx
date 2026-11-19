@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { formatNaira } from '@medfind/core';
@@ -22,8 +22,7 @@ export default function VerifyCard() {
     return () => clearInterval(i);
   }, []);
   if (!t) {
-    router.replace('/');
-    return null;
+    return <Redirect href="/" />;
   }
   const card = defaultCard(account);
 

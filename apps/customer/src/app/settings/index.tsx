@@ -8,11 +8,13 @@ import { defaultAddress, useAccount } from '../../features/demo/account';
 import { useReservations } from '../../features/demo/store';
 import { ConfirmSheet, LinkRow, Screen, avatarGrace, kit } from '../../features/demo/kit';
 import { ExtraIcon } from '../../features/demo/icons';
-import { setDemoSignedIn, supabase } from '../../lib/supabase';
+import { demoAuth, setDemoSignedIn, supabase } from '../../lib/supabase';
+import { resetWebLocation } from '../../lib/deviceLocation';
 
 async function signOut() {
   await setDemoSignedIn(false);
-  await supabase?.auth.signOut().catch(() => {});
+  resetWebLocation();
+  if (!demoAuth) await supabase?.auth.signOut().catch(() => {});
   router.replace('/welcome');
 }
 

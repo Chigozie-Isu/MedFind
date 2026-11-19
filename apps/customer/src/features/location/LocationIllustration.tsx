@@ -27,7 +27,7 @@ export function LocationIllustration({ variant = 'base', size = 260 }: { variant
   const off = variant === 'off';
   const ringOpacity = variant === 'finding' ? 0.45 : scheme === 'dark' ? 0.35 : 0.3;
   return (
-    <Svg width={size} height={size} viewBox="0 0 260 260" fill="none" accessible={false}>
+    <Svg width={size} height={size} viewBox="0 0 260 260" fill="none" aria-hidden>
       <G clipPath="url(#loc-clip)">
         <Path d="M130 260C201.797 260 260 201.797 260 130C260 58.203 201.797 0 130 0C58.203 0 0 58.203 0 130C0 201.797 58.203 260 130 260Z" fill={C.disc} />
         <Path d="M129.999 238.333C174.034 238.333 209.732 234.065 209.732 228.8C209.732 223.535 174.034 219.267 129.999 219.267C85.9635 219.267 50.2656 223.535 50.2656 228.8C50.2656 234.065 85.9635 238.333 129.999 238.333Z" fill={C.shadow} />

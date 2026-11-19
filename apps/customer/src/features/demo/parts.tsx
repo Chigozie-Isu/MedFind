@@ -46,29 +46,44 @@ export function Thumb({ icon = 'box', size = 42, medicineId }: { icon?: IconName
 const shortDate = (d: Date) =>
   `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
 
+/**
+ * A tappable card that also holds buttons. On the web a Pressable becomes a <button>, and a
+ * button can't sit inside another, so the tap target is a layer behind the content.
+ */
+export function PressCard({ onPress, style, children, label }: { onPress: () => void; style: object; children: ReactNode; label?: string }) {
+  return (
+    <View style={style}>
+      <Pressable onPress={onPress} style={StyleSheet.absoluteFill} accessibilityLabel={label} />
+      {children}
+    </View>
+  );
+}
+
 /** History list card (Figma "List" in Home 91:14 and My reservations 538:26148). */
 export function ReservationRow({ r }: { r: DemoReservation }) {
   const { colors } = useTheme();
   const active = r.status === 'waiting' || r.status === 'ready';
   return (
-    <Pressable
+    <PressCard
       onPress={() => router.push(detailHref(r))}
-      accessibilityRole="button"
+      label={`${r.medicineName}, ${statusBadge[r.status].label}`}
       style={[styles.row, { backgroundColor: colors.surface.raised }]}
     >
-      <Thumb medicineId={r.medicineId} />
-      <View style={styles.rowBody}>
-        <View style={styles.rowTop}>
+      <View pointerEvents="none">
+        <Thumb medicineId={r.medicineId} />
+      </View>
+      <View style={styles.rowBody} pointerEvents="box-none">
+        <View style={styles.rowTop} pointerEvents="none">
           <Text variant="h5" style={styles.flex} numberOfLines={1}>
             {r.medicineName}
           </Text>
           <StatusBadge status={r.status} />
         </View>
-        <Text variant="caption1" color="secondary">
+        <Text variant="caption1" color="secondary" pointerEvents="none">
           {r.pharmacyName}
         </Text>
-        <View style={styles.rowTop}>
-          <Text variant="caption1" color="tertiary" style={styles.flex}>
+        <View style={styles.rowTop} pointerEvents="box-none">
+          <Text variant="caption1" color="tertiary" style={styles.flex} pointerEvents="none">
             {shortDate(r.placedAt)}
           </Text>
           {active ? (
@@ -83,7 +98,7 @@ export function ReservationRow({ r }: { r: DemoReservation }) {
           )}
         </View>
       </View>
-    </Pressable>
+    </PressCard>
   );
 }
 

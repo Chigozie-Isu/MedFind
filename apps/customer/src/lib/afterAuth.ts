@@ -1,6 +1,5 @@
 import { homeRouteFor, routeAfterAuth, type AuthEntry, type HomeRoute } from '@medfind/core';
 import type { Href } from 'expo-router';
-import { Platform } from 'react-native';
 import { permissionState } from './deviceLocation';
 import { loadSavedLocation } from './locationStore';
 
@@ -17,8 +16,6 @@ export function homeHrefFor(entry: AuthEntry): Href {
  * The sign-up and log-in screens call this and `router.replace` the result.
  */
 export async function hrefAfterAuth(entry: AuthEntry): Promise<Href> {
-  // The web demo can't use GPS, so it skips Location access and goes straight to Home.
-  if (Platform.OS === 'web') return homeHrefFor(entry);
   const [perm, saved] = await Promise.all([permissionState(), loadSavedLocation()]);
   const route = routeAfterAuth(entry, { permissionOn: perm === 'on', hasSavedLocation: saved !== null });
   return route === 'location_access' ? { pathname: '/location', params: { entry } } : homeHref(route);

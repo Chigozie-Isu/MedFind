@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { formatNaira } from '@medfind/core';
 import { Button, Text } from '@medfind/ui/native';
 import { useReservation } from '../../features/demo/store';
@@ -13,8 +13,7 @@ export default function PaymentSuccess() {
   const { id, via } = useLocalSearchParams<{ id: string; via?: string }>();
   const r = useReservation(id);
   if (!r) {
-    router.replace('/reservations');
-    return null;
+    return <Redirect href="/reservations" />;
   }
   const paidWith =
     via === 'transfer' ? `Bank transfer · ${transferAccount.bank}` : via === 'wallet' ? 'MedFind wallet' : `Card •••• ${r.cardLast4 ?? '1456'}`;
