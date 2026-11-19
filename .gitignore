@@ -1,0 +1,25 @@
+node_modules/
+.turbo/
+.DS_Store
+*.tsbuildinfo
+
+# env files: secrets live here, never commit them
+.env
+.env.*
+!.env.example
+
+# Expo
+.expo/
+dist/
+web-build/
+ios/
+android/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# local screenshots and scratch
+/screenshots/
+*.tsbuildinfo
