@@ -80,3 +80,20 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Dark: links and outline buttons | #0077B6 | #5EAAD2 | Contrast at least 4.5:1, as elsewhere. |
 | Map | Static map picture | Live OpenStreetMap map with a draggable pin (Leaflet) | Needed to place a real pin. |
 | Images | @2x | @1x exports | Same export limit as above. |
+
+## Customer demo flow: Home, Search results, Reserve, Pickup code, My reservations
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Data | Grace, Fuasi Pharmacy, Augmentin and the other names in the frames | Same names, kept in the app (`features/demo/data.ts`), not the Supabase seed | Emmanuel asked for the Figma names; runs without a local database. |
+| Recent searches | "Gestad" | "Gestid" | Typo; the medicine is Gestid. |
+| Home and Search | Camera button | Not built | Scanning is out of scope. |
+| Home header | Profile icon | Settings icon, opens Appearance | No profile screen yet; the icon set has no profile icon. |
+| Search filters | Distance, Price, Open now, Delivery | Distance, Price, Delivery | Every seeded pharmacy is open in the demo. |
+| Search and history images | Product and shop photos | Icon placeholders | Seed has photo paths but no image files. |
+| Reserve | Pay online and Pay at pharmacy, "1 OF 2" steps | Pay at pharmacy only, no steps | Demo scope: pay at pharmacy only. |
+| Reserve amount | Starts at 0 | Starts at 1 | A reservation needs at least one item. |
+| Pickup code header | Map with route | Plain header with the pharmacy pin | No map library approved for the customer app. |
+| Pickup code | "AB-145", copy button | 6-digit code ("199 364"), no copy button | The schema uses 6-digit codes; copying needs a new library. |
+| Pickup code buttons | Cancel | My reservations | Happy path only; links the screens in order. |
+| Waiting → ready | Pharmacy confirms | Confirms by itself after 4 seconds | Demo stands in for the pharmacy. |

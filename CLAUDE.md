@@ -2,6 +2,16 @@
 
 Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, Typescale, Icon, Colour Palette).
 
+## Current scope (school project, low usage) — overrides anything below
+
+- Build ONLY the demo path screens Emmanuel names, happy path only. Skip error, loading and empty states unless asked.
+- Read only the Figma frames Emmanuel links, never whole sections.
+- Use the existing theme for dark mode; don't check screens one by one.
+- Pay at pharmacy only. No Paystack, no wallet, no MedChat, no scanning.
+- One test file only: pricing (pickup, +NGN 1,000 delivery, no service fee).
+- Keep answers short. Plan in 5 bullets max, then build without asking again.
+- The demo flow (Home → Search results → Reserve → Pickup code → My reservations) uses the customer, pharmacy and medicine names from Figma (customer Grace), kept in `apps/customer/src/features/demo/`.
+
 ## Rules
 
 - Secrets only in .env files; never commit them.

@@ -71,6 +71,8 @@ export interface SearchFieldProps {
   placeholder?: string;
   value?: string;
   onChangeText?: (text: string) => void;
+  /** Called when the keyboard's search key is pressed. */
+  onSubmit?: () => void;
   size?: 'mobile' | 'web';
   forceState?: 'default' | 'focus' | 'filled';
 }
