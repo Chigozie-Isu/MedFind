@@ -1,5 +1,5 @@
-import { Workspace } from '../../features/workspace/Workspace';
+import { Activity } from '../../features/activity/Activity';
 
 export default function Page() {
-  return <Workspace section="activity" />;
+  return <Activity />;
 }

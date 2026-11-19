@@ -1,5 +1,5 @@
-import { Workspace } from '../../features/workspace/Workspace';
+import { Earnings } from '../../features/earnings/Earnings';
 
 export default function Page() {
-  return <Workspace section="earnings" />;
+  return <Earnings />;
 }

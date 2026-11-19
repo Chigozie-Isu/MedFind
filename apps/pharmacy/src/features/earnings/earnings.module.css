@@ -1,0 +1,11 @@
+.top { display: grid; grid-template-columns: minmax(0, 448fr) minmax(0, 566fr); gap: 24px; align-items: stretch; }
+.leftCol { display: flex; flex-direction: column; gap: 24px; }
+.payout { position: relative; background: var(--mf-brand-subtle); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+.payoutIcon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 96px; height: 96px; border-radius: 48px; display: grid; place-items: center; background: var(--mf-tone-error-bg); color: var(--mf-text-brand); }
+.key { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.chart { display: flex; gap: 12px; height: 260px; }
+.yAxis { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 28px; }
+.bars { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; border-bottom: 1px solid var(--mf-surface-border); background-image: linear-gradient(var(--mf-surface-border) 1px, transparent 1px); background-size: 100% 20%; }
+.barCol { position: relative; border: 0; background: none; padding: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; cursor: pointer; }
+.stack { width: 60%; max-width: 48px; display: flex; flex-direction: column; border-radius: 4px 4px 0 0; overflow: hidden; }
+.tip { position: absolute; top: -4px; background: var(--mf-surface-inverse); color: var(--mf-text-on-inverse); padding: 4px 8px; border-radius: 8px; white-space: nowrap; }
