@@ -133,6 +133,12 @@ const subscribe = (l: () => void) => {
 };
 
 /** Settings > Reset demo data: back to the seeded history, with nothing active. */
+export function startNewCustomerReservations(): void {
+  reservations = [];
+  counter = 0;
+  emit();
+}
+
 export function resetReservations(): void {
   reservations = seedReservations();
   emit();
