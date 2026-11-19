@@ -90,7 +90,7 @@ export default function Reserve() {
           <Text variant="h5">Order summary</Text>
           <View style={styles.between}>
             <Text variant="body3" color="secondary">
-              {medicine.brand} × {quantity}
+              {medicine.short} × {quantity}
             </Text>
             <Text variant="body3">{formatNaira(totals.subtotalKobo)}</Text>
           </View>

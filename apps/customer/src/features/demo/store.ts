@@ -4,7 +4,7 @@
  */
 import { useSyncExternalStore } from 'react';
 import { PICKUP_CODE_LENGTH, pickupDeadline, reservationTotals, type Fulfilment, type ReservationTotals } from '@medfind/core';
-import { findInventory, findMedicine, findPharmacy, medicineName, pharmacies } from './data';
+import { findInventory, findMedicine, findPharmacy, medicineName } from './data';
 
 export type DemoStatus = 'waiting' | 'ready' | 'collected' | 'cancelled';
 
@@ -50,14 +50,13 @@ function make(inventoryId: string, quantity: number, fulfilment: Fulfilment, sta
   };
 }
 
-const [admiralty, adesola, , sabo] = pharmacies.map((p) => p.id);
 const now = Date.now();
-/** Past orders like the seed's: Ada collected Panadol Extra, Loratadine and Gestid. */
+/** History as in "My reservations – all" (Figma 538:26148). */
 let reservations: DemoReservation[] = [
-  make(`${admiralty}:panadol-extra`, 1, 'pickup', 'collected', new Date(now - 3 * day)),
-  make(`${adesola}:emzor-ors`, 2, 'delivery', 'cancelled', new Date(now - 6 * day)),
-  make(`${admiralty}:loratadine`, 1, 'pickup', 'collected', new Date(now - 9 * day)),
-  make(`${sabo}:gestid`, 1, 'pickup', 'collected', new Date(now - 12 * day)),
+  make('precious:diclofenac', 1, 'pickup', 'collected', new Date(now - 1 * day)),
+  make('precious:gestid', 1, 'pickup', 'collected', new Date(now - 2 * day)),
+  make('precious:amoxil', 1, 'pickup', 'cancelled', new Date(now - 3 * day)),
+  make('green-cross:paracetamol', 1, 'pickup', 'collected', new Date(now - 4 * day)),
 ];
 
 const listeners = new Set<() => void>();

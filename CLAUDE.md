@@ -10,7 +10,7 @@ Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, 
 - Pay at pharmacy only. No Paystack, no wallet, no MedChat, no scanning.
 - One test file only: pricing (pickup, +NGN 1,000 delivery, no service fee).
 - Keep answers short. Plan in 5 bullets max, then build without asking again.
-- The demo flow (Home → Search results → Reserve → Pickup code → My reservations) uses a copy of the seed in `apps/customer/src/features/demo/`.
+- The demo flow (Home → Search results → Reserve → Pickup code → My reservations) uses the customer, pharmacy and medicine names from Figma (customer Grace), kept in `apps/customer/src/features/demo/`.
 
 ## Rules
 

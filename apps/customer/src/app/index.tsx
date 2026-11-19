@@ -30,7 +30,8 @@ function greeting(now = new Date()): string {
   return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
 }
 
-const RECENT = ['Coartem', 'Panadol Extra', 'Loratadine'];
+/** Recent searches from Figma 91:14 ("Gestad" there is a typo for Gestid). */
+const RECENT = ['Gestid', 'Actifed', 'Diclofenac'];
 
 /** Home (Figma 91:14). `?newUser=1` is "Home – new user" (from sign-up): no history yet. */
 export default function Home() {

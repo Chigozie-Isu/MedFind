@@ -85,7 +85,8 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 
 | Where | Figma | Code | Why |
 | --- | --- | --- | --- |
-| Data | Example names (Fuasi Pharmacy, Augmentin) | Seeded pharmacies and OTC medicines (copied into the app) | Use seeded inventory; runs without a local database. Prices are close to the seed, Coartem at Admiralty is exactly ₦3,450. |
+| Data | Grace, Fuasi Pharmacy, Augmentin and the other names in the frames | Same names, kept in the app (`features/demo/data.ts`), not the Supabase seed | Emmanuel asked for the Figma names; runs without a local database. |
+| Recent searches | "Gestad" | "Gestid" | Typo; the medicine is Gestid. |
 | Home and Search | Camera button | Not built | Scanning is out of scope. |
 | Home header | Profile icon | Settings icon, opens Appearance | No profile screen yet; the icon set has no profile icon. |
 | Search filters | Distance, Price, Open now, Delivery | Distance, Price, Delivery | Every seeded pharmacy is open in the demo. |
