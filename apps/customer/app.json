@@ -25,7 +25,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "MedFind uses your location to show pharmacies near you that have your medicine."
+        }
+      ]
     ],
     "scheme": "medfind",
     "experiments": {

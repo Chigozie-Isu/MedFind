@@ -379,3 +379,7 @@ select public.generate_payouts(date '2026-11-27');
 delete from public.staff_sessions;
 select set_config('request.jwt.claims', '', false);
 drop schema seed cascade;
+
+-- Location access: Ada has a saved GPS location; the other customers have none yet.
+insert into public.customer_locations (customer_id, label, address_line, lat, lng, accuracy_m, source) values
+  ('c0000000-0000-4000-8000-000000000001', 'Lekki Phase 1', 'Lagos · within 20 m', 6.4441, 3.4705, 20, 'gps');
