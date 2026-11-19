@@ -75,10 +75,10 @@ function make(inventoryId: string, quantity: number, fulfilment: Fulfilment, sta
 const now = Date.now();
 /** History as in "My reservations – all" (Figma 538:26148). */
 let reservations: DemoReservation[] = [
-  make('precious:diclofenac', 1, 'pickup', 'collected', new Date(now - 1 * day)),
-  make('precious:gestid', 1, 'pickup', 'collected', new Date(now - 2 * day)),
-  make('precious:amoxil', 1, 'pickup', 'cancelled', new Date(now - 3 * day)),
-  make('green-cross:paracetamol', 1, 'pickup', 'collected', new Date(now - 4 * day)),
+  make('fuasi:diclofenac', 1, 'pickup', 'collected', new Date(now - 1 * day)),
+  make('caduces:gestid', 1, 'pickup', 'collected', new Date(now - 2 * day)),
+  make('mediguy:amoxil', 1, 'pickup', 'cancelled', new Date(now - 3 * day)),
+  make('mediguy:paracetamol', 1, 'pickup', 'collected', new Date(now - 4 * day)),
 ];
 
 const listeners = new Set<() => void>();

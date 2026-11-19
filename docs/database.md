@@ -7,7 +7,7 @@ developer's quick reference.
 
 ```
 pnpm db:start     # starts local Supabase in Docker
-pnpm db:reset     # rebuilds the database from migrations and loads the Lagos seed data
+pnpm db:reset     # rebuilds the database from migrations and loads the Port Harcourt demo data
 pnpm db:test      # 103 pgTAP tests: who can see what, sign up, and the reservation rules
 pnpm db:types     # regenerates packages/core/src/database.types.ts after a schema change
 ```
@@ -18,16 +18,15 @@ Every account's password is `MedFind-test-1`.
 
 | Who | Email | Passcode |
 | --- | --- | --- |
-| Customers | ada@, tunde@, chiamaka@, ibrahim@, funke@ `example.com` | n/a |
-| Admiralty Care, Lekki Phase 1 | folake@ (owner), yusuf@ (pharmacist), grace@ (assistant) `admiraltycare.example.com` | 11001, 11002, 11003 |
-| Adesola 24/7, Victoria Island | ngozi@, segun@, blessing@ `adesola247.example.com` | 12001, 12002, 12003 |
-| Isaac John, Ikeja GRA | kola@, amina@, frank@ `isaacjohn.example.com` | 13001 to 13003 |
-| Sabo Health, Yaba | halima@, olu@, adanwosu@ `sabohealth.example.com` | 14001 to 14003 |
-| Ogunsanya Family, Surulere | bisi@, kemi@, musa@ `ogunsanya.example.com` | 15001 to 15003 |
-| Ajah Wellness, Ajah | emeka@, zainab@, ned@ `ajahwellness.example.com` | 16001 to 16003 |
+| Customers | grace@ (Grace Mary), chinedu@ (Chinedu Okoro) `example.com` | n/a |
+| Fuasi Pharmacy, GRA Phase 2 | ifeoma@ (owner), yusuf@ (pharmacist), blessing@ (assistant) `fuasi.example.com` | 11001, 11002, 11003 |
+| Caduces Pharma, Rumuogba | tamuno@, ngozi@, ibim@ `caduces.example.com` | 12001, 12002, 12003 |
+| Mediguy, D-Line | kelechi@, amina@, frank@ `mediguy.example.com` | 13001 to 13003 |
 
-The seed creates 10 orders covering every status, wallet top-ups and refunds, ratings, saved medicines,
-two MedChat threads, past shifts and the payouts due on Friday 27 November 2026.
+All three are in Port Harcourt and open 24 hours. The seed has 15 medicines with the same prices as the
+customer app's demo data (`apps/customer/src/features/demo/data.ts`). It creates 6 pay-at-pharmacy orders
+(collected, declined, expired, ready and one waiting for approval), ratings, a saved medicine, past shifts,
+wallet top-ups (used only by the database tests) and the payouts due on Friday 27 November 2026.
 
 ## How staff access works
 

@@ -25,28 +25,28 @@ select ok(not private.account_name_matches('ANYTHING', 'Ltd'), 'an empty busines
 
 -- ---------- signed-out checks ----------
 select pg_temp.as_anon();
-select is(sign_in_precheck('ada@example.com') ->> 'account', 'customer', 'Ada''s email is a customer account');
+select is(sign_in_precheck('grace@example.com') ->> 'account', 'customer', 'Grace''s email is a customer account');
 select is(sign_in_precheck('+234 803 123 4501') ->> 'account', 'customer', 'so is her verified phone number');
 select is(sign_in_precheck('nobody@example.com') ->> 'account', 'none', 'unknown emails are reported as none');
-select is(sign_in_precheck('yusuf@admiraltycare.example.com') ->> 'account', 'staff', 'staff emails are staff accounts');
-select is((sign_up_precheck('ADA@example.com', '+2348000000000') ->> 'email_in_use')::boolean, true, 'sign up spots an email in use, any case');
+select is(sign_in_precheck('yusuf@fuasi.example.com') ->> 'account', 'staff', 'staff emails are staff accounts');
+select is((sign_up_precheck('GRACE@example.com', '+2348000000000') ->> 'email_in_use')::boolean, true, 'sign up spots an email in use, any case');
 select is((sign_up_precheck('new@example.com', '+2348031234501') ->> 'phone_in_use')::boolean, true, 'and a phone in use');
-select throws_ok($$ select private.auth_user_for('ada@example.com') $$, '42501', null, 'internal lookups are not callable');
+select throws_ok($$ select private.auth_user_for('grace@example.com') $$, '42501', null, 'internal lookups are not callable');
 select throws_ok($$ select * from private.sign_in_attempts $$, '42501', null, 'attempt counts are not readable');
 
 -- ---------- lockout: 5 wrong tries lock for 5 minutes ----------
-select is(record_sign_in_failure('ada@example.com'), 0, 'first wrong try does not lock');
-select record_sign_in_failure('ada@example.com') from generate_series(1, 3);
-select ok(record_sign_in_failure('ADA@example.com') between 299 and 300, 'the fifth wrong try locks for 5 minutes');
-select ok((sign_in_precheck('ada@example.com') ->> 'locked_seconds')::int > 0, 'precheck reports the lock');
+select is(record_sign_in_failure('grace@example.com'), 0, 'first wrong try does not lock');
+select record_sign_in_failure('grace@example.com') from generate_series(1, 3);
+select ok(record_sign_in_failure('GRACE@example.com') between 299 and 300, 'the fifth wrong try locks for 5 minutes');
+select ok((sign_in_precheck('grace@example.com') ->> 'locked_seconds')::int > 0, 'precheck reports the lock');
 reset role;
-update private.sign_in_attempts set locked_until = now() - interval '1 second' where identifier = 'ada@example.com';
+update private.sign_in_attempts set locked_until = now() - interval '1 second' where identifier = 'grace@example.com';
 select pg_temp.as_anon();
-select is(record_sign_in_failure('ada@example.com'), 0, 'after the lock runs out the count starts again');
+select is(record_sign_in_failure('grace@example.com'), 0, 'after the lock runs out the count starts again');
 select pg_temp.as_user('c0000000-0000-4000-8000-000000000001');
 select clear_sign_in_failures();
 reset role;
-select is((select count(*) from private.sign_in_attempts where identifier = 'ada@example.com'), 0::bigint, 'signing in clears the count');
+select is((select count(*) from private.sign_in_attempts where identifier = 'grace@example.com'), 0::bigint, 'signing in clears the count');
 
 -- ---------- pharmacy sign up ----------
 -- A brand-new owner account (created by sign up with account_type pharmacy_owner).

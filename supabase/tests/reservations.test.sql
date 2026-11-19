@@ -19,12 +19,12 @@ create function pg_temp.balance(p_customer uuid) returns bigint language sql sec
   select balance_kobo from public.wallet_balances where customer_id = p_customer
 $$;
 
--- Adesola (a1..02) is open 24 hours, so these tests do not depend on the time of day.
+-- Caduces (a1..02) is open 24 hours, so these tests do not depend on the time of day.
 create temp table ids (name text primary key, id uuid);
 grant all on ids to authenticated;
 
 -- ---------- totals ----------
-select pg_temp.as_user('c0000000-0000-4000-8000-000000000002'); -- Tunde
+select pg_temp.as_user('c0000000-0000-4000-8000-000000000002'); -- Chinedu
 insert into ids select 'delivery', (place_reservation('a1000000-0000-4000-8000-000000000002', 'delivery', 'wallet',
   jsonb_build_array(jsonb_build_object('inventory_id', pg_temp.inv('a1000000-0000-4000-8000-000000000002', 'Coartem'), 'quantity', 1)),
   'ad000000-0000-4000-8000-000000000003')).id;
@@ -42,18 +42,18 @@ select throws_ok($$ select place_reservation('a1000000-0000-4000-8000-0000000000
   'P0001', null, 'cannot reserve more than the pharmacy has');
 
 -- ---------- prescription order: checks ----------
-select pg_temp.as_user('c0000000-0000-4000-8000-000000000005'); -- Funke
+select pg_temp.as_user('c0000000-0000-4000-8000-000000000002'); -- Chinedu
 insert into ids select 'rx', (place_reservation('a1000000-0000-4000-8000-000000000002', 'pickup', 'at_pharmacy',
   jsonb_build_array(jsonb_build_object('inventory_id', pg_temp.inv('a1000000-0000-4000-8000-000000000002', 'Amoxil'), 'quantity', 1)),
   null, 'e0000000-0000-4000-8000-000000000002')).id;
 select is((select kind::text from reservations where id = (select id from ids where name = 'rx')), 'prescription', 'order with Amoxil is a prescription order');
 
-select pg_temp.as_user('b0000000-0000-4000-8000-000000000023'); -- Adesola assistant
+select pg_temp.as_user('b0000000-0000-4000-8000-000000000023'); -- Caduces assistant
 select unlock_staff('a1000000-0000-4000-8000-000000000002', '12003');
 select throws_ok($$ select set_prescription_check((select id from ids where name = 'rx'), 'medicine_and_dosage') $$, '42501', null,
   'assistants cannot tick prescription checks');
 
-select pg_temp.as_user('b0000000-0000-4000-8000-000000000022'); -- Adesola pharmacist
+select pg_temp.as_user('b0000000-0000-4000-8000-000000000022'); -- Caduces pharmacist
 select unlock_staff('a1000000-0000-4000-8000-000000000002', '12002');
 select set_prescription_check((select id from ids where name = 'rx'), 'medicine_and_dosage');
 select set_prescription_check((select id from ids where name = 'rx'), 'patient_name_and_age');
@@ -85,7 +85,7 @@ select is(pg_temp.balance('c0000000-0000-4000-8000-000000000002') - (select b fr
   'declined order is refunded in full to the customer''s wallet');
 
 -- ---------- expiry after 10 minutes ----------
-select pg_temp.as_user('c0000000-0000-4000-8000-000000000001'); -- Ada
+select pg_temp.as_user('c0000000-0000-4000-8000-000000000001'); -- Grace
 insert into ids select 'late', (place_reservation('a1000000-0000-4000-8000-000000000002', 'pickup', 'wallet',
   jsonb_build_array(jsonb_build_object('inventory_id', pg_temp.inv('a1000000-0000-4000-8000-000000000002', 'Panadol Extra'), 'quantity', 1)))).id;
 select pg_temp.as_admin();
