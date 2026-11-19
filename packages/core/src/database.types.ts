@@ -87,6 +87,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"customer_locations": {
+                  Row: {
+                    "accuracy_m": number | null,"address_line": string | null,"customer_id": string,"label": string,"lat": number,"lng": number,"location": unknown,"source": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accuracy_m"?: number | null,"address_line"?: string | null,"customer_id": string,"label": string,"lat": number,"lng": number,"location"?: never,"source"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "accuracy_m"?: number | null,"address_line"?: string | null,"customer_id"?: string,"label"?: string,"lat"?: number,"lng"?: number,"location"?: never,"source"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "customer_locations_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: true
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "customer_locations_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: true
+      referencedRelation: "wallet_balances"
+      referencedColumns: ["customer_id"]
+    }
+                  ]
                 },"customers": {
                   Row: {
                     "appearance": Database["public"]['Enums']["appearance"],"avatar_path": string | null,"created_at": string,"email": string | null,"full_name": string,"id": string,"phone": string | null,"updated_at": string

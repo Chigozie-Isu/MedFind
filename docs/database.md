@@ -54,3 +54,7 @@ pg_cron runs the expiry and pickup-warning jobs every minute, and payouts every 
 - Card and bank transfer orders must be paid before the pharmacy can approve them.
 - Pickup codes are 6 digits.
 - New medicines are added to the shared catalogue by MedFind (pharmacies pick from it), not by pharmacies.
+
+## Customer location (Location access)
+
+`customer_locations` keeps one current location per customer, saved from the Location access screens: a label ("GRA Phase 2"), the line under it, lat/lng, GPS accuracy in metres (empty for a typed address), where it came from (`gps` or `address`) and `updated_at`. A map point (`location`) is worked out from lat/lng for nearby-pharmacy searches. Only the customer can read or change their row. Added in its own migration, `20261120000100_customer_locations.sql`; tests are in `supabase/tests/customer_locations.test.sql`. The seed gives Ada a saved location; the other customers have none, so they see the Location access screens.

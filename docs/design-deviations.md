@@ -35,3 +35,16 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 - **Loading buttons** keep their width and draw the spinner over the hidden label, so the button doesn't shrink while loading.
 - **Callout card:** the button variant uses the message icon, because the calendar icon couldn't be exported from Figma.
 - **Code input:** empty digit boxes show a tertiary "0" placeholder.
+
+## Location access (customer app, Figma 2677:160663 light, 2679:160877 dark)
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| "System prompt" frame | Drawn iOS alert | Not built | It's the phone's own permission popup; iOS and Android draw it. Its message is set in `app.json` (`locationWhenInUsePermission`). |
+| Dark: "Change" and "Enter my address instead" | #0077B6 | #5EAAD2 | Same contrast fix as the other dark Inline/Text buttons (#0077B6 is about 3:1 on #11293A). |
+| Buttons on these screens | SF Pro Medium | Manrope SemiBold | Project rule: buttons use Manrope. The shared Button already does this. |
+| Dark: dividers between suggestions | #545458 at 65% (iOS default) | #3F505D (surface pressed) | Uses the theme's own divider colour instead of an iOS system grey. |
+| Search placeholder | Not shown (frame is filled with "Ada George") | "Search for your street or area" | Needed copy for the empty field. |
+| Found screen without a place name | Always "You're near GRA Phase 2" | "We found your location" when the phone can't name the area | Reverse geocoding can fail (no network, or on the web). |
+| Address screen on the web | Suggestions list | A note that search works in the app | The free geocoder that comes with expo-location only runs on phones. |
+| Illustration and text position | 37px under a 47px status bar | 36px (space.xl + space.xxs) under the safe area | Nearest spacing tokens. |
