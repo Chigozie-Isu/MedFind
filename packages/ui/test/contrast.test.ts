@@ -34,6 +34,10 @@ function pairsFor(c: ThemeColors): Pair[] {
     pairs.push({ name: `text.${k} on pressed`, fg: c.text[k], bg: c.surface.pressed, size: 12 });
   }
 
+  // Sign In / Sign Up switch and the "OR CONTINUE WITH" label.
+  pairs.push({ name: 'segment active', fg: c.segment.activeText, bg: c.segment.activeBg, size: 16, weight: 600 });
+  pairs.push({ name: 'segment inactive', fg: c.segment.inactiveText, bg: c.segment.track, size: 16, weight: 600 });
+
   // Buttons (disabled states are exempt from contrast rules).
   for (const st of ['default', 'hover', 'pressed'] as const) {
     pairs.push({ name: `primary button ${st}`, fg: c.button.primaryText, bg: c.button.primaryBg[st], size: 12, weight: 600 });

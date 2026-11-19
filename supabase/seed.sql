@@ -10,11 +10,14 @@ create schema seed;
 
 create function seed.user(p_id uuid, p_email text, p_name text, p_phone text, p_type text) returns void
 language sql as $$
+  -- Customers get a verified phone too, so they can log in with it.
   insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+    phone, phone_confirmed_at,
     raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
     confirmation_token, recovery_token, email_change_token_new, email_change)
   values ('00000000-0000-0000-0000-000000000000', p_id, 'authenticated', 'authenticated', p_email,
     extensions.crypt('MedFind-test-1', extensions.gen_salt('bf')), now(),
+    case when p_type = 'customer' then ltrim(p_phone, '+') end, case when p_type = 'customer' then now() end,
     '{"provider":"email","providers":["email"]}',
     jsonb_build_object('full_name', p_name, 'phone', p_phone, 'account_type', p_type),
     now() - interval '30 days', now(), '', '', '', '');
@@ -84,6 +87,8 @@ insert into public.addresses (id, customer_id, label, street, area, landmark, co
   ('ad000000-0000-4000-8000-000000000006', 'c0000000-0000-4000-8000-000000000005', 'Home', '17 Addo Road', 'Ajah', 'Behind the market', '+2348121234505', 'SRID=4326;POINT(3.5800 6.4680)', true);
 
 -- ---------- pharmacies (invented names, real Lagos areas) ----------
+-- The seed pharmacies are already approved (new sign-ups start as drafts).
+alter table public.pharmacies alter column application_status set default 'approved';
 insert into public.pharmacies (id, name, street, area, location, phone, email, licence_number, pharmacist_in_charge,
   opening_hours, open_24_hours, offers_delivery, services, is_live) values
   ('a1000000-0000-4000-8000-000000000001', 'Admiralty Care Pharmacy', '12 Admiralty Way', 'Lekki Phase 1',
@@ -108,6 +113,7 @@ insert into public.pharmacies (id, name, street, area, location, phone, email, l
    'SRID=4326;POINT(3.5850 6.4680)', '+2349012345606', 'ajahwellness@example.com', 'PCN/LA/2021/0864', 'Pharm. Emeka Obi',
    '{"mon":{"open":"08:00","close":"22:00"},"tue":{"open":"08:00","close":"22:00"},"wed":{"open":"08:00","close":"22:00"},"thu":{"open":"08:00","close":"22:00"},"fri":{"open":"08:00","close":"22:00"},"sat":{"open":"08:00","close":"22:00"},"sun":{"open":"10:00","close":"20:00"}}',
    false, true, array['Prescriptions', 'Delivery'], true);
+alter table public.pharmacies alter column application_status set default 'draft';
 
 insert into public.pharmacy_payout_accounts (pharmacy_id, bank_name, account_number, account_name) values
   ('a1000000-0000-4000-8000-000000000001', 'GTBank', '0123456781', 'Admiralty Care Pharmacy Ltd'),

@@ -126,6 +126,10 @@ export interface ThemeColors {
   tone: Record<StatusTone, ToneColors>;
   toast: { bg: string; text: string; success: string; error: string; info: string };
   mapMarker: string;
+  /** Sign In / Sign Up switch on the customer log-in screens. */
+  segment: { track: string; activeBg: string; activeText: string; inactiveText: string };
+  /** Lines either side of "OR CONTINUE WITH". */
+  divider: string;
 }
 
 /*
@@ -217,6 +221,8 @@ export const lightColors: ThemeColors = {
   },
   toast: { bg: p.neutral[800], text: p.neutral[25], success: p.success[400], error: p.error.disabled, info: p.info[300] },
   mapMarker: p.mapMarker,
+  segment: { track: p.neutral[200], activeBg: p.primary[600], activeText: p.surfaceLight.default, inactiveText: p.primary[700] },
+  divider: '#4B5A67',
 };
 
 /*
@@ -309,6 +315,8 @@ export const darkColors: ThemeColors = {
   },
   toast: { bg: p.neutral[700], text: p.neutral[25], success: p.success[400], error: p.error.disabled, info: p.info[300] },
   mapMarker: p.mapMarker,
+  segment: { track: p.neutral[600], activeBg: p.primary[600], activeText: p.neutral[25], inactiveText: p.neutral[25] },
+  divider: p.neutral[200],
 };
 
 export const themes: Record<ColorScheme, ThemeColors> = {

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as rules from '../src/rules.ts';
+import * as auth from '../src/auth.ts';
+import * as signup from '../src/pharmacySignup.ts';
 
 // The database enforces the same rules as packages/core. This fails if the numbers drift apart.
 const migrations = join(import.meta.dirname, '../../../supabase/migrations');
@@ -45,4 +47,16 @@ test('database status transitions match packages/core', () => {
     assert.ok(line, `no transitions for ${from}`);
     assert.deepEqual([...line[1].matchAll(/'(\w+)'/g)].map((m) => m[1]).sort(), [...tos].sort(), from);
   }
+});
+
+test('sign-in lockout and pharmacy application rules match the database', () => {
+  assert.equal(Number(ruleValue('sign_in_max_attempts')), auth.SIGN_IN_MAX_ATTEMPTS);
+  assert.equal(Number(ruleValue('sign_in_lock_minutes')), auth.SIGN_IN_LOCK_MINUTES);
+  const enumValues = (name: string) => {
+    const match = sql.match(new RegExp(`create type public\\.${name} as enum \\(([^)]*)\\)`));
+    assert.ok(match, `${name} enum not found`);
+    return [...match[1].matchAll(/'(\w+)'/g)].map((m) => m[1]);
+  };
+  assert.deepEqual(enumValues('pharmacy_application_status'), [...signup.PHARMACY_APPLICATION_STATUSES]);
+  assert.deepEqual(enumValues('pharmacy_document_kind'), signup.PHARMACY_DOCUMENTS.map((d) => d.kind));
 });
