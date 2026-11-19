@@ -15,6 +15,8 @@ import {
   searchMedicine,
 } from '../features/demo/data';
 import { TabScreen, Thumb } from '../features/demo/parts';
+import { toggleSavedMedicine, useSavedMedicines } from '../features/demo/saved';
+import { Button } from '@medfind/ui/native';
 
 type Filter = 'distance' | 'price' | 'delivery';
 const FILTERS: Array<{ key: Filter; label: string }> = [
@@ -31,6 +33,7 @@ export default function SearchResults() {
   const [submitted, setSubmitted] = useState(params.q ?? '');
   const [filter, setFilter] = useState<Filter>('distance');
   const medicine = searchMedicine(submitted);
+  const saved = useSavedMedicines();
 
   const results = useMemo(() => {
     if (!medicine) return [];
@@ -74,6 +77,8 @@ export default function SearchResults() {
             </Text>
           </Text>
         )}
+        {!medicine && submitted.trim() !== '' && <Text variant="body2" color="secondary">No medicines found. Try another name.</Text>}
+        {medicine && <Button label={saved.includes(medicine.id) ? 'Remove from saved' : 'Save medicine'} variant="outline" fullWidth onPress={() => toggleSavedMedicine(medicine.id)} />}
         {results.map(({ inv, pharmacy, km }) => (
           <Pressable
             key={inv.id}
