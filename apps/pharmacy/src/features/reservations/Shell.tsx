@@ -28,10 +28,6 @@ export function Shell({ active, heading, actions, children }: { active: NavKey; 
   const [bellOpen, setBellOpen] = useState(false);
   const lowStock = w.items.filter((i) => stockStatus(i) !== 'in').length;
   // Client-side navigation keeps live reservations in memory between screens.
-/** Side nav, bell and sun/moon toggle shared by the pharmacy demo screens (Figma "Dashboard" 167:2472). */
-export function Shell({ active, heading, children }: { active: string; heading: ReactNode; children: ReactNode }) {
-  const waiting = useReservations().filter((r) => r.status === 'review').length;
-  const workspace = useWorkspace();
   const items = pharmacyNavItems.map((item) => ({
     ...item,
     count: item.key === 'dashboard' || item.key === 'reservations' ? waiting : item.key === 'inventory' ? lowStock : undefined,
@@ -57,9 +53,6 @@ export function Shell({ active, heading, children }: { active: string; heading: 
             <Logo height={48} />
           </button>
         }
-        takingReservations={workspace.accepting}
-        onTakingReservationsChange={(accepting) => updateWorkspace({ accepting }, accepting ? 'Started taking reservations' : 'Paused reservations')}
-        header={<Logo height={48} />}
         footer={
           <button type="button" className={s.staffCard} onClick={() => router.push('/profile')} aria-label="Your profile and shift">
             <Text variant="caption2" color={cssVar.text.secondary}>
