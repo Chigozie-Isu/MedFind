@@ -134,3 +134,25 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Log in, Sign up, Sign in, Forgot password | Real accounts and codes | Without Supabase settings, any details and any code are accepted, signing in as Grace or Yusuf | The Vercel links have no database. |
 | Customer Location access on web | Shown after log in when location is off | Skipped on web; goes straight to Home | Browsers in the demo can't use the phone's GPS flow. |
 | Saved tab, bell, pharmacy Inventory / Activity / Earnings / Profile | Their own screens | A "coming soon" toast | Not in the demo path. |
+
+## Pharmacy app: all screens and flows (delivery, Inventory, Activity, Earnings, Profile, Employees, Shift history)
+
+The pharmacy Inventory, Activity, Earnings and Profile screens are now built, so the "coming soon" rows above no longer apply to the pharmacy app. Demo data lives in `apps/pharmacy/src/features/workspace/store.ts` (saved in the browser; Profile › Reset demo puts it back).
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Side nav | MedChat button above "Taking reservations" | Not shown | Demo scope: no MedChat. |
+| Prototype data | Each frame shows its own snapshot (e.g. Grace appears again after she's approved) | One live set of reservations that moves between columns as you act | So every click has a lasting result. |
+| Kemi's OTC delivery order | Appears from the "new reservation" toast | Arrives on its own about 12 seconds after the app opens, with the same toast | Lets the toast and the OTC delivery flow be shown without a second device. |
+| Delivered | Prototype jumps to "Ned delivered" | Delivery completes 30 seconds after hand-over (simulated rider) | No real rider or delivery is triggered. |
+| Tracking map | Map image | A drawn street grid with the route | No map tiles or new library needed. |
+| Calling Musa | Phone call | Banner only; no call is made | Simulation. |
+| Inventory and transactions counts | 550 medicines, 201 transactions | The real count of the demo rows (12 medicines, 8 transactions) | Tabs and pagers stay consistent with what's listed. |
+| Inventory "Add" column | Steppers only | Steppers plus a "Save stock" bar | Stock changes need a confirm step. |
+| Earnings payout date | Friday 13 November | The next payout Friday from `nextPayoutDate` (27 November) | Business rule lives in packages/core. |
+| Earnings fee column | ₦1755 on a ₦3,500 sale | 5% of the sale (`commissionKobo`) | Agreed 5% rule. |
+| Earnings mascot illustration, cover photo | Illustration / shop-front photo | Wallet icon / a drawn "Fuasi Pharmacy" sign (a chosen photo replaces it) | Assets not exported; the sign colours are part of the illustration. |
+| Staff codes | 6 characters (e.g. AB7890) | 5 digits | Agreed rule: 5-digit staff passcode. |
+| Opening hours picker | Scroll wheel | Time dropdowns | Same result, easier on a laptop. |
+| Clock out button icon | Log-out icon | Chevron | No log-out icon in the shared set. |
+| Bulk upload | Reads real pack photos | Any photo is accepted and the Figma list of 6 medicines is "found" | Simulation; no scanning service. |

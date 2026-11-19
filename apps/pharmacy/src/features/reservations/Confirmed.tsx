@@ -1,11 +1,12 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { PICKUP_WINDOW_MINUTES, formatNaira, pickupDeadline } from '@medfind/core';
+import { DELIVERY_FEE_KOBO, PICKUP_WINDOW_MINUTES, formatNaira, pickupDeadline } from '@medfind/core';
 import { Button, Icon, Text, cssVar } from '@medfind/ui/web';
 import { Crumbs } from './Review';
+import { EmptyState } from '../common/ui';
 import { Progress, Shell } from './Shell';
-import { clock, firstName, hhmm, useNow, useReservation, useReservations } from './store';
+import { RIDER, clock, firstName, his, hhmm, useNow, useReservation, useReservations } from './store';
 import s from './reservations.module.css';
 
 const TIPS = [
@@ -34,11 +35,29 @@ export function Confirmed({ id }: { id: string }) {
   const now = useNow();
   const r = useReservation(id);
   const waiting = useReservations().filter((x) => x.status === 'review').length;
-  if (!r?.readyAt || !now) return null;
+  if (!now) return null;
+  if (!r?.readyAt)
+    return (
+      <Shell active="reservations" heading={<Text variant="h2" as="h1" color={cssVar.text.primary}>Reservation not found</Text>}>
+        <EmptyState
+          icon="ticket"
+          title="This reservation isn’t here any more"
+          body="It may have expired, been cancelled, or the demo was reset."
+          action={<Button label="Back to Reservations" onPress={() => router.push('/reservations')} />}
+        />
+      </Shell>
+    );
   const deadline = pickupDeadline(r.readyAt);
   const left = Math.max(0, deadline.getTime() - now);
   const name = firstName(r.customerName);
-  const code = `${r.pickupCode.slice(0, 3)} ${r.pickupCode.slice(3)}`;
+  const delivery = r.fulfilment === 'delivery';
+  const code = delivery || !r.pickupCode ? r.ref : `${r.pickupCode.slice(0, 3)} ${r.pickupCode.slice(3)}`;
+  const riderAt = new Date(r.readyAt.getTime() + 8 * 60_000);
+  const payment = delivery
+    ? `${formatNaira(r.totalKobo)} paid online · includes ${formatNaira(DELIVERY_FEE_KOBO)} delivery`
+    : r.payment === 'counter'
+      ? `${formatNaira(r.totalKobo)} to pay at the counter`
+      : `${formatNaira(r.totalKobo)} paid online`;
 
   return (
     <Shell
@@ -60,10 +79,12 @@ export function Confirmed({ id }: { id: string }) {
           <Icon name="tick" size={32} />
         </span>
         <Text variant="h3" as="h1" color={cssVar.text.heading}>
-          Reservation confirmed
+          {delivery ? 'Delivery confirmed' : 'Reservation confirmed'}
         </Text>
         <Text variant="body2" as="p" color={cssVar.text.secondary}>
-          {name} has been told her medicine is ready. Keep it at the counter until she comes.
+          {delivery
+            ? `${name} has been told ${his(r)} order is being packed. ${RIDER.name} (${RIDER.plate}) is on his way to collect it.`
+            : `${name} has been told ${his(r)} medicine is ready. Keep it at the counter until ${r.pronoun} comes.`}
         </Text>
       </div>
       <div className={s.reviewGrid} style={{ gridTemplateColumns: 'minmax(0, 683fr) minmax(0, 330fr)' }}>
@@ -72,29 +93,31 @@ export function Confirmed({ id }: { id: string }) {
             <div className={s.codeRow}>
               <div className={s.headingBlock}>
                 <Text variant="label1" color={cssVar.text.brand}>
-                  Pickup code
+                  {delivery ? 'Order code' : 'Pickup code'}
                 </Text>
                 <span className={`${s.code} mf-t-h3`}>{code}</span>
               </div>
               <div className={s.headingBlock} style={{ alignItems: 'flex-end' }}>
                 <Text variant="body3" color={cssVar.text.heading}>
-                  Held until {hhmm(deadline)}
+                  {delivery ? `Rider arrives ${hhmm(riderAt)}` : `Held until ${hhmm(deadline)}`}
                 </Text>
                 <Text variant="caption1" color={cssVar.text.secondary}>
                   {clock(left, true)} hours left
                 </Text>
               </div>
             </div>
-            <Detail label="Patient" value={`${r.customerName} · for her son Prince, 6 years`} />
-            <Detail label="Medicine" value={`${r.medicineName} × ${r.quantity} bottle`} />
-            <Detail label="Prescription" value={`Checked by ${r.approvedBy} at ${hhmm(r.readyAt)}`} />
-            <Detail label="Payment" value={`${formatNaira(r.totalKobo)} to pay at the counter`} />
+            <Detail label="Patient" value={r.patient ? `${r.customerName} · ${r.patient}` : r.customerName} />
+            <Detail label="Medicine" value={`${r.medicineName} × ${r.quantity}${r.unit ? ` ${r.unit}` : ''}`} />
+            <Detail label="Prescription" value={r.kind === 'prescription' ? `Checked by ${r.approvedBy} at ${hhmm(r.readyAt)}` : 'Not needed · over-the-counter'} />
+            <Detail label="Payment" value={payment} />
             <Detail label="Stock" value="56 left after this" />
           </section>
           <div className={s.note}>
             <Icon name="time-circle" size={20} color={cssVar.text.secondary} />
             <Text variant="caption1" color={cssVar.text.secondary}>
-              Not collected by {hhmm(deadline)}? It expires on its own and the bottle goes back into stock.
+              {delivery
+                ? `No rider in 30 minutes? We reassign one and let ${name} know. You don’t need to do anything.`
+                : `Not collected by ${hhmm(deadline)}? It expires on its own and the medicine goes back into stock.`}
             </Text>
           </div>
         </div>
@@ -108,7 +131,9 @@ export function Confirmed({ id }: { id: string }) {
                 Always check the code before you hand over
               </Text>
               <Text variant="body3" color={cssVar.text.secondary}>
-                When {name} arrives, ask for her pickup code, only hand over the medicine if it matches {code}.
+                {delivery
+                  ? `When ${RIDER.first} arrives, ask for his rider code and only hand over the bag if it matches.`
+                  : `When ${name} arrives, ask for ${his(r)} pickup code, only hand over the medicine if it matches ${code}.`}
               </Text>
             </div>
           </section>

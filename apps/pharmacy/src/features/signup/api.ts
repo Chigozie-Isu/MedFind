@@ -50,8 +50,18 @@ export async function signedInEmail(): Promise<string | null> {
   return data.session?.user.email ?? null;
 }
 
+/**
+ * Without Supabase (the hosted web demo) the application lives here in memory, so each step's
+ * progress (documents, payout, submit) shows up in the next one just as it would from the database.
+ */
+let demoApp: Application | null = null;
+
+function demoDocument(kind: PharmacyDocumentKind, file: File, path: string): ApplicationDocument {
+  return { id: `demo-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, file_name: file.name, size_bytes: file.size, storage_path: path };
+}
+
 export async function loadApplication(): Promise<Application | null> {
-  if (!supabase) return null;
+  if (!supabase) return demoApp ? { ...demoApp, documents: [...demoApp.documents] } : null;
   const { data } = await supabase.rpc('my_pharmacy_application');
   return (data as Application | null) ?? null;
 }
@@ -100,6 +110,13 @@ let demoPharmacyName = 'Fuasi Pharmacy';
 
 export async function saveDetails(details: DetailsPayload): Promise<ApiResult<string>> {
   demoPharmacyName = details.name.trim() || demoPharmacyName;
+  if (!supabase) {
+    demoApp = {
+      pharmacy: { id: 'demo-pharmacy', ...details, landmark: details.landmark || null, application_status: 'draft', submitted_at: null },
+      documents: demoApp?.documents ?? [],
+      payout: demoApp?.payout ?? null,
+    };
+  }
   return attempt(async () => {
     const { data, error } = await client().rpc('save_pharmacy_details', { p_details: details as never });
     if (error) return { ok: false, reason: /pcn_in_use/.test(error.message) ? 'pcn_in_use' : OFFLINE };
@@ -135,7 +152,13 @@ export function uploadDocument(
         await new Promise((r) => setTimeout(r, 200));
         onProgress(f);
       }
-      return { ok: true, value: `demo-${path}` };
+      const doc = demoDocument(kind, file, `demo-${path}`);
+      if (demoApp) {
+        // A new licence replaces the old one of the same kind; shop-front photos add up.
+        const others = kind === 'shop_front' ? demoApp.documents : demoApp.documents.filter((d) => d.kind !== kind);
+        demoApp = { ...demoApp, documents: [...others, doc] };
+      }
+      return { ok: true, value: doc.id };
     }
     const { data } = await sb.auth.getSession();
     const token = data.session?.access_token;
@@ -168,6 +191,7 @@ export function uploadDocument(
 }
 
 export async function removeDocument(id: string): Promise<ApiResult> {
+  if (!supabase && demoApp) demoApp = { ...demoApp, documents: demoApp.documents.filter((d) => d.id !== id) };
   return attempt(async () => {
     const { error } = await client().rpc('remove_pharmacy_document', { p_document_id: id });
     return error ? { ok: false, reason: OFFLINE } : { ok: true, value: undefined };
@@ -202,6 +226,12 @@ export type ResolveResult = { accountName: string; matches: boolean; businessNam
 
 /** Asks Paystack whose account it is; the server saves it only when the name matches. */
 export async function resolveAccount(bank: Bank, accountNumber: string): Promise<ApiResult<ResolveResult>> {
+  if (!supabase && demoApp) {
+    demoApp = {
+      ...demoApp,
+      payout: { bank_name: bank.name, bank_code: bank.code, account_number: accountNumber.replace(/\s/g, ''), account_name: `${demoPharmacyName.toUpperCase()} LTD`, verified: true },
+    };
+  }
   return attempt(async () => {
     const { data, error } = await client().functions.invoke('paystack-resolve-account', {
       body: { bank_code: bank.code, bank_name: bank.name, account_number: accountNumber.replace(/\s/g, '') },
@@ -224,6 +254,9 @@ export async function resolveAccount(bank: Bank, accountNumber: string): Promise
 
 /** Submits for review and returns the owner's 5-digit staff passcode (shown once). */
 export async function submitApplication(): Promise<ApiResult<string>> {
+  if (!supabase && demoApp) {
+    demoApp = { ...demoApp, pharmacy: { ...demoApp.pharmacy, application_status: 'submitted', submitted_at: new Date().toISOString() } };
+  }
   return attempt(async () => {
     const { data, error } = await client().rpc('submit_pharmacy_application');
     if (error) return { ok: false, reason: error.message || OFFLINE };

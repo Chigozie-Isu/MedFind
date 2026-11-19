@@ -1,0 +1,12 @@
+.grid { display: grid; grid-template-columns: minmax(0, 566fr) minmax(0, 448fr); gap: 24px; align-items: start; }
+.card { background: var(--mf-surface-raised); border-radius: 24px; overflow: hidden; }
+.cardBody { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.cover { width: 100%; object-fit: cover; display: block; }
+.coverSign { width: 100%; display: grid; place-items: center; background: linear-gradient(180deg, #e9f4fb 0%, #e9f4fb 62%, #e2735c 62%, #e2735c 100%); color: #0d3b66; }
+.facts { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding-top: 16px; border-top: 1px solid var(--mf-surface-border); }
+.shift { background: var(--mf-brand-subtle); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.track { height: 4px; border-radius: 4px; background: var(--mf-surface-border); overflow: hidden; }
+.track > div { height: 100%; background: var(--mf-brand-default); }
+.divider { height: 1px; background: var(--mf-surface-border); }
+.faces { display: flex; gap: 8px; flex-wrap: wrap; }
+.hoursGrid { display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: 12px 16px; align-items: center; }

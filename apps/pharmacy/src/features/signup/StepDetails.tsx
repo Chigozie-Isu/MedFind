@@ -1,5 +1,6 @@
 'use client';
 
+import { LegalLink } from '../common/Legal';
 import dynamic from 'next/dynamic';
 import { useCallback, type FormEvent } from 'react';
 import {
@@ -131,7 +132,7 @@ export function StepDetails({
             <div className={s.terms}>
               <Checkbox checked={value.agreedToTerms} onChange={(agreedToTerms) => onChange({ agreedToTerms })} accessibilityLabel="Agree to the MedFind Terms" />
               <Text variant="body3" color="var(--mf-text-heading)">
-                I agree to the MedFind Terms including the 5% fee on reserved sales, and the Privacy Policy
+                I agree to the <LegalLink doc="terms" label="MedFind Terms" /> including the 5% fee on reserved sales, and the <LegalLink doc="privacy" label="Privacy Policy" />
               </Text>
             </div>
             {errors.agreedToTerms && (

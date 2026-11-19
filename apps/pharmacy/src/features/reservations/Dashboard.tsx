@@ -4,7 +4,8 @@ import { APPROVAL_WINDOW_MINUTES } from '@medfind/core';
 import { Badge, Button, Icon, InsightCard, Text, cssVar } from '@medfind/ui/web';
 import { useRouter } from 'next/navigation';
 import { Shell } from './Shell';
-import { useWorkspace } from '../workspace/Workspace';
+import { stockStatus, useWorkspace } from '../workspace/store';
+import { Skeleton, useFirstLoad } from '../common/ui';
 import { staff, useNow, useReservations } from './store';
 import s from './reservations.module.css';
 
@@ -23,11 +24,11 @@ const trending = [
   { name: 'Amlodipine 5mg', searches: 127, up: 50, stock: ['Out of stock', 'error'], action: 'Restock' },
   { name: 'Salbutamol inhaler 100mcg', searches: 212, up: 40, stock: ['Low stock', 'warning'], action: 'Restock' },
 ] as const;
-const runningLow = [
-  { name: 'Co-amoxiclav 625mg', detail: 'Augmentin · 14 tablets', badge: ['Out of stock', 'error'] },
-  { name: 'Amlodipine 5mg', detail: '28 tablets', badge: ['Out of stock', 'error'] },
-  { name: 'Salbutamol inhaler 100mcg', detail: 'Ventolin · 200 doses', badge: ['2 left', 'warning'] },
-] as const;
+const insights = [
+  { title: 'Collected today', value: '25', insight: '4 more than last Monday', href: '/activity' },
+  { title: 'Sales today', value: '₦42,900', insight: '₦28,600 online · ₦14,300 counter', href: '/earnings' },
+  { title: 'Avg reply time', value: '4 min', insight: 'Quick to respond', href: '/reservations' },
+];
 
 /** Dashboard (Figma 167:2472). The waiting card counts live reservations. */
 export function Dashboard() {
@@ -39,6 +40,8 @@ export function Dashboard() {
     .filter((r) => r.status === 'review')
     .sort((a, b) => a.placedAt.getTime() - b.placedAt.getTime());
   const oldest = waiting[0];
+  const loading = useFirstLoad('dashboard');
+  const low = workspace.items.filter((i) => stockStatus(i) !== 'in').slice(0, 3);
   if (!tick) return null;
   const waitedMins = oldest ? Math.floor((now.getTime() - oldest.placedAt.getTime()) / 60_000) : 0;
 
@@ -57,10 +60,13 @@ export function Dashboard() {
         </div>
       }
     >
+      {loading ? <Skeleton rows={3} cards={3} /> : <>
       <div className={s.insights}>
-        <InsightCard title="Collected today" value="25" insight="4 more than last Monday" onDismiss={() => {}} />
-        <InsightCard title="Sales today" value="₦42,900" insight="₦28,600 online · ₦14,300 counter" onDismiss={() => {}} />
-        <InsightCard title="Avg reply time" value="4 min" insight="Quick to respond" onDismiss={() => {}} />
+        {insights.map((c) => (
+          <div key={c.title} role="link" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => router.push(c.href)} onKeyDown={(e) => e.key === 'Enter' && router.push(c.href)}>
+            <InsightCard title={c.title} value={c.value} insight={c.insight} />
+          </div>
+        ))}
       </div>
 
       {oldest && (
@@ -113,7 +119,7 @@ export function Dashboard() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 16 }}>
                 <Badge label={t.stock[0]} tone={t.stock[1]} dot="left" />
-                <Button label={t.action} variant="text" size="small" iconLeft={t.action === 'Add stock' ? 'add' : undefined} icon={t.action === 'Restock' ? 'chevron-right' : undefined} onPress={() => router.push('/inventory')} />
+                <Button label={t.action} variant="text" size="small" iconLeft={t.action === 'Add stock' ? 'add' : undefined} icon={t.action === 'Restock' ? 'chevron-right' : undefined} onPress={() => router.push(t.action === 'Add stock' ? '/inventory/add' : '/inventory?tab=low')} />
               </div>
             </div>
           ))}
@@ -137,7 +143,7 @@ export function Dashboard() {
                   <Text variant="label1">Next payout Friday 27 Nov · ₦196,950</Text>
                 </span>
               </div>
-              <Button label="Earnings" variant="text" size="small" icon="chevron-right" />
+              <Button label="Earnings" variant="text" size="small" icon="chevron-right" onPress={() => router.push('/earnings')} />
             </div>
           </section>
           <section className={s.panelBordered}>
@@ -145,10 +151,10 @@ export function Dashboard() {
               <Text variant="h4" as="h2" color={cssVar.text.heading}>
                 Running low
               </Text>
-              <Button label="Restock" variant="text" size="small" icon="chevron-right" />
+              <Button label="Restock" variant="text" size="small" icon="chevron-right" onPress={() => router.push('/inventory?tab=low')} />
             </div>
-            {runningLow.map((r) => (
-              <div key={r.name} className={s.row}>
+            {low.map((i) => ({ name: `${i.brand} ${i.dosage}`, detail: `${i.generic} · ${i.pack}`, badge: i.quantity === 0 ? (['Out of stock', 'error'] as const) : ([`${i.quantity} left`, 'warning'] as const), id: i.id })).map((r) => (
+              <div key={r.id} className={s.row} role="link" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => router.push(`/inventory/add?restock=${r.id}`)}>
                 <span className={s.thumb}>
                   <Icon name="box" />
                 </span>
@@ -168,6 +174,7 @@ export function Dashboard() {
           </section>
         </div>
       </div>
+      </>}
     </Shell>
   );
 }

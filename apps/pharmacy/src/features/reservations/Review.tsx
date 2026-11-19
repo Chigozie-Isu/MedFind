@@ -7,7 +7,9 @@ import { APPROVAL_WINDOW_MINUTES, PRESCRIPTION_CHECKS, canApprove, formatNaira, 
 import { Badge, Button, ChecklistItem, Icon, Text, cssVar } from '@medfind/ui/web';
 import { DeclineDialog } from './DeclineDialog';
 import { Progress, Shell } from './Shell';
-import { approve, clock, firstName, hhmm, minutesLeftToReply, useNow, useReservation } from './store';
+import { approve, clock, firstName, hhmm, minutesLeftToReply, paymentBadge, useNow, useReservation } from './store';
+import { DELIVERY_FEE_KOBO } from '@medfind/core';
+import { EmptyState } from '../common/ui';
 import s from './reservations.module.css';
 
 /** What the pharmacist reads off Grace's prescription photo (Figma "Review Grace"). */
@@ -37,7 +39,18 @@ export function Review({ id }: { id: string }) {
   const r = useReservation(id);
   const [ticked, setTicked] = useState<PrescriptionCheck[]>([]);
   const [declining, setDeclining] = useState(false);
-  if (!r || !now) return null;
+  if (!now) return null;
+  if (!r)
+    return (
+      <Shell active="reservations" heading={<Text variant="h2" as="h1" color={cssVar.text.primary}>Reservation not found</Text>}>
+        <EmptyState
+          icon="ticket"
+          title="This reservation isn’t here any more"
+          body="It may have expired, been cancelled, or the demo was reset."
+          action={<Button label="Back to Reservations" onPress={() => router.push('/reservations')} />}
+        />
+      </Shell>
+    );
   const left = minutesLeftToReply(r, now);
   const name = firstName(r.customerName);
   const subtitles: Record<PrescriptionCheck, string> = {
@@ -59,7 +72,7 @@ export function Review({ id }: { id: string }) {
           </Text>
           <div className={s.tags}>
             <Badge label="Prescription" />
-            <Badge label={`Pay in person · ${formatNaira(r.totalKobo)}`} tone="info" dot="left" />
+            <Badge label={paymentBadge(r)} tone="info" dot="left" />
           </div>
         </div>
       }
@@ -98,7 +111,28 @@ export function Review({ id }: { id: string }) {
             </span>
           </div>
         </section>
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {r.fulfilment === 'delivery' && (
+            <section className={s.details} style={{ gap: 12 }}>
+              <Text variant="h3" as="h2" color={cssVar.text.primary}>
+                Delivery
+              </Text>
+              {[
+                ['Deliver to', r.address ?? ''],
+                ['Delivery fee', `${formatNaira(DELIVERY_FEE_KOBO)}, already paid by ${name}`],
+                ['Rider', 'We assign one when you mark the order ready'],
+              ].map(([k, v]) => (
+                <div key={k} className={s.grow} style={{ gap: 4 }}>
+                  <Text variant="body1" color={cssVar.text.heading}>
+                    {k}
+                  </Text>
+                  <Text variant="caption1" color={cssVar.text.secondary}>
+                    {v}
+                  </Text>
+                </div>
+              ))}
+            </section>
+          )}
           <section className={s.checklist}>
             <div className={s.checklistHead}>
               <Text variant="h3" as="h2" color={cssVar.text.primary}>
@@ -120,8 +154,13 @@ export function Review({ id }: { id: string }) {
               ))}
             </div>
           </section>
-          {r.status === 'review' && (
+          {r.status !== 'review' && (
             <div className={s.buttons}>
+              <Button label="Back to Reservations" variant="secondary" fullWidth onPress={() => router.push('/reservations')} />
+            </div>
+          )}
+          {r.status === 'review' && (
+            <div className={s.buttons} style={{ marginTop: 8 }}>
               <Button
                 label="Approve"
                 fullWidth
