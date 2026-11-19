@@ -17,9 +17,31 @@ export const supabase: SupabaseClient<Database> | null =
       })
     : null;
 
-/** The signed-in customer's id, or null when signed out (or Supabase isn't set up). */
+const DEMO_SIGNED_IN = 'medfind.demoSignedIn';
+
+/** Without Supabase (the hosted web demo), logging in or signing up signs in as Grace. */
+export async function setDemoSignedIn(on: boolean): Promise<void> {
+  try {
+    if (on) await AsyncStorage.setItem(DEMO_SIGNED_IN, '1');
+    else await AsyncStorage.removeItem(DEMO_SIGNED_IN);
+  } catch {
+    // Storage can be blocked (private browsing); the demo then signs in for this visit only.
+  }
+  demoSignedIn = on;
+}
+let demoSignedIn = false;
+
+/** The signed-in customer's id, or null when signed out. */
 export async function currentCustomerId(): Promise<string | null> {
-  if (!supabase) return null;
+  if (!supabase) {
+    let stored: string | null = null;
+    try {
+      stored = await AsyncStorage.getItem(DEMO_SIGNED_IN);
+    } catch {
+      // ignore
+    }
+    return demoSignedIn || stored ? 'demo-grace' : null;
+  }
   const { data } = await supabase.auth.getSession();
   return data.session?.user.id ?? null;
 }

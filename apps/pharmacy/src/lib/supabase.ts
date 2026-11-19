@@ -27,7 +27,12 @@ export function client(): SupabaseClient<Database> {
 
 export type ApiResult<T = void> = { ok: true; value: T } | { ok: false; reason: string; lockedSeconds?: number };
 
-export async function attempt<T>(fn: () => Promise<ApiResult<T>>): Promise<ApiResult<T>> {
+/**
+ * Without Supabase settings (the hosted web demo) every call succeeds with `demo`, so Sign in,
+ * Forgot password and Sign up can be clicked through with any details.
+ */
+export async function attempt<T>(fn: () => Promise<ApiResult<T>>, demo?: T): Promise<ApiResult<T>> {
+  if (!supabase) return { ok: true, value: demo as T };
   try {
     return await fn();
   } catch (e) {

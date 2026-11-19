@@ -126,3 +126,11 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 ## Buttons
 
 - **Native button labels** use a line box 1.5 times the font size instead of Figma's 100%, with an equal negative margin, so the button height is unchanged. At 100%, phones clip the bottoms of letters like g, y and p in one-line labels. The pharmacy (web) buttons already showed them in full and are unchanged.
+
+## Hosted web demo (no database)
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Log in, Sign up, Sign in, Forgot password | Real accounts and codes | Without Supabase settings, any details and any code are accepted, signing in as Grace or Yusuf | The Vercel links have no database. |
+| Customer Location access on web | Shown after log in when location is off | Skipped on web; goes straight to Home | Browsers in the demo can't use the phone's GPS flow. |
+| Saved tab, bell, pharmacy Inventory / Activity / Earnings / Profile | Their own screens | A "coming soon" toast | Not in the demo path. |
