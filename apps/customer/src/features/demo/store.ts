@@ -23,7 +23,8 @@ import {
   type ReservationTotals,
 } from '@medfind/core';
 import { supabase } from '../../lib/supabase';
-import { customer, findInventory, findMedicine, findPharmacy, medicineName } from './data';
+import { loadDemoProfile } from './profile';
+import { findInventory, findMedicine, findPharmacy, medicineName } from './data';
 
 export type DemoStatus = 'waiting' | 'ready' | 'collected' | 'cancelled' | 'declined' | 'expired';
 
@@ -99,7 +100,7 @@ export function hydrateReservations(): Promise<void> {
         if (Array.isArray(values)) {
           const restored = values.filter((r): r is DemoReservation => !!r && typeof r === 'object' && typeof r.id === 'string' && typeof r.medicineId === 'string' && typeof r.status === 'string').map((r) => ({ ...r, placedAt: new Date(r.placedAt), readyAt: r.readyAt ? new Date(r.readyAt) : undefined }));
           reservations = restored;
-          counter = Math.max(counter, ...restored.map((r) => Number(/^r(\\d+)$/.exec(r.id)?.[1] ?? 0)));
+          counter = Math.max(counter, ...restored.map((r) => Number(/^r(\d+)$/.exec(r.id)?.[1] ?? 0)));
         }
       }
     } catch { /* Use seed reservations if storage is unavailable. */ }
@@ -131,11 +132,11 @@ const session = Math.random().toString(36).slice(2, 8);
 const wireId = (r: DemoReservation) => `${session}-${r.id}`;
 const localId = (id: string) => (id.startsWith(`${session}-`) ? id.slice(session.length + 1) : undefined);
 
-function placedPayload(r: DemoReservation): DemoPlacedPayload {
+function placedPayload(r: DemoReservation, customerName: string): DemoPlacedPayload {
   return {
     id: wireId(r),
     ref: r.ref,
-    customerName: customer.fullName,
+    customerName,
     medicineName: r.medicineName,
     quantity: r.quantity,
     fulfilment: r.fulfilment,
@@ -166,7 +167,7 @@ function connect(): Promise<void> | null {
       if (id) update(id, { status: 'declined', declineReason: p.reason });
     })
     .on('broadcast', { event: DEMO_EVENTS.sync }, () => {
-      for (const r of reservations) if (r.status === 'waiting') send(DEMO_EVENTS.placed, placedPayload(r));
+      void loadDemoProfile().then((profile) => { for (const r of reservations) if (r.status === 'waiting') send(DEMO_EVENTS.placed, placedPayload(r, profile.name)); });
     });
   joined = new Promise((resolve) => channel!.subscribe((status) => status === 'SUBSCRIBED' && resolve()));
   return joined;
@@ -185,7 +186,7 @@ export function placeReservation(inventoryId: string, quantity: number, fulfilme
   persist();
   emit();
   const live = connect();
-  if (live) live.then(() => send(DEMO_EVENTS.placed, placedPayload(r)));
+  if (live) live.then(async () => { const profile = await loadDemoProfile(); send(DEMO_EVENTS.placed, placedPayload(r, profile.name)); });
   else setTimeout(() => update(r.id, { status: 'ready', readyAt: new Date() }), OFFLINE_CONFIRM_MS);
   return r;
 }
