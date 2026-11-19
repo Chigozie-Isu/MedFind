@@ -13,6 +13,7 @@ Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, 
 - Preserve the existing Figma visual language, shared components, typography, colour tokens and responsive patterns. Use the Figma file `OpCNyqo5elBMJI3z5XtxVC` as the design source.
 - Keep the customer and pharmacy demo data in sync where the journey crosses apps. Where Supabase is not configured, provide a complete local demo fallback rather than blocking the user.
 - Prefer the established app architecture and existing dependencies. Do not add paid services or new libraries without asking.
+- Customer demo data lives in `apps/customer/src/features/demo/` (`account.ts` for Grace's profile, wallet, cards, addresses and saved medicines; `store.ts` for reservations), reset from Settings › Reset demo data. On the web, and whenever Supabase isn't configured, sign-in is demo-only (`demoAuth` in `lib/supabase.ts`). The demo broadcast channel also carries `reservation_collected` and `reservation_cancelled`.
 - Do not call a feature complete until its screens, navigation, state changes and repeat/reset path have been checked. Run available tests and builds where the environment permits; report any checks that could not be run.
 
 ## Rules

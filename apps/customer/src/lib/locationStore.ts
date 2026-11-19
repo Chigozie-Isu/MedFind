@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { assertValidLocation, type CustomerLocation } from '@medfind/core';
-import { currentCustomerId, supabase } from './supabase';
+import { currentCustomerId, demoAuth, supabase as realSupabase } from './supabase';
+
+// Demo sign-in (hosted web demo) has no real customer row, so locations stay on the device.
+const supabase = demoAuth ? null : realSupabase;
 
 const KEY = 'medfind.location';
 

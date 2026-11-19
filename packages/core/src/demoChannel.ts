@@ -21,6 +21,23 @@ export interface DemoPlacedPayload {
   /** ISO time. */
   placedAt: string;
   pickupCode: string;
+  /** How the customer is paying. Older customer builds leave it out (pay at pharmacy). */
+  paymentMethod?: DemoPaymentMethod;
+}
+
+export type DemoPaymentMethod = 'pharmacy' | 'wallet' | 'card' | 'transfer';
+
+/** Sent by the pharmacy when the customer collects (or the rider hands over) the order. */
+export interface DemoCollectedPayload {
+  id: string;
+  /** ISO time. */
+  collectedAt: string;
+}
+
+/** Sent by the customer when they cancel, so the pharmacy can drop the card. */
+export interface DemoCancelledPayload {
+  id: string;
+  reason: string;
 }
 
 export interface DemoApprovedPayload {
@@ -41,4 +58,6 @@ export const DEMO_EVENTS = {
   approved: 'reservation_approved',
   declined: 'reservation_declined',
   sync: 'sync_request',
+  collected: 'reservation_collected',
+  cancelled: 'reservation_cancelled',
 } as const;

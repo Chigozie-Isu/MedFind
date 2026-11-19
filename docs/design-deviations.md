@@ -132,8 +132,8 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Where | Figma | Code | Why |
 | --- | --- | --- | --- |
 | Log in, Sign up, Sign in, Forgot password | Real accounts and codes | Without Supabase settings, any details and any code are accepted, signing in as Grace or Yusuf | The Vercel links have no database. |
-| Customer Location access on web | Shown after log in when location is off | Skipped on web; goes straight to Home | Browsers in the demo can't use the phone's GPS flow. |
-| Saved tab, bell, pharmacy Inventory / Activity / Earnings / Profile | Their own screens | A "coming soon" toast | Not in the demo path. |
+| Customer Location access on web | Shown after log in when location is off | Shown on web too, with a copy of the phone's permission popup and a demo GPS fix in GRA Phase 2 | So the allow and deny paths can be shown in a browser. |
+| Customer Google and Apple buttons | Sign in with the provider | Without Supabase (and on web), sign straight in as Grace | No real provider in the demo. |
 
 ## Pharmacy app: all screens and flows (delivery, Inventory, Activity, Earnings, Profile, Employees, Shift history)
 
@@ -156,3 +156,24 @@ The pharmacy Inventory, Activity, Earnings and Profile screens are now built, so
 | Opening hours picker | Scroll wheel | Time dropdowns | Same result, easier on a laptop. |
 | Clock out button icon | Log-out icon | Chevron | No log-out icon in the shared set. |
 | Bulk upload | Reads real pack photos | Any photo is accepted and the Figma list of 6 medicines is "found" | Simulation; no scanning service. |
+
+## Customer app: all screens and flows (sign up to rating, payments, map, Settings, Wallet)
+
+The customer Saved, Notifications, Profile/Settings, Wallet, online payment, cancellation and map screens are now built, so the customer rows in "Customer demo flow" above about pay at pharmacy only, no map, no copy button, no camera, no profile and Cancel are superseded. Demo data lives in `apps/customer/src/features/demo/` (`account.ts` for Grace's account, `store.ts` for reservations). Settings › Reset demo data puts it back.
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Pickup and delivery map | Map image with route | OpenStreetMap tiles drawn as images, with an SVG route, pins and ETA bubble | Uses the approved free OSM tiles; no new library. |
+| Card, transfer and wallet payments | Real bank / Paystack screens | Simulated. Bank code 000000 shows "Payment didn't go through"; any other 6 digits succeeds. A transfer "lands" after 3 seconds | Demo only; nothing is charged. |
+| Prescription upload | Camera, file picker, gallery | Picking a source attaches a sample photo. The first PDF try shows the "Image problem" error so it can be seen | No camera or file access in the demo. |
+| Camera (scan) button on Home | Scans a pack | Shows "Scanned: Paracetamol 500mg pack" and searches for it | Simulation; no scanning service. |
+| Reservation done | Pharmacy marks collected / rider delivers | An "I've collected it" / "I've received it" button on the pickup screen (the pharmacy can also mark it collected) | Lets the rating screen be reached on one device. |
+| Waiting → ready | Pharmacy confirms | Pharmacy approval over Supabase Realtime, or after 4 seconds without Supabase | Same as before. |
+| Appearance | Theme and text size | Theme only | Text size isn't built. |
+| Search by active ingredient | Shown in search hints | Not built; search matches medicine names | Not in the data. |
+| Icons not in the shared set (user, edit, copy, star, bank, call, palette, refresh, trash, gallery, file, chat, directions, send, mail) | Figma icons | Hand-drawn 1.5px stroke icons in `features/demo/icons.tsx` | The shared icon set doesn't have them. |
+| Wallet card buttons (Withdraw, View wallet) | Outline button on the dark card | Outline button on a white chip | Brand-blue text on the dark card failed 4.5:1 contrast. |
+| Card CVV field | Eye toggle | No toggle | The toggle didn't fit the half-width field. |
+| Medicine photos and mascots | Full resolution | 1x exports (Augmentin, Gestid, Grace, 4 mascots); other medicines keep the icon | Only the images in the linked frames were exported. |
+| Refunds | Every refund to the MedFind wallet | Wallet payments refund to the wallet; a card or transfer hold is shown as "released" because it was never charged | The demo only places holds until the pharmacist confirms. |
+

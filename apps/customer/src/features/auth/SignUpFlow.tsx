@@ -33,11 +33,14 @@ const EMPTY: SignUpState = { email: '', phone: '', password: '', errors: {}, loa
 export function SignUpFlow({
   initial,
   demo,
+  onSocial,
   onCodeSent,
   onSignIn,
 }: {
   initial?: Partial<SignUpState>;
   demo?: boolean;
+  /** Demo only: Google or Apple signs straight in as the demo customer. */
+  onSocial?: (provider: 'Google' | 'Apple') => void;
   onCodeSent: (phone: string) => void;
   onSignIn: () => void;
 }) {
@@ -126,7 +129,7 @@ export function SignUpFlow({
         />
       </View>
       <Button label="Sign Up" loadingLabel="Creating account…" fullWidth loading={s.loading} onPress={submit} />
-      <SocialSignIn onPress={(p) => showToast(socialComingSoon(p), 'info')} />
+      <SocialSignIn onPress={(p) => (onSocial ? onSocial(p) : showToast(socialComingSoon(p), 'info'))} />
     </AuthScreen>
   );
 }

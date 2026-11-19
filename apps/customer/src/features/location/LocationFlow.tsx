@@ -13,6 +13,7 @@ import {
   turnOnLocation,
 } from '../../lib/deviceLocation';
 import { AddressLink, Benefit, IllustratedScreen, LocationCard, SuggestionRow } from './parts';
+import { WebLocationPrompt } from './WebLocationPrompt';
 
 /**
  * Location access (Figma section 2677:160663 light, 2679:160877 dark).
@@ -29,7 +30,16 @@ export interface LocationFlowProps {
   initialLocation?: CustomerLocation;
 }
 
-export function LocationFlow({ onDone, initialStep = 'checking', initialLocation }: LocationFlowProps) {
+export function LocationFlow(props: LocationFlowProps) {
+  return (
+    <>
+      <Steps {...props} />
+      <WebLocationPrompt />
+    </>
+  );
+}
+
+function Steps({ onDone, initialStep = 'checking', initialLocation }: LocationFlowProps) {
   const [step, setStep] = useState<LocationStep>(initialStep);
   const [location, setLocation] = useState<CustomerLocation | null>(initialLocation ?? null);
   const [saving, setSaving] = useState(false);
