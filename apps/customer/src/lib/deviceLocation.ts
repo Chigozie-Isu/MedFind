@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { Linking, Platform } from 'react-native';
-import { describeAddress, describeGpsFix, type CustomerLocation } from '@medfind/core';
+import { describeGpsFix, type CustomerLocation } from '@medfind/core';
 
 /**
  * Wrappers around expo-location for the Location access screens.
@@ -81,29 +81,4 @@ export async function findCurrentLocation(): Promise<CustomerLocation> {
   const accuracyM = accuracy ?? null;
   const { label, addressLine } = describeGpsFix(await reverse(lat, lng), accuracyM);
   return { label, addressLine: addressLine || null, lat, lng, accuracyM, source: 'gps' };
-}
-
-/** True where address search works (the phone's own geocoder; not on the web). */
-export const canSearchAddresses = Platform.OS !== 'web';
-
-/**
- * Address suggestions from the phone's built-in geocoder (free; Apple on iOS, Google's
- * on-device geocoder on Android). Biased to Nigeria by appending the country.
- */
-export async function searchAddresses(query: string, limit = 5): Promise<CustomerLocation[]> {
-  const q = query.trim();
-  if (q.length < 3 || !canSearchAddresses) return [];
-  const withCountry = /nigeria/i.test(q) ? q : `${q}, Nigeria`;
-  const hits = await Location.geocodeAsync(withCountry);
-  const out: CustomerLocation[] = [];
-  const seen = new Set<string>();
-  for (const h of hits.slice(0, limit)) {
-    const place = await reverse(h.latitude, h.longitude);
-    const { label, addressLine } = describeAddress(place);
-    const key = `${label}|${addressLine}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({ label, addressLine: addressLine || null, lat: h.latitude, lng: h.longitude, accuracyM: null, source: 'address' });
-  }
-  return out;
 }

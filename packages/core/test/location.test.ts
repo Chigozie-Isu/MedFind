@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  routeAfterAuth, homeRouteFor, formatAccuracy, describeAddress, describeGpsFix, assertValidLocation,
+  routeAfterAuth, homeRouteFor, formatAccuracy, describeGpsFix, assertValidLocation,
 } from '../src/location.ts';
 
 test('location screens show when permission is off or nothing is saved', () => {
@@ -31,18 +31,6 @@ test('accuracy reads like the Figma copy and never understates', () => {
   assert.equal(formatAccuracy(1240), 'within 1.3 km');
   assert.throws(() => formatAccuracy(-1));
   assert.throws(() => formatAccuracy(Number.NaN));
-});
-
-test('addresses describe like the Figma suggestions', () => {
-  assert.deepEqual(
-    describeAddress({ streetNumber: '12', street: 'Ada George Road', district: 'Mgbuoba', city: 'Port Harcourt', region: 'Rivers' }),
-    { label: '12 Ada George Road', addressLine: 'Mgbuoba, Port Harcourt, Rivers' },
-  );
-  assert.deepEqual(
-    describeAddress({ name: 'Ada George Market', subregion: 'Obio-Akpor', region: 'Rivers' }),
-    { label: 'Ada George Market', addressLine: 'Obio-Akpor, Rivers' },
-  );
-  assert.equal(describeAddress({}).label, 'Pinned location');
 });
 
 test('a GPS fix shows the area and city with accuracy', () => {

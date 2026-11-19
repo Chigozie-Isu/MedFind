@@ -81,22 +81,6 @@ export interface GeocodedPlace {
 }
 
 const clean = (s: string | null | undefined) => (s ?? '').trim();
-const uniqueJoin = (parts: (string | null | undefined)[], sep: string) => {
-  const out: string[] = [];
-  for (const p of parts.map(clean)) if (p && !out.includes(p)) out.push(p);
-  return out.join(sep);
-};
-
-/** Label and second line for a typed or picked address, e.g. "12 Ada George Road" / "Mgbuoba, Port Harcourt, Rivers". */
-export function describeAddress(place: GeocodedPlace): { label: string; addressLine: string } {
-  const street = uniqueJoin([place.streetNumber, place.street], ' ');
-  const label = street || clean(place.name) || clean(place.district) || clean(place.city) || 'Pinned location';
-  const addressLine = uniqueJoin([place.district, place.city ?? place.subregion, place.region], ', ')
-    .split(', ')
-    .filter((p) => p !== label)
-    .join(', ');
-  return { label, addressLine };
-}
 
 /** Label used when the phone can't name the place around a GPS fix. */
 export const GPS_FALLBACK_LABEL = 'Your location';

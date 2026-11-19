@@ -32,4 +32,5 @@ Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, 
 - Apps never write orders, payments, the wallet or payouts directly: they call the server functions in `supabase/migrations/*_functions.sql`. Row-level security is in `*_security.sql`.
 - Rule numbers live in `packages/core/src/rules.ts` and the `private.rule_*` SQL functions; `packages/core/test/rules-sync.test.ts` fails if they differ.
 - A customer's current location lives in `public.customer_locations` (one row per customer, only they can see it).
+- Address search uses Google Places (New) autocomplete through the `places` edge function (`supabase/functions/places`), so the Google key stays server-side. Signed-in customers only. Key: `GOOGLE_PLACES_API_KEY` in `supabase/functions/.env` locally (see `.env.example`), `supabase secrets set` in production. Serve locally with `pnpm db:functions`.
 - See `docs/database.md` for tables, test accounts and open assumptions.

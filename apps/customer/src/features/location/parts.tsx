@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { radii, sizes, space } from '@medfind/ui';
 import { Button, Icon, Text, useTheme } from '@medfind/ui/native';
@@ -77,19 +77,31 @@ export function LocationCard({ location, onChange }: { location: CustomerLocatio
 }
 
 /** One address suggestion row. */
-export function SuggestionRow({ location, onPress }: { location: CustomerLocation; onPress: () => void }) {
+export function SuggestionRow({
+  label,
+  addressLine,
+  busy,
+  onPress,
+}: {
+  label: string;
+  addressLine: string | null;
+  busy?: boolean;
+  onPress: () => void;
+}) {
   const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityState={{ busy: !!busy }}
       style={({ pressed }) => [styles.suggestion, pressed && { backgroundColor: colors.surface.pressed }]}
     >
       <Icon name="location" size={sizes.icon.md} color={colors.text.secondary} />
       <View style={styles.details}>
-        <Text variant="label1">{location.label}</Text>
-        {location.addressLine ? <Text variant="caption1" color="secondary">{location.addressLine}</Text> : null}
+        <Text variant="label1">{label}</Text>
+        {addressLine ? <Text variant="caption1" color="secondary">{addressLine}</Text> : null}
       </View>
+      {busy && <ActivityIndicator size="small" color={colors.brand.default} />}
     </Pressable>
   );
 }

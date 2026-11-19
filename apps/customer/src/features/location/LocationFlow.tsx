@@ -6,12 +6,11 @@ import { Button, Icon, SearchField, Text, textStyle, useTheme } from '@medfind/u
 import { GPS_FALLBACK_LABEL, type CustomerLocation } from '@medfind/core';
 import {
   askForPermission,
-  canSearchAddresses,
   findCurrentLocation,
   permissionState,
-  searchAddresses,
   turnOnLocation,
 } from '../../lib/deviceLocation';
+import { newPlacesSession, placeToLocation, PlacesUnavailable, searchPlaces, type PlaceSuggestion } from '../../lib/places';
 import { AddressLink, Benefit, IllustratedScreen, LocationCard, SuggestionRow } from './parts';
 
 /**
@@ -192,6 +191,9 @@ function Checking() {
 }
 
 /** "Your address" (Figma 2678:160849): search, use my current location, suggestions. */
+type SearchStatus = 'idle' | 'searching' | 'done' | PlacesErrorStatus;
+type PlacesErrorStatus = 'not_set_up' | 'sign_in_required' | 'failed';
+
 function EnterAddress({
   onBack,
   onUseCurrent,
@@ -203,8 +205,11 @@ function EnterAddress({
 }) {
   const { colors, scheme } = useTheme();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<CustomerLocation[]>([]);
-  const [status, setStatus] = useState<'idle' | 'searching' | 'done' | 'error'>('idle');
+  const [results, setResults] = useState<PlaceSuggestion[]>([]);
+  const [status, setStatus] = useState<SearchStatus>('idle');
+  const [picking, setPicking] = useState<string | null>(null);
+  // One Google Places session per search, ended by the pick.
+  const session = useRef(newPlacesSession());
 
   useEffect(() => {
     const q = query.trim();
@@ -216,15 +221,28 @@ function EnterAddress({
     let live = true;
     setStatus('searching');
     const t = setTimeout(() => {
-      searchAddresses(q)
+      searchPlaces(q, session.current)
         .then((r) => live && (setResults(r), setStatus('done')))
-        .catch(() => live && (setResults([]), setStatus('error')));
-    }, 400);
+        .catch((e) => live && (setResults([]), setStatus(e instanceof PlacesUnavailable ? e.reason : 'failed')));
+    }, 300);
     return () => {
       live = false;
       clearTimeout(t);
     };
   }, [query]);
+
+  const pick = async (s: PlaceSuggestion) => {
+    setPicking(s.placeId);
+    try {
+      const loc = await placeToLocation(s.placeId, session.current);
+      session.current = newPlacesSession();
+      onPick(loc);
+    } catch (e) {
+      setStatus(e instanceof PlacesUnavailable ? e.reason : 'failed');
+    } finally {
+      setPicking(null);
+    }
+  };
 
   const dark = scheme === 'dark';
   return (
@@ -256,36 +274,36 @@ function EnterAddress({
           </View>
           <Icon name="chevron-right" size={sizes.icon.lg} color={colors.icon.default} />
         </Pressable>
-        <SuggestionsList
-          query={query.trim()}
-          results={results}
-          status={status}
-          onPick={onPick}
-        />
+        <SuggestionsList query={query.trim()} results={results} status={status} picking={picking} onPick={pick} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+const SEARCH_MESSAGES: Record<PlacesErrorStatus, string> = {
+  not_set_up: 'Address search isn’t set up yet. Use your current location instead.',
+  sign_in_required: 'Sign in to search for an address.',
+  failed: 'We couldn’t search right now. Check your connection and try again.',
+};
+
 function SuggestionsList({
   query,
   results,
   status,
+  picking,
   onPick,
 }: {
   query: string;
-  results: CustomerLocation[];
-  status: 'idle' | 'searching' | 'done' | 'error';
-  onPick: (loc: CustomerLocation) => void;
+  results: PlaceSuggestion[];
+  status: SearchStatus;
+  picking: string | null;
+  onPick: (s: PlaceSuggestion) => void;
 }) {
   const { colors } = useTheme();
-  if (!canSearchAddresses) {
-    return <Text variant="label2" color="secondary" style={styles.suggestionsTitle}>Address search works in the MedFind app on your phone.</Text>;
-  }
   if (query.length < 3) return null;
   let message: string | null = null;
   if (status === 'searching' && results.length === 0) message = 'Searching…';
-  else if (status === 'error') message = 'We couldn’t search right now. Check your connection and try again.';
+  else if (status in SEARCH_MESSAGES) message = SEARCH_MESSAGES[status as PlacesErrorStatus];
   else if (status === 'done' && results.length === 0) message = `No places found for “${query}”. Try a street name or area.`;
   return (
     <View>
@@ -294,9 +312,14 @@ function SuggestionsList({
         <Text variant="caption1" color="secondary">{message}</Text>
       ) : (
         results.map((r, i) => (
-          <View key={`${r.lat},${r.lng},${i}`}>
+          <View key={r.placeId}>
             {i > 0 && <View style={[styles.divider, { backgroundColor: colors.surface.pressed }]} />}
-            <SuggestionRow location={r} onPress={() => onPick(r)} />
+            <SuggestionRow
+              label={r.label}
+              addressLine={r.addressLine}
+              busy={picking === r.placeId}
+              onPress={() => picking === null && onPick(r)}
+            />
           </View>
         ))
       )}

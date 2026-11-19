@@ -46,5 +46,5 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Dark: dividers between suggestions | #545458 at 65% (iOS default) | #3F505D (surface pressed) | Uses the theme's own divider colour instead of an iOS system grey. |
 | Search placeholder | Not shown (frame is filled with "Ada George") | "Search for your street or area" | Needed copy for the empty field. |
 | Found screen without a place name | Always "You're near GRA Phase 2" | "We found your location" when the phone can't name the area | Reverse geocoding can fail (no network, or on the web). |
-| Address screen on the web | Suggestions list | A note that search works in the app | The free geocoder that comes with expo-location only runs on phones. |
+| Address search messages | Not designed | "Searching…", "No places found…", "Sign in to search for an address.", "Address search isn't set up yet…" and a connection error | States the Figma frame doesn't show. |
 | Illustration and text position | 37px under a 47px status bar | 36px (space.xl + space.xxs) under the safe area | Nearest spacing tokens. |
