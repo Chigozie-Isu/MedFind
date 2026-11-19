@@ -85,7 +85,7 @@ export function TabScreen({ tab, children }: { tab: CustomerTab; children: React
           onChange={(t) => {
             if (t === 'home') router.navigate('/');
             if (t === 'reservation') router.navigate('/reservations');
-            if (t === 'saved') showSoon('Saved medicines are coming soon');
+            if (t === 'saved') router.navigate('/saved');
           }}
         />
       </View>
