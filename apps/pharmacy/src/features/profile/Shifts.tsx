@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PAYOUT_INTERVAL_DAYS, nextPayoutDate } from '@medfind/core';
 import { Badge, Button, Icon, Text, cssVar } from '@medfind/ui/web';
 import { Shell } from '../reservations/Shell';
+import { useNow } from '../reservations/store';
 import { useWorkspace } from '../workspace/store';
 import { Avatar, EmptyState, PageHeading, Pager, Skeleton, Tabs, dmyOf, downloadCsv, useFirstLoad, usePaged } from '../common/ui';
 import c from '../common/common.module.css';
@@ -23,6 +24,10 @@ function period(offset: number) {
 
 /** Shift history (Figma 601:16828) with the empty state (608:25790). */
 export function Shifts() {
+  return useNow() ? <ShiftsScreen /> : null;
+}
+
+function ShiftsScreen() {
   const router = useRouter();
   const w = useWorkspace();
   const loading = useFirstLoad('shifts');

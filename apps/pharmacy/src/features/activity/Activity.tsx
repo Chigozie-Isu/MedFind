@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Badge, Button, Text, cssVar } from '@medfind/ui/web';
 import { Shell } from '../reservations/Shell';
+import { useNow } from '../reservations/store';
 import { useWorkspace, type ActivityEntry } from '../workspace/store';
 import { Avatar, EmptyState, Pager, SearchBox, Skeleton, Tabs, dmyOf, downloadCsv, hhmmOf, useFirstLoad, usePaged } from '../common/ui';
 import c from '../common/common.module.css';
@@ -21,6 +22,10 @@ function dayLabel(iso: string) {
 
 /** Activity (Figma 305:2703) with the empty state (597:11273). */
 export function Activity() {
+  return useNow() ? <ActivityScreen /> : null;
+}
+
+function ActivityScreen() {
   const w = useWorkspace();
   const loading = useFirstLoad('activity');
   const [tab, setTab] = useState<Tab>('all');

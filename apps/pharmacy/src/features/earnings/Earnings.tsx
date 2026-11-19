@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { commissionKobo, formatNaira, nextPayoutDate } from '@medfind/core';
 import { Badge, Button, Icon, Text, cssVar } from '@medfind/ui/web';
 import { Shell } from '../reservations/Shell';
+import { useNow } from '../reservations/store';
 import { useWorkspace, type Transaction } from '../workspace/store';
 import { Pager, Skeleton, Tabs, EmptyState, dmyOf, downloadCsv, hhmmOf, useFirstLoad, usePaged } from '../common/ui';
 import c from '../common/common.module.css';
@@ -42,6 +43,10 @@ const isOnline = (t: Transaction) => t.method.startsWith('Online');
 
 /** Earnings (Figma 605:24223). Figures are simulated; no money moves. */
 export function Earnings() {
+  return useNow() ? <EarningsScreen /> : null;
+}
+
+function EarningsScreen() {
   const w = useWorkspace();
   const loading = useFirstLoad('earnings');
   const [tab, setTab] = useState<Tab>('all');
