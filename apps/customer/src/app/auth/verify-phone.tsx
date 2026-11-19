@@ -3,7 +3,7 @@ import { formatPhoneInternational } from '@medfind/core';
 import { VerifyPhoneFlow } from '../../features/auth/VerifyPhoneFlow';
 import { signedUpEmail } from '../../features/auth/authApi';
 import { hrefAfterAuth } from '../../lib/afterAuth';
-import { startNewCustomerAccount } from '../../features/demo/account';
+import { setAccount, startNewCustomerAccount } from '../../features/demo/account';
 import { startNewCustomerReservations } from '../../features/demo/store';
 
 /** Sign up step 2: /auth/verify-phone?phone=+234… */
@@ -22,7 +22,9 @@ export default function VerifyPhone() {
         else router.replace({ pathname: '/auth/sign-up', params: { email, phone: local } });
       }}
       onVerified={async () => {
+        const email = (await signedUpEmail()) ?? '';
         startNewCustomerAccount();
+        setAccount(a => ({ profile: { ...a.profile, email, phone, maskedPhone: phone } }));
         startNewCustomerReservations();
         router.replace(await hrefAfterAuth('sign_up'));
       }}
