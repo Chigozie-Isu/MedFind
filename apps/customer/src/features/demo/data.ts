@@ -36,12 +36,14 @@ export interface DemoInventory {
 const daily = (open: string, close: string): OpeningHours =>
   Object.fromEntries((['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as Weekday[]).map((d) => [d, { open, close }]));
 
+/**
+ * The same 3 Port Harcourt pharmacies, 15 medicines and prices as supabase/seed.sql; change both together.
+ * Pharmacy names and Augmentin prices are from Figma ("Search – results", 115:671).
+ */
 export const pharmacies: DemoPharmacy[] = [
-  { id: 'fuasi', name: 'Fuasi Pharmacy', street: '50 Evo Road', area: 'GRA', km: 1.8, hours: {}, open24Hours: true, offersDelivery: true },
-  { id: 'caduces', name: 'Caduces Pharma', street: '12 Aba Road', area: 'Port Harcourt', km: 3.5, hours: {}, open24Hours: true, offersDelivery: true },
-  { id: 'mediguy', name: 'Mediguy', street: '8 Olu Obasanjo Road', area: 'Port Harcourt', km: 5, hours: {}, open24Hours: true, offersDelivery: true },
-  { id: 'precious', name: 'Precious Pharmacy', street: '21 Woji Road', area: 'Woji', km: 2.4, hours: daily('08:00', '22:00'), open24Hours: false, offersDelivery: true },
-  { id: 'green-cross', name: 'Green Cross Pharmacy', street: '3 Stadium Road', area: 'Elekahia', km: 4.1, hours: daily('08:00', '21:00'), open24Hours: false, offersDelivery: false },
+  { id: 'fuasi', name: 'Fuasi Pharmacy', street: '50 Evo Road', area: 'GRA Phase 2', km: 1.8, hours: {}, open24Hours: true, offersDelivery: true },
+  { id: 'caduces', name: 'Caduces Pharma', street: '12 Aba Road', area: 'Rumuogba', km: 3.5, hours: {}, open24Hours: true, offersDelivery: true },
+  { id: 'mediguy', name: 'Mediguy', street: '8 Olu Obasanjo Road', area: 'D-Line', km: 5, hours: {}, open24Hours: true, offersDelivery: true },
 ];
 
 export const medicines: DemoMedicine[] = [
@@ -51,6 +53,15 @@ export const medicines: DemoMedicine[] = [
   { id: 'amoxil', name: 'Amoxil 100ml', short: 'Amoxil' },
   { id: 'paracetamol', name: 'Paracetamol 500mg', short: 'Paracetamol' },
   { id: 'actifed', name: 'Actifed 100ml', short: 'Actifed' },
+  { id: 'coartem', name: 'Coartem 80/480mg', short: 'Coartem' },
+  { id: 'lonart', name: 'Lonart DS 80/480mg', short: 'Lonart DS' },
+  { id: 'panadol-extra', name: 'Panadol Extra 500mg/65mg', short: 'Panadol Extra' },
+  { id: 'loratadine', name: 'Loratadine 10mg', short: 'Loratadine' },
+  { id: 'vitamin-c', name: 'Emzor Vitamin C 100mg', short: 'Emzor Vitamin C' },
+  { id: 'buscopan', name: 'Buscopan 10mg', short: 'Buscopan' },
+  { id: 'ors', name: 'Emzor ORS sachets', short: 'Emzor ORS' },
+  { id: 'ventolin', name: 'Ventolin Inhaler 100mcg', short: 'Ventolin Inhaler' },
+  { id: 'flagyl', name: 'Flagyl 400mg', short: 'Flagyl' },
 ];
 
 const stock = (pharmacyId: string, medicineId: string, naira: number, quantityInStock = 20): DemoInventory => ({
@@ -61,26 +72,45 @@ const stock = (pharmacyId: string, medicineId: string, naira: number, quantityIn
   quantityInStock,
 });
 
-/** Augmentin prices and stock match "Search – results" (Figma 115:671). */
-export const inventory: DemoInventory[] = [
-  stock('fuasi', 'augmentin', 3450),
-  stock('caduces', 'augmentin', 4000),
-  stock('mediguy', 'augmentin', 3400, 3),
-  stock('precious', 'diclofenac', 1200),
-  stock('fuasi', 'diclofenac', 1300),
-  stock('precious', 'gestid', 1800),
-  stock('caduces', 'gestid', 1900),
-  stock('precious', 'amoxil', 2500),
-  stock('green-cross', 'paracetamol', 600),
-  stock('fuasi', 'paracetamol', 650),
-  stock('fuasi', 'actifed', 2200),
-  stock('precious', 'actifed', 2100, 4),
+/** Naira prices at Fuasi, Caduces and Mediguy (null = not stocked), as in supabase/seed.sql. */
+const prices: [string, number | null, number | null, number | null][] = [
+  ['augmentin', 3450, 4000, 3400],
+  ['diclofenac', 1300, 1200, null],
+  ['gestid', 1800, 1900, null],
+  ['amoxil', 2600, 2500, 2450],
+  ['paracetamol', 650, 600, 550],
+  ['actifed', 2200, null, 2100],
+  ['coartem', 3600, 3450, 3500],
+  ['lonart', 2900, 2800, null],
+  ['panadol-extra', 1300, 1250, 1200],
+  ['loratadine', 1200, null, 1150],
+  ['vitamin-c', 650, 600, 700],
+  ['buscopan', 3300, 3200, null],
+  ['ors', 1000, 1050, 1000],
+  ['ventolin', 5000, 4800, null],
+  ['flagyl', null, 1800, 1850],
 ];
+
+/** Low stock as drawn in Figma (Mediguy has 3 Augmentin) and in the seed. */
+const lowStock: Record<string, number> = { 'mediguy:augmentin': 3, 'mediguy:actifed': 4 };
+
+export const inventory: DemoInventory[] = prices.flatMap(([medicineId, ...byPharmacy]) =>
+  pharmacies.flatMap((p, i) => {
+    const naira = byPharmacy[i];
+    return naira == null ? [] : [stock(p.id, medicineId, naira, lowStock[`${p.id}:${medicineId}`] ?? 20)];
+  }),
+);
 
 export const LOW_STOCK_THRESHOLD = 5;
 
 /** `fullName` is how the pharmacy screens show her (Figma "Review Grace"). */
 export const customer = { firstName: 'Grace', fullName: 'Grace Mary' };
+
+/** The 2 test customers, matching the accounts in supabase/seed.sql (password MedFind-test-1). */
+export const testCustomers = [
+  { firstName: 'Grace', fullName: 'Grace Mary', email: 'grace@example.com' },
+  { firstName: 'Chinedu', fullName: 'Chinedu Okoro', email: 'chinedu@example.com' },
+];
 
 export const medicineName = (m: DemoMedicine) => m.name;
 export const findPharmacy = (id: string) => pharmacies.find((p) => p.id === id)!;

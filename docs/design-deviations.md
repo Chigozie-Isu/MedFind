@@ -115,3 +115,10 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Notifications badge | 5 | Waiting reservations + 2 | Sample number that moves with the demo. |
 | Sample cards | Bob Mackie, Ned Mackie (Review), Annie Oak, Tunde Yomi ×2 (Ready) | Bob Mackie (Review), Annie Oak and Tunde Yomi (Ready) | Fewer samples; Grace's card is the live one. |
 | Prescription photo | Grace uploads a photo | The Figma photo is bundled (`public/demo/grace-prescription.png`) | No scanning or uploads in the demo. |
+
+## Demo data (Port Harcourt)
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Pharmacies | Fuasi, Caduces, Mediguy, Precious Pharmacy | Fuasi Pharmacy, Caduces Pharma and Mediguy only | Demo data is 3 pharmacies, the same in the app and the Supabase seed. |
+| My reservations history | Orders at Precious Pharmacy | The same orders at Fuasi, Caduces and Mediguy | Precious Pharmacy isn't in the 3-pharmacy demo data. |
