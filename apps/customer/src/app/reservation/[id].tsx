@@ -7,7 +7,7 @@ import { radii, sizes, space } from '@medfind/ui';
 import { Button, Card, Icon, Text, useTheme } from '@medfind/ui/native';
 import { findPharmacy } from '../../features/demo/data';
 import { StatusBadge } from '../../features/demo/parts';
-import { deadlineOf, useReservation } from '../../features/demo/store';
+import { cancelReservation, deadlineOf, markCollected, useReservation } from '../../features/demo/store';
 
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 function countdown(ms: number): string {
@@ -30,7 +30,7 @@ export default function PickupCode() {
     return () => clearInterval(t);
   }, []);
 
-  if (!r) return null;
+  if (!r) return <SafeAreaView style={styles.flex}><Button label="Back to reservations" onPress={() => router.replace('/reservations')} /></SafeAreaView>;
   const pharmacy = findPharmacy(r.pharmacyId);
   const ready = r.status === 'ready';
   const ended = r.status === 'declined' || r.status === 'expired';
@@ -78,7 +78,7 @@ export default function PickupCode() {
               another pharmacy.
             </Text>
           </Card>
-        ) : ready ? (
+        ) : r.status === 'cancelled' || r.status === 'collected' ? null : ready ? (
           <>
             <Card>
               <Text variant="caption1" color="secondary">
@@ -126,7 +126,7 @@ export default function PickupCode() {
           </>
         )}
 
-        {!ended && (
+        {!ended && r.status !== 'cancelled' && r.status !== 'collected' && (
         <View style={styles.note}>
           <Icon name="shield" size={sizes.icon.md} color={colors.text.secondary} />
           <Text variant="caption1" color="secondary" style={styles.flex}>
@@ -136,6 +136,10 @@ export default function PickupCode() {
           </Text>
         </View>
         )}
+        {r.status === 'cancelled' && <Card><Text variant="h5">Reservation cancelled</Text><Text variant="body3">No payment was taken.</Text></Card>}
+        {r.status === 'collected' && <Card><Text variant="h5">Order completed</Text><Text variant="body3">Collection and payment were simulated for this demo.</Text></Card>}
+        {(r.status === 'waiting' || r.status === 'ready') && <Button label="Cancel reservation" variant="secondary" fullWidth onPress={() => cancelReservation(r.id)} />}
+        {ready && <Button label={pickup ? 'Simulate collection and payment' : 'Simulate delivery and payment'} fullWidth onPress={() => markCollected(r.id)} />}
         {ended && (
           <Button
             label="Find another pharmacy"
