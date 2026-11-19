@@ -45,9 +45,9 @@ export default function Home() {
   if (gate === 'welcome') return <Redirect href="/welcome" />;
 
   // "Home – new user" (from sign-up): no history until the first reservation.
-  const freshUser = newUser === '1' && all.every((r) => r.placedAt.getTime() < APP_START);
+  const freshUser = newUser === '1' && all.length === 0;
   const active = all.filter(isActive);
-  const history = freshUser ? [] : all.filter((r) => !isActive(r));
+  const history = all.filter((r) => !isActive(r));
 
   const search = (q: string) => {
     if (!q.trim()) return router.push('/search');
@@ -63,7 +63,7 @@ export default function Home() {
             <Text variant="label1" color="secondary">
               {greeting()}
             </Text>
-            <Text variant="h1">{customer.firstName}</Text>
+            <Text variant="h1">{account.profile.fullName?.trim().split(/\s+/)[0] || 'there'}</Text>
           </View>
           <View style={styles.headerIcons}>
             <Pressable accessibilityLabel="Notifications" accessibilityRole="button" onPress={() => router.push('/notifications')}>
@@ -165,7 +165,6 @@ export default function Home() {
   );
 }
 
-const APP_START = Date.now();
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
