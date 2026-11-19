@@ -11,6 +11,8 @@ const statusBadge: Record<DemoStatus, { label: string; tone: StatusTone }> = {
   ready: { label: 'Ready for pickup', tone: 'success' },
   collected: { label: 'Collected', tone: 'success' },
   cancelled: { label: 'Cancelled', tone: 'error' },
+  declined: { label: 'Declined', tone: 'error' },
+  expired: { label: 'Expired', tone: 'error' },
 };
 
 export function StatusBadge({ status }: { status: DemoStatus }) {

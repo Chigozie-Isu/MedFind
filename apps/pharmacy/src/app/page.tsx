@@ -20,6 +20,7 @@ export default function Home() {
       const s = await myStaffState();
       if (!s) return router.replace('/welcome');
       if (s.application_status === 'draft') return router.replace('/sign-up');
+      if (s.application_status === 'approved') return router.replace('/dashboard');
       setStaff(s);
     })();
   }, [router]);

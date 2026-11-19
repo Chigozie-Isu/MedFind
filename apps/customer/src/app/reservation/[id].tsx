@@ -7,10 +7,7 @@ import { radii, sizes, space } from '@medfind/ui';
 import { Button, Card, Icon, Text, useTheme } from '@medfind/ui/native';
 import { findPharmacy } from '../../features/demo/data';
 import { StatusBadge } from '../../features/demo/parts';
-import { deadlineOf, markReady, useReservation } from '../../features/demo/store';
-
-/** How long the demo waits before the pharmacy "confirms". */
-const DEMO_CONFIRM_MS = 4000;
+import { deadlineOf, useReservation } from '../../features/demo/store';
 
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 function countdown(ms: number): string {
@@ -18,18 +15,16 @@ function countdown(ms: number): string {
   return [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60].map((n) => String(n).padStart(2, '0')).join(':');
 }
 
-/** Pickup code – waiting for pharmacy (Figma 289:9235), then ready, pay at pharmacy (Figma 2436:86375). */
+/**
+ * Pickup code – waiting for pharmacy (Figma 289:9235), then ready, pay at pharmacy (Figma 2436:86375).
+ * Changes the moment the pharmacy approves or declines (Supabase Realtime, see features/demo/store).
+ */
 export default function PickupCode() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const r = useReservation(id);
   const [now, setNow] = useState(Date.now());
 
-  useEffect(() => {
-    if (r?.status !== 'waiting') return;
-    const t = setTimeout(() => markReady(r.id), DEMO_CONFIRM_MS);
-    return () => clearTimeout(t);
-  }, [r?.id, r?.status]);
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
@@ -38,6 +33,7 @@ export default function PickupCode() {
   if (!r) return null;
   const pharmacy = findPharmacy(r.pharmacyId);
   const ready = r.status === 'ready';
+  const ended = r.status === 'declined' || r.status === 'expired';
   const deadline = deadlineOf(r);
   const left = deadline ? deadline.getTime() - now : 0;
   const total = formatNaira(r.totals.totalKobo);
@@ -72,7 +68,17 @@ export default function PickupCode() {
           {pharmacy.name} · {pharmacy.street}, {pharmacy.area}
         </Text>
 
-        {ready ? (
+        {ended ? (
+          <Card>
+            <Text variant="h5">
+              {r.status === 'declined' ? `${pharmacy.name} declined your reservation` : `${pharmacy.name} didn’t reply in ${APPROVAL_WINDOW_MINUTES} mins`}
+            </Text>
+            <Text variant="body3" color="secondary">
+              {r.status === 'declined' ? `“${r.declineReason}”` : 'Your reservation has expired.'} You haven’t been charged, so you can reserve at
+              another pharmacy.
+            </Text>
+          </Card>
+        ) : ready ? (
           <>
             <Card>
               <Text variant="caption1" color="secondary">
@@ -120,6 +126,7 @@ export default function PickupCode() {
           </>
         )}
 
+        {!ended && (
         <View style={styles.note}>
           <Icon name="shield" size={sizes.icon.md} color={colors.text.secondary} />
           <Text variant="caption1" color="secondary" style={styles.flex}>
@@ -128,6 +135,14 @@ export default function PickupCode() {
               : `Pay ${total} when your order arrives. This includes ${formatNaira(r.totals.deliveryFeeKobo)} delivery.`}
           </Text>
         </View>
+        )}
+        {ended && (
+          <Button
+            label="Find another pharmacy"
+            fullWidth
+            onPress={() => router.navigate({ pathname: '/search', params: { q: r.medicineName.split(' ')[0] } })}
+          />
+        )}
         <Button label="My reservations" variant={ready ? 'primary' : 'secondary'} fullWidth onPress={() => router.navigate('/reservations')} />
       </ScrollView>
     </SafeAreaView>
