@@ -29,6 +29,7 @@ export function Button({
   iconLeft,
   disabled,
   loading,
+  loadingLabel,
   fullWidth,
   onPress,
   accessibilityLabel,
@@ -39,6 +40,8 @@ export function Button({
   const iconOnly = !label && !!(icon || iconLeft);
   const isText = variant === 'text';
   const inactive = disabled || loading;
+  const spinner = loading && !loadingLabel;
+  const shownLabel = loading && loadingLabel ? loadingLabel : label;
 
   const stateFor = ({ pressed, hovered }: PressableStateCallbackType & { hovered?: boolean }): InteractionState =>
     forceState ?? (disabled ? 'disabled' : pressed ? 'pressed' : hovered ? 'hover' : 'default');
@@ -73,16 +76,16 @@ export function Button({
         const iconSize = iconOnly ? dims.iconOnlyIcon : dims.icon;
         return (
           <>
-            {loading && (
+            {spinner && (
               <View style={[StyleSheet.absoluteFill, styles.spinner]}>
                 <ActivityIndicator size="small" color={c.text} />
               </View>
             )}
-            <View style={[styles.content, loading && styles.hidden]}>
+            <View style={[styles.content, spinner && styles.hidden]}>
             {iconLeft && <Icon name={iconLeft} size={iconSize} color={c.text} />}
-            {label && (
+            {shownLabel && (
               <Text style={[...labelStyle(size), { color: c.text }]} numberOfLines={1}>
-                {label}
+                {shownLabel}
               </Text>
             )}
             {icon && <Icon name={icon} size={iconSize} color={c.text} />}
