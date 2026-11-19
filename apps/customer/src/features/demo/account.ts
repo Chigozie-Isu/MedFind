@@ -104,6 +104,7 @@ export const getAccount = () => state;
 export function startNewCustomerAccount(): void {
   state = {
     ...seed(),
+    profile: { ...profileSeed, fullName: '', displayName: '', email: '', phone: '', maskedPhone: '', dob: { d: '', m: '', y: '' }, allergies: '' },
     walletKobo: 0,
     wallet: [],
     cards: [],
