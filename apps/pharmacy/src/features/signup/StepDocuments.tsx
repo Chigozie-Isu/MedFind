@@ -70,7 +70,7 @@ export function StepDocuments({
       } else if (res.reason === 'cancelled') {
         setUploads((u) => ({ ...u, [kind]: undefined }));
       } else {
-        setUploads((u) => ({ ...u, [kind]: { ...u[kind]!, error: 'Upload failed. Check your connection and try again.' } }));
+        setUploads((u) => ({ ...u, [kind]: { ...u[kind]!, error: res.reason.startsWith('Upload failed') || res.reason.startsWith('Sign in') ? res.reason : 'Upload failed. Check your connection and try again.' } }));
       }
     });
   };
@@ -86,7 +86,7 @@ export function StepDocuments({
         if (res.ok) {
           setPhotoUploads((p) => p.filter((x) => x.id !== id));
           onDocumentsChanged();
-        } else update({ error: `${file.name} didn’t upload. Try again.` });
+        } else update({ error: `${file.name} didn’t upload. ${res.reason.startsWith('Upload failed') ? res.reason : 'Try again.'}` });
       });
     }
   };

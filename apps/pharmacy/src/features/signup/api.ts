@@ -176,7 +176,16 @@ export function uploadDocument(
       xhr.send(file);
     });
     if (status === -1) return { ok: false, reason: 'cancelled' };
-    if (status < 200 || status >= 300) return { ok: false, reason: 'upload_failed' };
+    if (status < 200 || status >= 300) {
+      let detail = status === 0 ? 'no connection to storage' : `storage said ${status}`;
+      try {
+        const body = JSON.parse(xhr.responseText) as { message?: string; error?: string };
+        detail = body.message || body.error || detail;
+      } catch {
+        // Not JSON: keep the status.
+      }
+      return { ok: false, reason: `Upload failed: ${detail}.` };
+    }
     const { data: id, error } = await sb.rpc('add_pharmacy_document', {
       p_kind: kind,
       p_storage_path: path,
@@ -184,7 +193,7 @@ export function uploadDocument(
       p_size_bytes: file.size,
       p_mime_type: file.type,
     });
-    if (error) return { ok: false, reason: 'upload_failed' };
+    if (error) return { ok: false, reason: `Upload failed: ${error.message}.` };
     return { ok: true, value: id as string };
   })();
   return { done, cancel: () => xhr.abort() };
