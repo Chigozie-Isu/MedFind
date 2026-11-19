@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { radii, sizes, space } from '@medfind/ui';
 import { Button, Icon, SearchField, Text, useTheme } from '@medfind/ui/native';
 import { currentCustomerId } from '../lib/supabase';
-import { customer } from '../features/demo/data';
+import { useDemoProfile } from '../features/demo/profile';
 import { ReservationRow, TabScreen, useComingSoon } from '../features/demo/parts';
 import { useReservations } from '../features/demo/store';
 
@@ -36,6 +36,7 @@ export default function Home() {
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const history = useReservations();
+  const profile = useDemoProfile();
   const gate = useAuthGate();
   const [soonToast, showSoon] = useComingSoon();
   if (gate === 'checking') return null;
@@ -51,13 +52,13 @@ export default function Home() {
             <Text variant="label1" color="secondary">
               {greeting()}
             </Text>
-            <Text variant="h1">{customer.firstName}</Text>
+            <Text variant="h1">{profile.name.trim().split(/\\s+/)[0] || 'Welcome'}</Text>
           </View>
           <View style={styles.headerIcons}>
-            <Pressable accessibilityLabel="Notifications" accessibilityRole="button" onPress={() => showSoon('Notifications are coming soon')}>
+            <Pressable accessibilityLabel="Notifications" accessibilityRole="button" onPress={() => router.push('/reservations')}>
               <Icon name="notification" size={sizes.icon.lg} color={colors.icon.default} />
             </Pressable>
-            <Link href="/settings/appearance" asChild>
+            <Link href="/settings/profile" asChild>
               <Pressable accessibilityLabel="Settings" accessibilityRole="button">
                 <Icon name="setting" size={sizes.icon.lg} color={colors.icon.default} />
               </Pressable>
