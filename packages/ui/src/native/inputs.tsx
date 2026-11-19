@@ -135,7 +135,7 @@ export function TextField({
 }
 
 /** Search (Figma 195:3096): 42px box with the search icon on the right. */
-export function SearchField({ placeholder = 'Search', value, onChangeText, size = 'mobile', forceState }: SearchFieldProps) {
+export function SearchField({ placeholder = 'Search', value, onChangeText, onSubmit, size = 'mobile', forceState }: SearchFieldProps) {
   const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
   const state = forceState ?? (focused ? 'focus' : value ? 'filled' : 'default');
@@ -152,6 +152,7 @@ export function SearchField({ placeholder = 'Search', value, onChangeText, size 
         onBlur={() => setFocused(false)}
         accessibilityLabel={placeholder}
         returnKeyType="search"
+        onSubmitEditing={onSubmit}
         style={[styles.input, textStyle(token), { color: colors.input.value }]}
       />
       <Icon name="search" size={sizes.icon.lg} color={colors.icon.default} />

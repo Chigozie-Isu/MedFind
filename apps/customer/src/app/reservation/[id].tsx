@@ -1,0 +1,152 @@
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { APPROVAL_WINDOW_MINUTES, PICKUP_WINDOW_MINUTES, formatNaira } from '@medfind/core';
+import { radii, sizes, space } from '@medfind/ui';
+import { Button, Card, Icon, Text, useTheme } from '@medfind/ui/native';
+import { findPharmacy } from '../../features/demo/data';
+import { StatusBadge } from '../../features/demo/parts';
+import { deadlineOf, markReady, useReservation } from '../../features/demo/store';
+
+/** How long the demo waits before the pharmacy "confirms". */
+const DEMO_CONFIRM_MS = 4000;
+
+const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+function countdown(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60].map((n) => String(n).padStart(2, '0')).join(':');
+}
+
+/** Pickup code – waiting for pharmacy (Figma 289:9235), then ready, pay at pharmacy (Figma 2436:86375). */
+export default function PickupCode() {
+  const { colors } = useTheme();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const r = useReservation(id);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (r?.status !== 'waiting') return;
+    const t = setTimeout(() => markReady(r.id), DEMO_CONFIRM_MS);
+    return () => clearTimeout(t);
+  }, [r?.id, r?.status]);
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (!r) return null;
+  const pharmacy = findPharmacy(r.pharmacyId);
+  const ready = r.status === 'ready';
+  const deadline = deadlineOf(r);
+  const left = deadline ? deadline.getTime() - now : 0;
+  const total = formatNaira(r.totals.totalKobo);
+  const pickup = r.fulfilment === 'pickup';
+
+  return (
+    <SafeAreaView style={[styles.flex, { backgroundColor: colors.surface.muted }]} edges={['top', 'bottom']}>
+      <View style={styles.map}>
+        <View style={styles.close}>
+          <Button icon="close" variant="secondary" size="small" onPress={() => router.navigate('/')} accessibilityLabel="Close" />
+        </View>
+        <View style={styles.pin}>
+          <View style={[styles.pinLabel, { backgroundColor: colors.surface.raised }]}>
+            <Text variant="caption1">{pharmacy.name}</Text>
+          </View>
+          <Icon name="location" size={sizes.icon.xl} color={colors.brand.default} />
+        </View>
+      </View>
+      <ScrollView style={[styles.sheet, { backgroundColor: colors.surface.default }]} contentContainerStyle={styles.sheetContent}>
+        <View style={styles.between}>
+          <StatusBadge status={r.status} />
+          {ready && deadline && (
+            <Text variant="caption1" color="secondary">
+              Held until {hhmm(deadline)}
+            </Text>
+          )}
+        </View>
+        <Text variant="h2">
+          {r.medicineName} × {r.quantity}
+        </Text>
+        <Text variant="body3" color="secondary">
+          {pharmacy.name} · {pharmacy.street}, {pharmacy.area}
+        </Text>
+
+        {ready ? (
+          <>
+            <Card>
+              <Text variant="caption1" color="secondary">
+                {pickup ? 'Show this code at the counter' : 'Give this code to your rider'}
+              </Text>
+              <Text variant="h1" accessibilityLabel={`Pickup code ${r.pickupCode.split('').join(' ')}`}>
+                {r.pickupCode.slice(0, 3)} {r.pickupCode.slice(3)}
+              </Text>
+            </Card>
+            {pickup && (
+              <View style={styles.timer}>
+                <Text variant="h2" color="secondary">
+                  {countdown(left)} <Text variant="body3" color="secondary">left</Text>
+                </Text>
+                <View style={[styles.track, { backgroundColor: colors.surface.border }]}>
+                  <View
+                    style={[
+                      styles.fill,
+                      { backgroundColor: colors.brand.default, width: `${(left / (PICKUP_WINDOW_MINUTES * 60_000)) * 100}%` },
+                    ]}
+                  />
+                </View>
+              </View>
+            )}
+          </>
+        ) : (
+          <>
+            <Card>
+              <View style={styles.row}>
+                <ActivityIndicator color={colors.brand.default} />
+                <View style={styles.flex}>
+                  <Text variant="h5">Waiting for the pharmacy</Text>
+                  <Text variant="caption1" color="secondary">
+                    {pharmacy.name} replies within {APPROVAL_WINDOW_MINUTES} mins
+                  </Text>
+                </View>
+              </View>
+            </Card>
+            <Card>
+              <Text variant="caption1" color="secondary">
+                {pickup ? 'Pickup code' : 'Delivery code'} · shows once confirmed
+              </Text>
+              <View style={[styles.placeholder, { backgroundColor: colors.surface.muted }]} />
+            </Card>
+          </>
+        )}
+
+        <View style={styles.note}>
+          <Icon name="shield" size={sizes.icon.md} color={colors.text.secondary} />
+          <Text variant="caption1" color="secondary" style={styles.flex}>
+            {pickup
+              ? `Pay ${total} at the pharmacy when you collect. Pick up within ${PICKUP_WINDOW_MINUTES / 60} hours of it being ready.`
+              : `Pay ${total} when your order arrives. This includes ${formatNaira(r.totals.deliveryFeeKobo)} delivery.`}
+          </Text>
+        </View>
+        <Button label="My reservations" variant={ready ? 'primary' : 'secondary'} fullWidth onPress={() => router.navigate('/reservations')} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  map: { height: 220 },
+  close: { position: 'absolute', top: space.md, left: space.md, zIndex: 1 },
+  pin: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.xs },
+  pinLabel: { paddingHorizontal: space.sm, paddingVertical: space.xxs, borderRadius: radii.lg },
+  sheet: { flex: 1, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl },
+  sheetContent: { padding: space.md, gap: space.md },
+  between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  placeholder: { height: 28, width: 160, borderRadius: radii.sm, marginTop: space.xs },
+  timer: { gap: space.sm },
+  track: { height: 6, borderRadius: radii.pill, overflow: 'hidden' },
+  fill: { height: 6 },
+  note: { flexDirection: 'row', gap: space.xs, alignItems: 'center' },
+});
