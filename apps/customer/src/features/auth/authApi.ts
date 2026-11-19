@@ -9,6 +9,7 @@
  */
 import { parseLoginIdentifier, type LoginIdentifier } from '@medfind/core';
 import { setDemoSignedIn, supabase } from '../../lib/supabase';
+import { loadDemoProfile, saveDemoProfile } from '../demo/profile';
 
 export type ApiResult<T = void> = { ok: true; value: T } | { ok: false; reason: string; lockedSeconds?: number };
 
@@ -99,6 +100,7 @@ export async function checkSignUp(email: string, phone: string): Promise<ApiResu
  * to the phone number. The customer row is made by the database from the sign-up details.
  */
 export async function signUpAndSendCode(email: string, phone: string, password: string): Promise<ApiResult> {
+  if (!supabase) await saveDemoProfile({ email, phone });
   return attempt(async () => {
     const sb = client();
     const { data: current } = await sb.auth.getUser();
@@ -129,7 +131,7 @@ export async function verifyPhoneCode(phone: string, token: string): Promise<Api
 
 /** The signed-up email, for "Send code to email instead". */
 export async function signedUpEmail(): Promise<string | null> {
-  if (!supabase) return null;
+  if (!supabase) return (await loadDemoProfile()).email || null;
   const { data } = await supabase.auth.getUser();
   return data.user?.email ?? null;
 }
