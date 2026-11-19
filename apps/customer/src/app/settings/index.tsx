@@ -96,7 +96,7 @@ export default function Settings() {
       <LinkRow icon="message" title="Help and Support" subtitle="Questions, chat and calls" onPress={() => router.push('/settings/help')} />
       <LinkRow extraIcon="refresh" title="Reset demo data" subtitle="Start the demo again from the beginning" onPress={() => setConfirm('reset')} />
 
-      <Button label="Sign Out" variant="secondary" iconLeft="chevron-left" fullWidth onPress={() => setConfirm('signout')} />
+      <Button label="Sign Out" variant="destructive-secondary" iconLeft="chevron-left" fullWidth onPress={() => setConfirm('signout')} />
       <Button label="Delete account" variant="destructive-inline" size="large" onPress={() => setConfirm('delete')} />
       <Text variant="caption2" color="tertiary" style={kit.center}>
         MedFind v.1.2.0 · LEGAL · CONTACT US
@@ -108,6 +108,7 @@ export default function Settings() {
         body="You’ll need your email or phone number and password to sign back in."
         confirmLabel="Sign out"
         cancelLabel="Go back"
+        destructive
         onConfirm={() => (setConfirm(null), signOut())}
         onClose={() => setConfirm(null)}
       />
