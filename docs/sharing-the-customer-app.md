@@ -15,3 +15,11 @@ Supabase settings: `--environment preview` uses only EAS environment variables a
 what we want for demos. Never put secrets in `eas.json` or `app.json`.
 
 The Expo project id (`extra.eas.projectId`) and `updates.url` are committed in `app.json`.
+
+## Automatic updates
+
+`.github/workflows/customer-expo-update.yml` runs the `eas update` above on every merge to `main`
+that touches the customer app or shared packages (and on demand from the Actions tab). It needs an
+Expo access token saved as the `EXPO_TOKEN` repository secret; without it the job does nothing.
+No Supabase variables are needed: the update uses the empty EAS `preview` environment, so the app
+runs the local demo.
