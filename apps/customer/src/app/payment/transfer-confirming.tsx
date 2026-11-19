@@ -11,12 +11,15 @@ import { InfoRows, Screen, kit } from '../../features/demo/kit';
 export default function TransferConfirming() {
   const { colors } = useTheme();
   // The transfer "lands" straight away, so leaving early still keeps the reservation.
-  const [placed] = useState(() => placeFromCheckout('transfer'));
+  // Placed in an effect, not during render, because placing updates the shared store.
+  const [placed, setPlaced] = useState<ReturnType<typeof placeFromCheckout> | undefined>(undefined);
+  useEffect(() => setPlaced(placeFromCheckout('transfer')), []);
   useEffect(() => {
     if (!placed) return;
     const i = setTimeout(() => router.replace({ pathname: '/payment/success', params: { id: placed.id, via: 'transfer' } }), 3000);
     return () => clearTimeout(i);
   }, [placed]);
+  if (placed === undefined) return null;
   if (!placed) {
     return <Redirect href="/" />;
   }

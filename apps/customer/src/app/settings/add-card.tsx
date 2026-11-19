@@ -61,7 +61,7 @@ export default function AddCard() {
           />
         </View>
         <View style={kit.flex}>
-          <TextField label="CVV" placeholder="3 digits" keyboard="number" secure value={cvv} onChangeText={(v) => setCvv(digits(v).slice(0, 3))} errorText={errors.cvv} />
+          <TextField label="CVV" placeholder="3 digits" keyboard="number" value={cvv} onChangeText={(v) => setCvv(digits(v).slice(0, 3))} errorText={errors.cvv} />
         </View>
       </View>
       <TextField label="Name on card" placeholder="As it appears on the card" value={name} onChangeText={setName} errorText={errors.name} />
