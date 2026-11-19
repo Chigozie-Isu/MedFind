@@ -3,6 +3,7 @@
  * notification settings and the checkout in progress. Kept in memory until the app restarts.
  */
 import { useSyncExternalStore } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Fulfilment } from '@medfind/core';
 import type { DemoPaymentMethod } from '@medfind/core';
 import {
@@ -87,6 +88,25 @@ const seed = (): Account => ({
 });
 let state: Account = seed();
 
+const ACCOUNT_KEY = 'medfind.customer.account.v2';
+let hydrated = false;
+export async function hydrateAccount(): Promise<void> {
+  if (hydrated) return;
+  hydrated = true;
+  try {
+    const raw = await AsyncStorage.getItem(ACCOUNT_KEY);
+    if (!raw) return;
+    const stored = JSON.parse(raw) as Account;
+    state = {
+      ...seed(), ...stored,
+      saved: (stored.saved ?? []).map(s => ({ ...s, savedAt: new Date(s.savedAt) })),
+    };
+    listeners.forEach(l => l());
+  } catch { /* use default demo state if storage is unavailable */ }
+}
+function persistAccount() {
+  void AsyncStorage.setItem(ACCOUNT_KEY, JSON.stringify(state)).catch(() => {});
+}
 const listeners = new Set<() => void>();
 const subscribe = (l: () => void) => {
   listeners.add(l);
@@ -95,6 +115,7 @@ const subscribe = (l: () => void) => {
 
 export function setAccount(change: Partial<Account> | ((a: Account) => Partial<Account>)): void {
   state = { ...state, ...(typeof change === 'function' ? change(state) : change) };
+  persistAccount();
   listeners.forEach((l) => l());
 }
 
@@ -116,11 +137,13 @@ export function startNewCustomerAccount(): void {
     unreadNotifications: 0,
     stockAlerts: [],
   };
+  persistAccount();
   listeners.forEach((l) => l());
 }
 
 export function resetAccount(): void {
   state = seed();
+  persistAccount();
   listeners.forEach((l) => l());
 }
 
