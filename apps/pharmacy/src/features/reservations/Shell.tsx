@@ -1,45 +1,36 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
-import { Icon, Logo, SideNav, Text, ThemeToggle, Toast, cssVar, pharmacyNavItems } from '@medfind/ui/web';
+import { type ReactNode } from 'react';
+import { Icon, Logo, SideNav, Text, ThemeToggle, cssVar, pharmacyNavItems } from '@medfind/ui/web';
 import { staff, useReservations } from './store';
 import s from './reservations.module.css';
+import { updateWorkspace, useWorkspace } from '../workspace/Workspace';
 
-const hrefs: Record<string, string> = { dashboard: '/dashboard', reservations: '/reservations' };
+const hrefs: Record<string, string> = { dashboard: '/dashboard', inventory: '/inventory', reservations: '/reservations', activity: '/activity', earnings: '/earnings', profile: '/profile' };
 
 /** Side nav, bell and sun/moon toggle shared by the pharmacy demo screens (Figma "Dashboard" 167:2472). */
-export function Shell({ active, heading, children }: { active: 'dashboard' | 'reservations'; heading: ReactNode; children: ReactNode }) {
+export function Shell({ active, heading, children }: { active: 'dashboard' | 'reservations' | 'inventory' | 'activity' | 'earnings' | 'profile'; heading: ReactNode; children: ReactNode }) {
   const waiting = useReservations().filter((r) => r.status === 'review').length;
-  // Only Dashboard and Reservations are built for the demo; the other items say so.
-  const [soon, setSoon] = useState<string | null>(null);
-  useEffect(() => {
-    if (!soon) return;
-    const t = setTimeout(() => setSoon(null), 2500);
-    return () => clearTimeout(t);
-  }, [soon]);
+  const workspace = useWorkspace();
   const items = pharmacyNavItems.map((item) => ({
     ...item,
     href: hrefs[item.key],
-    count: item.key === 'dashboard' || item.key === 'reservations' ? waiting : item.key === 'inventory' ? 4 : undefined,
+    count: item.key === 'dashboard' || item.key === 'reservations' ? waiting : item.key === 'inventory' ? workspace.items.filter((i) => i.quantity <= 3).length : undefined,
   }));
   return (
     <div className={s.layout}>
       <SideNav
         items={items}
         activeKey={active}
-        onNavigate={(key) => {
-          const item = pharmacyNavItems.find((i) => i.key === key);
-          if (item && !hrefs[key]) setSoon(`${item.label} is coming soon`);
-        }}
-        takingReservations
+        onTakingReservationsChange={(accepting) => updateWorkspace({ accepting }, accepting ? 'Started taking reservations' : 'Paused reservations')}
         header={<Logo height={48} />}
         footer={
           <div className={s.staffCard}>
             <Text variant="caption2" color={cssVar.text.secondary}>
-              {staff.pharmacy}
+              {workspace.pharmacy}
             </Text>
             <span className="mf-tm-h5" style={{ color: cssVar.text.heading }}>
-              {staff.name}
+              {workspace.staffName}
             </span>
             <Text variant="caption1" color={cssVar.text.secondary}>
               {staff.code}
@@ -60,11 +51,7 @@ export function Shell({ active, heading, children }: { active: 'dashboard' | 're
         </div>
         {children}
       </main>
-      {soon && (
-        <div style={{ position: 'fixed', top: 24, right: 24, zIndex: 50, maxWidth: 420 }}>
-          <Toast message={soon} tone="info" />
-        </div>
-      )}
+
     </div>
   );
 }
