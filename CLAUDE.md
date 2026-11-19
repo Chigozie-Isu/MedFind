@@ -61,3 +61,4 @@ Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, 
 - Local SMS codes aren't sent: the `send_sms` hook writes them to `private.dev_sms_outbox`. Local emails go to Mailpit at http://127.0.0.1:54324.
 - Paystack functions run in test mode without `PAYSTACK_SECRET_KEY`: account 9999999999 resolves to "GRACE OKAFOR" (a mismatch), 0000000000 isn't found, and any other number resolves to the pharmacy's name plus " LTD".
 - See `docs/database.md` for tables, test accounts and open assumptions.
+- Sharing the customer app without a PC: Expo Go share link (`eas update --branch preview --environment preview`) and an Android APK (`eas build -p android --profile preview`), free tier only. See `docs/sharing-the-customer-app.md`.
