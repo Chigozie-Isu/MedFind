@@ -52,7 +52,7 @@ export default function Home() {
             <Text variant="label1" color="secondary">
               {greeting()}
             </Text>
-            <Text variant="h1">{profile.name.trim().split(/\\s+/)[0] || 'Welcome'}</Text>
+            <Text variant="h1">{profile.name.trim().split(/\s+/)[0] || 'Welcome'}</Text>
           </View>
           <View style={styles.headerIcons}>
             <Pressable accessibilityLabel="Notifications" accessibilityRole="button" onPress={() => router.push('/reservations')}>
