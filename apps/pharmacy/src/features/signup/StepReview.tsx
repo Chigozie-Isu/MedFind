@@ -1,5 +1,6 @@
 'use client';
 
+import { LegalLink } from '../common/Legal';
 import { useState } from 'react';
 import { formatAccountNumber, formatPhoneInternational, PHARMACY_DOCUMENTS } from '@medfind/core';
 import { sizes } from '@medfind/ui';
@@ -89,8 +90,8 @@ export function StepReview({
       <div className={s.terms}>
         <Checkbox checked={confirmed} onChange={setConfirmed} accessibilityLabel="I confirm these details are correct" />
         <Text variant="body3" color="var(--mf-text-heading)">
-          I confirm these details are correct and agree to the MedFind pharmacy terms, including the 5% fee on reserved sales, and the
-          privacy policy.
+          I confirm these details are correct and agree to the <LegalLink doc="terms" label="MedFind pharmacy terms" />, including the 5% fee on reserved sales, and the{' '}
+          <LegalLink doc="privacy" label="privacy policy" />.
         </Text>
       </div>
       <Notice>Submitting doesn’t make you live straight away. Our team checks everything first.</Notice>
