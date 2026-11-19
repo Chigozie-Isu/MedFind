@@ -7,6 +7,7 @@
  * settings the demo falls back to confirming after a few seconds.
  */
 import { useSyncExternalStore } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import {
   DEMO_CHANNEL,
@@ -124,6 +125,23 @@ const seedReservations = (now = Date.now()): DemoReservation[] => [
   }),
 ];
 let reservations = seedReservations();
+const RESERVATIONS_KEY = 'medfind.customer.reservations.v2';
+let hydrated = false;
+export async function hydrateReservations(): Promise<void> {
+  if (hydrated) return;
+  hydrated = true;
+  try {
+    const raw = await AsyncStorage.getItem(RESERVATIONS_KEY);
+    if (!raw) return;
+    const stored = JSON.parse(raw) as DemoReservation[];
+    reservations = stored.map(r => ({ ...r, placedAt: new Date(r.placedAt), readyAt: r.readyAt ? new Date(r.readyAt) : undefined, collectedAt: r.collectedAt ? new Date(r.collectedAt) : undefined, cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined }));
+    counter = Math.max(counter, ...reservations.map(r => Number(/^r(\d+)$/.exec(r.id)?.[1] ?? 0)));
+    emit();
+  } catch { /* fallback to seeded demo reservations */ }
+}
+function persistReservations() {
+  void AsyncStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations)).catch(() => {});
+}
 
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
@@ -136,17 +154,20 @@ const subscribe = (l: () => void) => {
 export function startNewCustomerReservations(): void {
   reservations = [];
   counter = 0;
+  persistReservations();
   emit();
 }
 
 export function resetReservations(): void {
   reservations = seedReservations();
+  persistReservations();
   emit();
 }
 
 /** Changes a reservation that is still in one of `from` (waiting by default). */
 function update(id: string, change: Partial<DemoReservation>, from: DemoStatus[] = ['waiting']): void {
   reservations = reservations.map((r) => (r.id === id && from.includes(r.status) ? { ...r, ...change } : r));
+  persistReservations();
   emit();
 }
 
@@ -220,6 +241,7 @@ export function placeReservation(
 ): DemoReservation {
   const r = make(inventoryId, quantity, fulfilment, 'waiting', new Date(), opts);
   reservations = [r, ...reservations];
+  persistReservations();
   emit();
   const live = connect();
   if (live) live.then(() => send(DEMO_EVENTS.placed, placedPayload(r)));
@@ -232,6 +254,7 @@ setInterval(() => {
   const now = new Date();
   if (reservations.some((r) => r.status === 'waiting' && isApprovalExpired(r.placedAt, now))) {
     reservations = reservations.map((r) => (r.status === 'waiting' && isApprovalExpired(r.placedAt, now) ? { ...r, status: 'expired' } : r));
+    persistReservations();
     emit();
   }
 }, 1000);
