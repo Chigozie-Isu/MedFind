@@ -57,4 +57,6 @@ jobs:
       - name: Publish to the preview branch
         if: steps.token.outputs.ok == 'true'
         working-directory: apps/customer
-        run: eas update --branch preview --environment preview --non-interactive --message "${{ github.event.head_commit.message || 'Manual update' }}"
+        env:
+          MESSAGE: ${{ github.event.head_commit.message || 'Manual update' }}
+        run: eas update --branch preview --environment preview --non-interactive --message "$(echo "$MESSAGE" | head -n 1)"
