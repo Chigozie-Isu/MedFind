@@ -122,3 +122,7 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | --- | --- | --- | --- |
 | Pharmacies | Fuasi, Caduces, Mediguy, Precious Pharmacy | Fuasi Pharmacy, Caduces Pharma and Mediguy only | Demo data is 3 pharmacies, the same in the app and the Supabase seed. |
 | My reservations history | Orders at Precious Pharmacy | The same orders at Fuasi, Caduces and Mediguy | Precious Pharmacy isn't in the 3-pharmacy demo data. |
+
+## Buttons
+
+- **Native button labels** use a line box 1.5 times the font size instead of Figma's 100%, with an equal negative margin, so the button height is unchanged. At 100%, phones clip the bottoms of letters like g, y and p in one-line labels. The pharmacy (web) buttons already showed them in full and are unchanged.
