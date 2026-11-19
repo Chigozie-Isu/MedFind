@@ -9,6 +9,7 @@ import { Manrope_500Medium } from '@expo-google-fonts/manrope/500Medium';
 import { Manrope_600SemiBold } from '@expo-google-fonts/manrope/600SemiBold';
 import { ThemeProvider, useTheme, type AppearancePreference } from '@medfind/ui/native';
 import { loadAppearance, saveAppearance } from '../lib/appearanceStorage';
+import { hydrateReservations } from '../features/demo/store';
 
 function ThemedRoot() {
   const { colors, scheme } = useTheme();
@@ -30,6 +31,7 @@ export default function RootLayout() {
   const [appearance, setAppearance] = useState<AppearancePreference | null>(null);
   useEffect(() => {
     loadAppearance().then(setAppearance);
+    void hydrateReservations();
   }, []);
   if (!fontsLoaded || !appearance) return null;
 
