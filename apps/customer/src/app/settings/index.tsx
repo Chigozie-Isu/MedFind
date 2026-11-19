@@ -4,12 +4,18 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { formatNaira } from '@medfind/core';
 import { boxShadow, radii, space } from '@medfind/ui';
 import { Button, Text, useTheme } from '@medfind/ui/native';
-import { defaultAddress, useAccount } from '../../features/demo/account';
-import { useReservations } from '../../features/demo/store';
-import { ConfirmSheet, LinkRow, Screen, avatarGrace, kit } from '../../features/demo/kit';
+import { defaultAddress, resetAccount, useAccount } from '../../features/demo/account';
+import { resetReservations, useReservations } from '../../features/demo/store';
+import { ConfirmSheet, LinkRow, Screen, avatarGrace, kit, useFlash } from '../../features/demo/kit';
 import { ExtraIcon } from '../../features/demo/icons';
 import { demoAuth, setDemoSignedIn, supabase } from '../../lib/supabase';
 import { resetWebLocation } from '../../lib/deviceLocation';
+
+/** Puts the whole customer demo back to its starting data. */
+function resetDemo() {
+  resetAccount();
+  resetReservations();
+}
 
 async function signOut() {
   await setDemoSignedIn(false);
@@ -23,7 +29,8 @@ export default function Settings() {
   const { colors } = useTheme();
   const account = useAccount();
   const reservations = useReservations();
-  const [confirm, setConfirm] = useState<'signout' | 'delete' | null>(null);
+  const [confirm, setConfirm] = useState<'signout' | 'delete' | 'reset' | null>(null);
+  const [flash, showFlash] = useFlash();
   const p = account.profile;
   const addr = defaultAddress(account);
 
@@ -41,7 +48,7 @@ export default function Settings() {
   );
 
   return (
-    <Screen title="Profile" onBack={false} onClose={() => (router.canGoBack() ? router.back() : router.replace('/'))}>
+    <Screen title="Profile" onBack={false} overlay={flash} onClose={() => (router.canGoBack() ? router.back() : router.replace('/'))}>
       <View style={[styles.profile, { backgroundColor: colors.surface.raised, boxShadow: boxShadow('card') }]}>
         <View style={kit.row}>
           <Image source={avatarGrace} style={styles.avatar} accessibilityIgnoresInvertColors />
@@ -87,6 +94,7 @@ export default function Settings() {
         Support
       </Text>
       <LinkRow icon="message" title="Help and Support" subtitle="Questions, chat and calls" onPress={() => router.push('/settings/help')} />
+      <LinkRow extraIcon="refresh" title="Reset demo data" subtitle="Start the demo again from the beginning" onPress={() => setConfirm('reset')} />
 
       <Button label="Sign Out" variant="secondary" iconLeft="chevron-left" fullWidth onPress={() => setConfirm('signout')} />
       <Button label="Delete account" variant="destructive-inline" size="large" onPress={() => setConfirm('delete')} />
@@ -110,7 +118,16 @@ export default function Settings() {
         confirmLabel="Delete account"
         cancelLabel="Go back"
         destructive
-        onConfirm={() => (setConfirm(null), signOut())}
+        onConfirm={() => (setConfirm(null), resetDemo(), signOut())}
+        onClose={() => setConfirm(null)}
+      />
+      <ConfirmSheet
+        visible={confirm === 'reset'}
+        title="Reset demo data?"
+        body="Your wallet, cards, addresses, saved medicines and reservations go back to how the demo starts. You stay signed in."
+        confirmLabel="Reset demo"
+        cancelLabel="Go back"
+        onConfirm={() => (setConfirm(null), resetDemo(), showFlash('Demo data reset', 'success'))}
         onClose={() => setConfirm(null)}
       />
     </Screen>

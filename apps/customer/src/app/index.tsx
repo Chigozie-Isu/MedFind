@@ -88,7 +88,11 @@ export default function Home() {
           <Pressable
             accessibilityLabel="Scan a medicine pack"
             accessibilityRole="button"
-            onPress={() => showFlash('Scanning is coming soon. Type the medicine name instead.', 'info')}
+            onPress={() => {
+              // Demo scan: "reads" a Paracetamol pack, then searches for it.
+              showFlash('Scanned: Paracetamol 500mg pack', 'success');
+              setTimeout(() => search('Paracetamol'), 900);
+            }}
             style={[styles.scan, { borderColor: colors.text.body }]}
           >
             <Icon name="camera" size={sizes.icon.lg} color={colors.icon.default} />

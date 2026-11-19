@@ -35,12 +35,15 @@ const EMPTY: LogInState = { identifier: '', password: '', errors: {}, loading: f
 export function LogInFlow({
   initial,
   demo,
+  onSocial,
   onLoggedIn,
   onSignUp,
   onForgotPassword,
 }: {
   initial?: Partial<LogInState>;
   demo?: boolean;
+  /** Demo only: Google or Apple signs straight in as the demo customer. */
+  onSocial?: (provider: 'Google' | 'Apple') => void;
   onLoggedIn: () => void;
   onSignUp: () => void;
   onForgotPassword: () => void;
@@ -126,7 +129,7 @@ export function LogInFlow({
         disabled={locked}
         onPress={submit}
       />
-      <SocialSignIn onPress={(p) => showToast(socialComingSoon(p), 'info')} />
+      <SocialSignIn onPress={(p) => (onSocial ? onSocial(p) : showToast(socialComingSoon(p), 'info'))} />
     </AuthScreen>
   );
 }

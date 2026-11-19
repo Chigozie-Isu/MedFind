@@ -109,10 +109,9 @@ function make(
   };
 }
 
-const now = Date.now();
 /** History as in "My reservations – all" (Figma 538:26148). */
 const past = (r: DemoReservation, change: Partial<DemoReservation>): DemoReservation => ({ ...r, ...change });
-let reservations: DemoReservation[] = [
+const seedReservations = (now = Date.now()): DemoReservation[] => [
   past(make('fuasi:diclofenac', 1, 'pickup', 'collected', new Date(now - 1 * day)), { collectedAt: new Date(now - 1 * day), rating: 5 }),
   past(make('caduces:gestid', 1, 'pickup', 'collected', new Date(now - 2 * day)), { collectedAt: new Date(now - 2 * day) }),
   past(make('mediguy:amoxil', 1, 'pickup', 'cancelled', new Date(now - 3 * day), { payment: 'card', cardLast4: '1456' }), {
@@ -124,6 +123,7 @@ let reservations: DemoReservation[] = [
     declineReason: 'Hi Grace, the signature on this prescription is incomplete and the name doesn’t match yours.',
   }),
 ];
+let reservations = seedReservations();
 
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
@@ -131,6 +131,12 @@ const subscribe = (l: () => void) => {
   listeners.add(l);
   return () => listeners.delete(l);
 };
+
+/** Settings > Reset demo data: back to the seeded history, with nothing active. */
+export function resetReservations(): void {
+  reservations = seedReservations();
+  emit();
+}
 
 /** Changes a reservation that is still in one of `from` (waiting by default). */
 function update(id: string, change: Partial<DemoReservation>, from: DemoStatus[] = ['waiting']): void {

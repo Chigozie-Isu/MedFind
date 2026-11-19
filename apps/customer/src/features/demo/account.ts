@@ -64,7 +64,7 @@ export interface Account {
 }
 
 const day = 86_400_000;
-let state: Account = {
+const seed = (): Account => ({
   profile: { ...profileSeed },
   walletKobo: WALLET_SEED_KOBO,
   wallet: walletSeed,
@@ -84,7 +84,8 @@ let state: Account = {
   stockAlerts: [],
   checkout: null,
   method: null,
-};
+});
+let state: Account = seed();
 
 const listeners = new Set<() => void>();
 const subscribe = (l: () => void) => {
@@ -98,6 +99,12 @@ export function setAccount(change: Partial<Account> | ((a: Account) => Partial<A
 }
 
 export const getAccount = () => state;
+
+/** Settings > Reset demo data: puts Grace's account back to how the demo starts. */
+export function resetAccount(): void {
+  state = seed();
+  listeners.forEach((l) => l());
+}
 
 export function useAccount(): Account {
   return useSyncExternalStore(subscribe, () => state);
