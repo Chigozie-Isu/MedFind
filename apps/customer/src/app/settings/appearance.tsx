@@ -1,35 +1,23 @@
-import { router } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { space } from '@medfind/ui';
-import { Button, OptionList, Text, useAppearance, type AppearancePreference } from '@medfind/ui/native';
+import { OptionList, Text, type AppearancePreference, useAppearance } from '@medfind/ui/native';
+import { Screen } from '../../features/demo/kit';
 
-/** Settings > Appearance: System, Light or Dark. */
+/** Settings – appearance (Figma 2034:20411): Light, Dark or Match my phone. */
 export default function AppearanceSettings() {
   const { preference, setPreference } = useAppearance();
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Button icon="chevron-left" variant="text" size="large" onPress={() => router.back()} accessibilityLabel="Back" />
-        <Text variant="h3">Appearance</Text>
-      </View>
-      <ScrollView contentContainerStyle={styles.content}>
-        <OptionList
-          value={preference}
-          onChange={(v) => setPreference(v as AppearancePreference)}
-          options={[
-            { value: 'system', title: 'System', description: 'Match your phone’s setting' },
-            { value: 'light', title: 'Light' },
-            { value: 'dark', title: 'Dark' },
-          ]}
-        />
-      </ScrollView>
-    </SafeAreaView>
+    <Screen title="Appearance">
+      <Text variant="label1" color="secondary">
+        Theme
+      </Text>
+      <OptionList
+        value={preference}
+        onChange={(v) => setPreference(v as AppearancePreference)}
+        options={[
+          { value: 'light', title: 'Light', description: 'Always use the light theme', icon: 'sun' },
+          { value: 'dark', title: 'Dark', description: 'Easier on the eyes at night', icon: 'moon' },
+          { value: 'system', title: 'Match my phone', description: 'Switches with your phone’s setting', icon: 'setting' },
+        ]}
+      />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: space.xs, paddingHorizontal: space.md, paddingVertical: space.xs },
-  content: { padding: space.md },
-});
