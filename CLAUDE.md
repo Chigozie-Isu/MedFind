@@ -2,16 +2,18 @@
 
 Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, Typescale, Icon, Colour Palette).
 
-## Current scope (school project, low usage) — overrides anything below
+## Current scope — complete interactive demo
 
-- Build ONLY the demo path screens Emmanuel names, happy path only. Skip error, loading and empty states unless asked.
-- Read only the Figma frames Emmanuel links, never whole sections.
-- Use the existing theme for dark mode; don't check screens one by one.
-- Pay at pharmacy only. No Paystack, no wallet, no MedChat, no scanning.
-- One test file only: pricing (pickup, +NGN 1,000 delivery, no service fee).
-- Keep answers short. Plan in 5 bullets max, then build without asking again.
-- The demo flow (Home → Search results → Reserve → Pickup code → My reservations) uses the customer, pharmacy and medicine names from Figma (customer Grace), kept in `apps/customer/src/features/demo/`.
-- The pharmacy demo (`/dashboard`, `/reservations`, Review, Decline, Confirmed; staff Yusuf Bilal at Fuasi Pharmacy) is in `apps/pharmacy/src/features/reservations/`. The two apps talk over one Supabase Realtime broadcast channel (`demoChannel.ts` in packages/core), so both need the same Supabase URL and anon key. Unanswered reservations expire after 10 minutes (`isApprovalExpired`).
+- Build a complete, restartable demonstration of both the customer app and pharmacy web app. This is a demo, not a production commerce or payments platform.
+- No dead ends: every visible button, navigation item, icon action and form submission must have a meaningful outcome. Do not leave "coming soon" placeholders in the demo journeys.
+- Complete end-to-end journeys, including sign up, six-digit verification, profile setup, sign in, forgot/reset password, search, saved medications, reservations, cancellation, payment simulation, delivery simulation, pharmacy reservation management, profile, business hours, earnings and activity.
+- Demo data must be coherent and reactive: edits to names, profile pictures, pharmacy details, hours, saved medicines, reservation statuses and preferences must appear everywhere those values are displayed.
+- Use simulated OTP, payment, delivery and earnings outcomes. Never charge a real payment method, trigger a real delivery, or imply that a simulated transaction is real.
+- Include useful loading, validation, empty, error, success and confirmation states. Make journeys repeatable and provide a clear way to restart/reset demo data.
+- Preserve the existing Figma visual language, shared components, typography, colour tokens and responsive patterns. Use the Figma file `OpCNyqo5elBMJI3z5XtxVC` as the design source.
+- Keep the customer and pharmacy demo data in sync where the journey crosses apps. Where Supabase is not configured, provide a complete local demo fallback rather than blocking the user.
+- Prefer the established app architecture and existing dependencies. Do not add paid services or new libraries without asking.
+- Do not call a feature complete until its screens, navigation, state changes and repeat/reset path have been checked. Run available tests and builds where the environment permits; report any checks that could not be run.
 
 ## Rules
 
