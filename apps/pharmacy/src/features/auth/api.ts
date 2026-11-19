@@ -6,7 +6,7 @@
  * a draft has no passcode yet and goes back to sign up.
  */
 import { normaliseEmail, type PharmacySignInFailure } from '@medfind/core';
-import { attempt, client, myStaffState, OFFLINE, type ApiResult } from '../../lib/supabase';
+import { attempt, client, myStaffState, OFFLINE, supabase, type ApiResult } from '../../lib/supabase';
 
 export type SignInOutcome = 'dashboard' | 'resume_sign_up';
 
@@ -16,6 +16,7 @@ export function isSignInFailure(reason: string): reason is PharmacySignInFailure
 
 export async function signIn(rawEmail: string, password: string, passcode: string): Promise<ApiResult<SignInOutcome>> {
   const email = normaliseEmail(rawEmail);
+  if (!supabase && !passcode.replace(/\s/g, '')) return { ok: false, reason: 'passcode_required' };
   return attempt(async () => {
     const sb = client();
     const { data: pre, error: preError } = await sb.rpc('sign_in_precheck', { p_identifier: email });
@@ -57,7 +58,7 @@ export async function signIn(rawEmail: string, password: string, passcode: strin
     }
     await sb.rpc('clear_sign_in_failures');
     return { ok: true, value: 'dashboard' };
-  });
+  }, 'dashboard');
 }
 
 // ---------- forgot password (email code) ----------
@@ -78,7 +79,7 @@ export async function verifyResetCode(email: string, token: string): Promise<Api
     if (error) return { ok: false, reason: /token|otp|code|expired|invalid/i.test(error.message) ? 'bad_code' : OFFLINE };
     const staff = await myStaffState();
     return { ok: true, value: staff?.pharmacy_name ?? 'MedFind' };
-  });
+  }, 'Fuasi Pharmacy');
 }
 
 export async function saveNewPassword(password: string): Promise<ApiResult> {

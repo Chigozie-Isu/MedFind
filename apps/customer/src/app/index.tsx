@@ -3,23 +3,23 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { radii, sizes, space } from '@medfind/ui';
 import { Button, Icon, SearchField, Text, useTheme } from '@medfind/ui/native';
-import { currentCustomerId, supabase } from '../lib/supabase';
+import { currentCustomerId } from '../lib/supabase';
 import { hasSeenOnboarding } from '../lib/onboarding';
 import { customer } from '../features/demo/data';
-import { ReservationRow, TabScreen } from '../features/demo/parts';
+import { ReservationRow, TabScreen, useComingSoon } from '../features/demo/parts';
 import { useReservations } from '../features/demo/store';
 
 type Gate = 'checking' | 'signed_in' | 'onboarding' | 'welcome';
 
 /**
  * Signed-out customers go to Onboarding (first launch) or the Splash.
- * Without Supabase settings the app runs as the demo customer.
+ * Without Supabase settings, Log in and Sign up accept anything and sign in as Grace.
  */
 function useAuthGate(): Gate {
   const [gate, setGate] = useState<Gate>('checking');
   useEffect(() => {
     Promise.all([currentCustomerId(), hasSeenOnboarding()]).then(([id, seen]) =>
-      setGate(id || !supabase ? 'signed_in' : seen ? 'welcome' : 'onboarding'),
+      setGate(id ? 'signed_in' : seen ? 'welcome' : 'onboarding'),
     );
   }, []);
   return gate;
@@ -40,6 +40,7 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const history = useReservations();
   const gate = useAuthGate();
+  const [soonToast, showSoon] = useComingSoon();
   if (gate === 'checking') return null;
   if (gate === 'onboarding') return <Redirect href="/onboarding" />;
   if (gate === 'welcome') return <Redirect href="/welcome" />;
@@ -57,7 +58,9 @@ export default function Home() {
             <Text variant="h1">{customer.firstName}</Text>
           </View>
           <View style={styles.headerIcons}>
-            <Icon name="notification" size={sizes.icon.lg} color={colors.icon.default} />
+            <Pressable accessibilityLabel="Notifications" accessibilityRole="button" onPress={() => showSoon('Notifications are coming soon')}>
+              <Icon name="notification" size={sizes.icon.lg} color={colors.icon.default} />
+            </Pressable>
             <Link href="/settings/appearance" asChild>
               <Pressable accessibilityLabel="Settings" accessibilityRole="button">
                 <Icon name="setting" size={sizes.icon.lg} color={colors.icon.default} />
@@ -111,6 +114,7 @@ export default function Home() {
           </View>
         )}
       </ScrollView>
+      {soonToast}
     </TabScreen>
   );
 }

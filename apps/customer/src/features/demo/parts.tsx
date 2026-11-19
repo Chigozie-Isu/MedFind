@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { radii, sizes, space, type CustomerTab, type IconName, type StatusTone } from '@medfind/ui';
-import { Badge, Button, Icon, TabBar, Text, useTheme } from '@medfind/ui/native';
+import { Badge, Button, Icon, TabBar, Text, Toast, useTheme } from '@medfind/ui/native';
 import type { DemoReservation, DemoStatus } from './store';
 
 const statusBadge: Record<DemoStatus, { label: string; tone: StatusTone }> = {
@@ -75,6 +75,7 @@ export function ReservationRow({ r }: { r: DemoReservation }) {
 
 /** Screen with the customer tab bar pinned at the bottom. */
 export function TabScreen({ tab, children }: { tab: CustomerTab; children: ReactNode }) {
+  const [soon, showSoon] = useComingSoon();
   return (
     <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
       <View style={styles.flex}>{children}</View>
@@ -84,14 +85,33 @@ export function TabScreen({ tab, children }: { tab: CustomerTab; children: React
           onChange={(t) => {
             if (t === 'home') router.navigate('/');
             if (t === 'reservation') router.navigate('/reservations');
+            if (t === 'saved') showSoon('Saved medicines are coming soon');
           }}
         />
       </View>
+      {soon}
     </SafeAreaView>
   );
 }
 
+/** A short "coming soon" toast for buttons whose screens aren't in the demo. */
+export function useComingSoon(): [ReactNode, (message: string) => void] {
+  const [message, setMessage] = useState<string | null>(null);
+  useEffect(() => {
+    if (!message) return;
+    const t = setTimeout(() => setMessage(null), 2500);
+    return () => clearTimeout(t);
+  }, [message]);
+  const toast = message ? (
+    <View style={styles.toast} pointerEvents="none">
+      <Toast message={message} tone="info" />
+    </View>
+  ) : null;
+  return [toast, setMessage];
+}
+
 const styles = StyleSheet.create({
+  toast: { position: 'absolute', left: space.md, right: space.md, top: space.xl },
   flex: { flex: 1 },
   thumb: { borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radii.xl },

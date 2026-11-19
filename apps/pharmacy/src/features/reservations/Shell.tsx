@@ -1,7 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { Icon, Logo, SideNav, Text, ThemeToggle, cssVar, pharmacyNavItems } from '@medfind/ui/web';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Icon, Logo, SideNav, Text, ThemeToggle, Toast, cssVar, pharmacyNavItems } from '@medfind/ui/web';
 import { staff, useReservations } from './store';
 import s from './reservations.module.css';
 
@@ -10,6 +10,13 @@ const hrefs: Record<string, string> = { dashboard: '/dashboard', reservations: '
 /** Side nav, bell and sun/moon toggle shared by the pharmacy demo screens (Figma "Dashboard" 167:2472). */
 export function Shell({ active, heading, children }: { active: 'dashboard' | 'reservations'; heading: ReactNode; children: ReactNode }) {
   const waiting = useReservations().filter((r) => r.status === 'review').length;
+  // Only Dashboard and Reservations are built for the demo; the other items say so.
+  const [soon, setSoon] = useState<string | null>(null);
+  useEffect(() => {
+    if (!soon) return;
+    const t = setTimeout(() => setSoon(null), 2500);
+    return () => clearTimeout(t);
+  }, [soon]);
   const items = pharmacyNavItems.map((item) => ({
     ...item,
     href: hrefs[item.key],
@@ -20,6 +27,10 @@ export function Shell({ active, heading, children }: { active: 'dashboard' | 're
       <SideNav
         items={items}
         activeKey={active}
+        onNavigate={(key) => {
+          const item = pharmacyNavItems.find((i) => i.key === key);
+          if (item && !hrefs[key]) setSoon(`${item.label} is coming soon`);
+        }}
         takingReservations
         header={<Logo height={48} />}
         footer={
@@ -49,6 +60,11 @@ export function Shell({ active, heading, children }: { active: 'dashboard' | 're
         </div>
         {children}
       </main>
+      {soon && (
+        <div style={{ position: 'fixed', top: 24, right: 24, zIndex: 50, maxWidth: 420 }}>
+          <Toast message={soon} tone="info" />
+        </div>
+      )}
     </div>
   );
 }

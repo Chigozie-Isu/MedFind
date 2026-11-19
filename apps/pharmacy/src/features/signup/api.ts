@@ -63,7 +63,7 @@ export async function emailInUse(email: string): Promise<ApiResult<boolean>> {
     const { data, error } = await client().rpc('sign_up_precheck', { p_email: normaliseEmail(email) });
     if (error) return { ok: false, reason: OFFLINE };
     return { ok: true, value: (data as { email_in_use: boolean }).email_in_use };
-  });
+  }, false);
 }
 
 /** Creates the owner's sign-in. Owners aren't customers (the database checks account_type). */
@@ -95,12 +95,16 @@ export interface DetailsPayload {
   email: string;
 }
 
+/** The web demo has no database, so it remembers the name for the payout account check. */
+let demoPharmacyName = 'Fuasi Pharmacy';
+
 export async function saveDetails(details: DetailsPayload): Promise<ApiResult<string>> {
+  demoPharmacyName = details.name.trim() || demoPharmacyName;
   return attempt(async () => {
     const { data, error } = await client().rpc('save_pharmacy_details', { p_details: details as never });
     if (error) return { ok: false, reason: /pcn_in_use/.test(error.message) ? 'pcn_in_use' : OFFLINE };
     return { ok: true, value: data as string };
-  });
+  }, 'demo-pharmacy');
 }
 
 // ---------- step 2 ----------
@@ -125,7 +129,14 @@ export function uploadDocument(
   const path = `${pharmacyId}/${kind}/${Date.now()}-${safeName}`;
   const done = (async (): Promise<ApiResult<string>> => {
     const sb = supabase;
-    if (!sb) return { ok: false, reason: 'not_set_up' };
+    if (!sb) {
+      // Web demo: pretend to upload so the step can be completed.
+      for (const f of [0.3, 0.7, 1]) {
+        await new Promise((r) => setTimeout(r, 200));
+        onProgress(f);
+      }
+      return { ok: true, value: `demo-${path}` };
+    }
     const { data } = await sb.auth.getSession();
     const token = data.session?.access_token;
     if (!token) return { ok: false, reason: 'Sign in again to upload.' };
@@ -175,6 +186,15 @@ export async function listBanks(): Promise<ApiResult<{ banks: Bank[]; testMode: 
     const { data, error } = await client().functions.invoke('paystack-banks', { method: 'GET' });
     if (error || !data?.banks) return { ok: false, reason: 'We couldn’t load the bank list. Try again.' };
     return { ok: true, value: { banks: data.banks as Bank[], testMode: !!data.test_mode } };
+  }, {
+    banks: [
+      { name: 'Access Bank', code: '044' },
+      { name: 'First Bank of Nigeria', code: '011' },
+      { name: 'Guaranty Trust Bank', code: '058' },
+      { name: 'United Bank For Africa', code: '033' },
+      { name: 'Zenith Bank', code: '057' },
+    ],
+    testMode: true,
   });
 }
 
@@ -197,7 +217,7 @@ export async function resolveAccount(bank: Bank, accountNumber: string): Promise
       return { ok: false, reason: code === 'not_found' ? 'not_found' : 'We couldn’t reach the bank. Try again in a moment.' };
     }
     return { ok: true, value: { accountName: data.account_name, matches: data.matches, businessName: data.business_name } };
-  });
+  }, { accountName: `${demoPharmacyName.toUpperCase()} LTD`, matches: true, businessName: demoPharmacyName });
 }
 
 // ---------- step 4 ----------
@@ -208,5 +228,5 @@ export async function submitApplication(): Promise<ApiResult<string>> {
     const { data, error } = await client().rpc('submit_pharmacy_application');
     if (error) return { ok: false, reason: error.message || OFFLINE };
     return { ok: true, value: data as string };
-  });
+  }, '48291');
 }

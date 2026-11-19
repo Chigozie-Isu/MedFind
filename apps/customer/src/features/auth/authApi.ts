@@ -8,7 +8,7 @@
  * uses an SMS sign-in code. All codes last 10 minutes (supabase/config.toml).
  */
 import { parseLoginIdentifier, type LoginIdentifier } from '@medfind/core';
-import { supabase } from '../../lib/supabase';
+import { setDemoSignedIn, supabase } from '../../lib/supabase';
 
 export type ApiResult<T = void> = { ok: true; value: T } | { ok: false; reason: string; lockedSeconds?: number };
 
@@ -20,7 +20,12 @@ function client() {
   return supabase;
 }
 
-async function attempt<T>(fn: () => Promise<ApiResult<T>>): Promise<ApiResult<T>> {
+/**
+ * Without Supabase settings (the hosted web demo) every call succeeds with `demo`, so the
+ * Log in, Sign up and Forgot password screens can be clicked through. Any code is accepted.
+ */
+async function attempt<T>(fn: () => Promise<ApiResult<T>>, demo?: T): Promise<ApiResult<T>> {
+  if (!supabase) return { ok: true, value: demo as T };
   try {
     return await fn();
   } catch (e) {
@@ -49,6 +54,7 @@ export function isLogInFailure(reason: string): reason is LogInFailure {
 export async function logIn(rawIdentifier: string, password: string): Promise<ApiResult> {
   const id = parseLoginIdentifier(rawIdentifier);
   if (!id) return { ok: false, reason: 'phone_not_found' };
+  if (!supabase) await setDemoSignedIn(true);
   return attempt(async () => {
     const sb = client();
     const { data: pre, error: preError } = await sb.rpc('sign_in_precheck', { p_identifier: id.value });
@@ -85,7 +91,7 @@ export async function checkSignUp(email: string, phone: string): Promise<ApiResu
     if (error) return { ok: false, reason: OFFLINE };
     const d = data as { email_in_use: boolean; phone_in_use: boolean };
     return { ok: true, value: { emailInUse: d.email_in_use, phoneInUse: d.phone_in_use } };
-  });
+  }, { emailInUse: false, phoneInUse: false });
 }
 
 /**
@@ -113,6 +119,7 @@ export async function sendPhoneCode(phone: string): Promise<ApiResult> {
 }
 
 export async function verifyPhoneCode(phone: string, token: string): Promise<ApiResult> {
+  if (!supabase) await setDemoSignedIn(true);
   return attempt(async () => {
     const { error } = await client().auth.verifyOtp({ phone, token, type: 'phone_change' });
     if (error) return { ok: false, reason: isBadCode(error.message) ? 'bad_code' : OFFLINE };

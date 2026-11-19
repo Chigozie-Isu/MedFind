@@ -14,7 +14,8 @@ export default function Home() {
   const [staff, setStaff] = useState<StaffState | null | undefined>(undefined);
   useEffect(() => {
     (async () => {
-      if (!supabase) return setStaff(null);
+      // The web demo has no accounts: start at the Splash (Sign in leads to the dashboard).
+      if (!supabase) return router.replace('/welcome');
       const { data } = await supabase.auth.getSession();
       if (!data.session) return router.replace('/welcome');
       const s = await myStaffState();
