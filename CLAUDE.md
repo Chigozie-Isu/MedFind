@@ -16,3 +16,18 @@ Design source: Figma file `OpCNyqo5elBMJI3z5XtxVC` (pages: Components, Buttons, 
 - Take colours, text styles, spacing and radii from `@medfind/ui`, never hard-code them in screens. Follow the Figma text styles, not the Typescale page labels.
 - Where the code differs from Figma, record it in `docs/design-deviations.md`.
 - Keep this file updated when new rules are agreed.
+
+## Business rules agreed (19 Nov 2026)
+
+- Staff sign in with their own email and password on any laptop, then their 5-digit staff passcode must match before they can see or do anything for the pharmacy. The passcode also clocks them in and out. Owners and managers generate staff codes.
+- Every refund goes to the customer's MedFind wallet, whatever way they paid.
+- MedFind keeps 5% of the medicine subtotal of every completed order. Online sales are paid out minus 5%; for pay-at-pharmacy sales the pharmacy owes 5%, taken from the same payout (a negative payout means the pharmacy pays MedFind the difference).
+- People can browse medicines and pharmacies signed out; an account is needed to reserve.
+- A ready pickup order must be collected within 2 hours or it expires, is refunded and goes back into stock. Pharmacies stop taking new reservations 2 hours before closing (both from Figma).
+
+## Database (supabase/)
+
+- `pnpm db:start`, `pnpm db:reset` (migrations + seed), `pnpm db:test` (pgTAP security and rule tests), `pnpm db:types` (regenerates `packages/core/src/database.types.ts`). Needs Docker.
+- Apps never write orders, payments, the wallet or payouts directly: they call the server functions in `supabase/migrations/*_functions.sql`. Row-level security is in `*_security.sql`.
+- Rule numbers live in `packages/core/src/rules.ts` and the `private.rule_*` SQL functions; `packages/core/test/rules-sync.test.ts` fails if they differ.
+- See `docs/database.md` for tables, test accounts and open assumptions.
