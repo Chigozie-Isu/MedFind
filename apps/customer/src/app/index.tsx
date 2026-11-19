@@ -1,10 +1,9 @@
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { radii, sizes, space } from '@medfind/ui';
 import { Button, Icon, SearchField, Text, useTheme } from '@medfind/ui/native';
 import { currentCustomerId } from '../lib/supabase';
-import { customer } from '../features/demo/data';
 import { ReservationRow, TabScreen } from '../features/demo/parts';
 import { ActiveCard } from '../features/demo/ActiveCard';
 import { isActive, useReservations } from '../features/demo/store';
@@ -33,7 +32,6 @@ function greeting(now = new Date()): string {
 
 /** Home (Figma 91:14) and its states: new user, loading, searches cleared, active reservation. */
 export default function Home() {
-  const { newUser } = useLocalSearchParams<{ newUser?: string }>();
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const all = useReservations();
@@ -45,7 +43,6 @@ export default function Home() {
   if (gate === 'welcome') return <Redirect href="/welcome" />;
 
   // "Home – new user" (from sign-up): no history until the first reservation.
-  const freshUser = newUser === '1' && all.length === 0;
   const active = all.filter(isActive);
   const history = all.filter((r) => !isActive(r));
 
