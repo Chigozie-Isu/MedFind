@@ -41,3 +41,5 @@ export {
   THEME_STORAGE_KEY,
 } from './navigation.tsx';
 export type { SideNavWebProps } from './navigation.tsx';
+export { Logo } from './Logo.tsx';
+export type { LogoProps } from './Logo.tsx';

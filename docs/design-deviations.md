@@ -48,3 +48,35 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Found screen without a place name | Always "You're near GRA Phase 2" | "We found your location" when the phone can't name the area | Reverse geocoding can fail (no network, or on the web). |
 | Address screen on the web | Suggestions list | A note that search works in the app | The free geocoder that comes with expo-location only runs on phones. |
 | Illustration and text position | 37px under a 47px status bar | 36px (space.xl + space.xxs) under the safe area | Nearest spacing tokens. |
+
+## Customer Start, Log in and Sign up
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Onboarding 3 | The body repeats its first sentence | Said once | Copy error. |
+| Phone placeholders | "+284" | "+234" | Nigeria's code is +234. |
+| Verify phone timer | "10:00" | 45-second resend countdown | Codes last 10 minutes, but you can ask for a new one after 45 seconds. The pill shows the resend wait. |
+| Verify by email | Not drawn | Same screen, "Check your email" copy | Used when a customer chooses "Send code to my email instead". |
+| "Send code to my phone instead" | Not drawn | Link on the email-code screen | Lets people switch back. |
+| Google and Apple buttons | Working sign in | Show a "coming soon" toast | Agreed with Emmanuel: wired up in a later PR. |
+| Illustrations | @1x, @2x, @3x | @1x exports | The Figma asset export is blocked in our build setup. They need re-exporting at @2x and @3x. |
+
+## Pharmacy Start, Sign in, Forgot password and Sign up
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Passcode field | 6 digits in one frame, 5 in another | 5 digits | Matches the schema and most frames. |
+| Wrong code on forgot password | Not drawn | Error under the code field, with tries left | Same pattern as the customer app. |
+| Story overlay on sign up | A stray story card overlaps step 1 | Not built | Looks like a leftover layer. |
+| Step 2 counter | "4 documents" | "n of 3 required documents" | The shop-front photo is optional, so only 3 count. |
+| Shop-front copy | "Add photos of your shop" / "photos" mixed | "Add a photo of your shop front" | Consistent wording. |
+| File size separator | " .1.2 MB" | " · 1.2 MB" | Typo. |
+| Documents privacy note | "o any 3rd party" | "or any third party" | Typo. |
+| Rail, step 2 in progress | "In progress" | "In progress. n of 3 uploaded" | Tells the owner how far they are. |
+| Mismatch banner | Fixed name "FUASI PHARMACY LTD" | The pharmacy's own name | Real data. |
+| Review phone | "+234 810 987 654" (9 digits) | Full formatted number | Typo in Figma. |
+| Submitted | No passcode | A box showing the owner's 5-digit staff passcode once | Agreed with Emmanuel: the passcode is created at submit. |
+| Google and Apple buttons | Working sign in | "Coming soon" toast | Agreed: a later PR. |
+| Dark: links and outline buttons | #0077B6 | #5EAAD2 | Contrast at least 4.5:1, as elsewhere. |
+| Map | Static map picture | Live OpenStreetMap map with a draggable pin (Leaflet) | Needed to place a real pin. |
+| Images | @2x | @1x exports | Same export limit as above. |

@@ -337,28 +337,48 @@ isOneToOne: false
                   ]
                 },"pharmacies": {
                   Row: {
-                    "area": string,"city": string,"created_at": string,"email": string | null,"id": string,"is_live": boolean,"licence_number": string | null,"location": unknown,"name": string,"offers_delivery": boolean,"open_24_hours": boolean,"opening_hours": NonNullable<Json>,"pharmacist_in_charge": string | null,"phone": string,"services": (string)[],"state": string,"street": string,"updated_at": string
+                    "application_status": Database["public"]['Enums']["pharmacy_application_status"],"area": string,"city": string,"created_at": string,"email": string | null,"id": string,"is_live": boolean,"landmark": string | null,"licence_number": string | null,"location": unknown,"name": string,"offers_delivery": boolean,"open_24_hours": boolean,"opening_hours": NonNullable<Json>,"pcn_number": string | null,"pharmacist_in_charge": string | null,"phone": string,"rejection_reason": string | null,"reviewed_at": string | null,"services": (string)[],"state": string,"street": string,"submitted_at": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "area": string,"city"?: string,"created_at"?: string,"email"?: string | null,"id"?: string,"is_live"?: boolean,"licence_number"?: string | null,"location": unknown,"name": string,"offers_delivery"?: boolean,"open_24_hours"?: boolean,"opening_hours"?: NonNullable<Json>,"pharmacist_in_charge"?: string | null,"phone": string,"services"?: (string)[],"state"?: string,"street": string,"updated_at"?: string
+                    "application_status"?: Database["public"]['Enums']["pharmacy_application_status"],"area": string,"city"?: string,"created_at"?: string,"email"?: string | null,"id"?: string,"is_live"?: boolean,"landmark"?: string | null,"licence_number"?: string | null,"location": unknown,"name": string,"offers_delivery"?: boolean,"open_24_hours"?: boolean,"opening_hours"?: NonNullable<Json>,"pcn_number"?: string | null,"pharmacist_in_charge"?: string | null,"phone": string,"rejection_reason"?: string | null,"reviewed_at"?: string | null,"services"?: (string)[],"state"?: string,"street": string,"submitted_at"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "area"?: string,"city"?: string,"created_at"?: string,"email"?: string | null,"id"?: string,"is_live"?: boolean,"licence_number"?: string | null,"location"?: unknown,"name"?: string,"offers_delivery"?: boolean,"open_24_hours"?: boolean,"opening_hours"?: NonNullable<Json>,"pharmacist_in_charge"?: string | null,"phone"?: string,"services"?: (string)[],"state"?: string,"street"?: string,"updated_at"?: string
+                    "application_status"?: Database["public"]['Enums']["pharmacy_application_status"],"area"?: string,"city"?: string,"created_at"?: string,"email"?: string | null,"id"?: string,"is_live"?: boolean,"landmark"?: string | null,"licence_number"?: string | null,"location"?: unknown,"name"?: string,"offers_delivery"?: boolean,"open_24_hours"?: boolean,"opening_hours"?: NonNullable<Json>,"pcn_number"?: string | null,"pharmacist_in_charge"?: string | null,"phone"?: string,"rejection_reason"?: string | null,"reviewed_at"?: string | null,"services"?: (string)[],"state"?: string,"street"?: string,"submitted_at"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
                   ]
-                },"pharmacy_payout_accounts": {
+                },"pharmacy_documents": {
                   Row: {
-                    "account_name": string,"account_number": string,"bank_name": string,"created_at": string,"paystack_recipient_code": string | null,"pharmacy_id": string,"updated_at": string
+                    "file_name": string,"id": string,"kind": Database["public"]['Enums']["pharmacy_document_kind"],"mime_type": string,"pharmacy_id": string,"size_bytes": number,"storage_path": string,"uploaded_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "account_name": string,"account_number": string,"bank_name": string,"created_at"?: string,"paystack_recipient_code"?: string | null,"pharmacy_id": string,"updated_at"?: string
+                    "file_name": string,"id"?: string,"kind": Database["public"]['Enums']["pharmacy_document_kind"],"mime_type": string,"pharmacy_id": string,"size_bytes": number,"storage_path": string,"uploaded_at"?: string
                   }
                   Update: {
-                    "account_name"?: string,"account_number"?: string,"bank_name"?: string,"created_at"?: string,"paystack_recipient_code"?: string | null,"pharmacy_id"?: string,"updated_at"?: string
+                    "file_name"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["pharmacy_document_kind"],"mime_type"?: string,"pharmacy_id"?: string,"size_bytes"?: number,"storage_path"?: string,"uploaded_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pharmacy_documents_pharmacy_id_fkey"
+      columns: ["pharmacy_id"]
+isOneToOne: false
+      referencedRelation: "pharmacies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pharmacy_payout_accounts": {
+                  Row: {
+                    "account_name": string,"account_number": string,"bank_code": string | null,"bank_name": string,"created_at": string,"paystack_recipient_code": string | null,"pharmacy_id": string,"updated_at": string,"verified_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_name": string,"account_number": string,"bank_code"?: string | null,"bank_name": string,"created_at"?: string,"paystack_recipient_code"?: string | null,"pharmacy_id": string,"updated_at"?: string,"verified_at"?: string | null
+                  }
+                  Update: {
+                    "account_name"?: string,"account_number"?: string,"bank_code"?: string | null,"bank_name"?: string,"created_at"?: string,"paystack_recipient_code"?: string | null,"pharmacy_id"?: string,"updated_at"?: string,"verified_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -775,7 +795,10 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "approve_reservation":
+            "add_pharmacy_document":
+{ Args: { "p_file_name": string,"p_kind": Database["public"]['Enums']["pharmacy_document_kind"],"p_mime_type": string,"p_size_bytes": number,"p_storage_path": string }; Returns: string
+                           },
+"approve_reservation":
 { Args: { "p_reservation_id": string }; Returns: {
               "approval_deadline": string,
 "approved_at": string | null,
@@ -871,6 +894,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"clear_sign_in_failures":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
 "clock_in":
 { Args: { "p_pharmacy_id": string }; Returns: {
               "clock_in_at": string,
@@ -1173,6 +1199,12 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"my_pharmacy_application":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_staff_state":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "nearby_pharmacies":
 { Args: { "p_lat": number,"p_lng": number,"p_medicine_id"?: string,"p_radius_km"?: number }; Returns: {
               "area": string,"average_stars": number,"distance_km": number,"in_stock": boolean,"inventory_id": string,"name": string,"offers_delivery": boolean,"open_24_hours": boolean,"pharmacy_id": string,"price_kobo": number
@@ -1226,6 +1258,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"record_sign_in_failure":
+{ Args: { "p_identifier": string }; Returns: number
+                           },
 "record_wallet_top_up":
 { Args: { "p_amount_kobo": number,"p_customer_id": string,"p_paystack_reference": string }; Returns: {
               "amount_kobo": number,
@@ -1246,18 +1281,69 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"remove_pharmacy_document":
+{ Args: { "p_document_id": string }; Returns: undefined
+                           },
+"review_pharmacy_application":
+{ Args: { "p_approve": boolean,"p_pharmacy_id": string,"p_reason"?: string }; Returns: {
+              "application_status": Database["public"]['Enums']["pharmacy_application_status"],
+"area": string,
+"city": string,
+"created_at": string,
+"email": string | null,
+"id": string,
+"is_live": boolean,
+"landmark": string | null,
+"licence_number": string | null,
+"location": unknown,
+"name": string,
+"offers_delivery": boolean,
+"open_24_hours": boolean,
+"opening_hours": NonNullable<Json>,
+"pcn_number": string | null,
+"pharmacist_in_charge": string | null,
+"phone": string,
+"rejection_reason": string | null,
+"reviewed_at": string | null,
+"services": (string)[],
+"state": string,
+"street": string,
+"submitted_at": string | null,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "pharmacies"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"save_pharmacy_details":
+{ Args: { "p_details": Json }; Returns: string
+                           },
+"save_verified_payout_account":
+{ Args: { "p_account_name": string,"p_account_number": string,"p_bank_code": string,"p_bank_name": string,"p_user": string }; Returns: boolean
+                           },
 "send_pickup_warnings":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
 "set_prescription_check":
 { Args: { "p_check": Database["public"]['Enums']["prescription_check"],"p_reservation_id": string,"p_ticked"?: boolean }; Returns: undefined
                            },
+"sign_in_precheck":
+{ Args: { "p_identifier": string }; Returns: Json
+                           },
+"sign_up_precheck":
+{ Args: { "p_email": string,"p_phone"?: string }; Returns: Json
+                           },
+"submit_pharmacy_application":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "unlock_staff":
 { Args: { "p_passcode": string,"p_pharmacy_id": string }; Returns: string
                            }
           }
           Enums: {
-            "actor_kind": "customer"|"staff"|"system","appearance": "system"|"light"|"dark","fulfilment": "pickup"|"delivery","medicine_form": "tablet"|"capsule"|"syrup"|"suspension"|"injection"|"inhaler"|"cream"|"drops"|"sachet"|"other","notification_type": "new_reservation"|"reservation_approved"|"reservation_declined"|"reservation_ready"|"out_for_delivery"|"reservation_completed"|"reservation_expired"|"reservation_cancelled"|"pickup_30_min_left"|"pickup_15_min_left"|"refund_issued"|"new_message"|"payout_sent"|"low_stock","order_kind": "otc"|"prescription","payment_method": "wallet"|"card"|"bank_transfer"|"at_pharmacy","payment_status": "pending"|"succeeded"|"failed"|"refunded","payout_status": "scheduled"|"processing"|"paid"|"failed"|"pharmacy_owes","prescription_check": "medicine_and_dosage"|"patient_name_and_age"|"prescriber_name_and_signature"|"dose_suits_patient_age","reservation_status": "pending"|"approved"|"ready_for_pickup"|"out_for_delivery"|"completed"|"declined"|"expired"|"cancelled","staff_role": "owner"|"manager"|"pharmacist"|"assistant","wallet_tx_kind": "top_up"|"payment"|"refund"|"adjustment"
+            "actor_kind": "customer"|"staff"|"system","appearance": "system"|"light"|"dark","fulfilment": "pickup"|"delivery","medicine_form": "tablet"|"capsule"|"syrup"|"suspension"|"injection"|"inhaler"|"cream"|"drops"|"sachet"|"other","notification_type": "new_reservation"|"reservation_approved"|"reservation_declined"|"reservation_ready"|"out_for_delivery"|"reservation_completed"|"reservation_expired"|"reservation_cancelled"|"pickup_30_min_left"|"pickup_15_min_left"|"refund_issued"|"new_message"|"payout_sent"|"low_stock","order_kind": "otc"|"prescription","payment_method": "wallet"|"card"|"bank_transfer"|"at_pharmacy","payment_status": "pending"|"succeeded"|"failed"|"refunded","payout_status": "scheduled"|"processing"|"paid"|"failed"|"pharmacy_owes","pharmacy_application_status": "draft"|"submitted"|"approved"|"rejected","pharmacy_document_kind": "premises_licence"|"superintendent_licence"|"cac_certificate"|"shop_front","prescription_check": "medicine_and_dosage"|"patient_name_and_age"|"prescriber_name_and_signature"|"dose_suits_patient_age","reservation_status": "pending"|"approved"|"ready_for_pickup"|"out_for_delivery"|"completed"|"declined"|"expired"|"cancelled","staff_role": "owner"|"manager"|"pharmacist"|"assistant","wallet_tx_kind": "top_up"|"payment"|"refund"|"adjustment"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1377,7 +1463,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "actor_kind": ["customer", "staff", "system"],"appearance": ["system", "light", "dark"],"fulfilment": ["pickup", "delivery"],"medicine_form": ["tablet", "capsule", "syrup", "suspension", "injection", "inhaler", "cream", "drops", "sachet", "other"],"notification_type": ["new_reservation", "reservation_approved", "reservation_declined", "reservation_ready", "out_for_delivery", "reservation_completed", "reservation_expired", "reservation_cancelled", "pickup_30_min_left", "pickup_15_min_left", "refund_issued", "new_message", "payout_sent", "low_stock"],"order_kind": ["otc", "prescription"],"payment_method": ["wallet", "card", "bank_transfer", "at_pharmacy"],"payment_status": ["pending", "succeeded", "failed", "refunded"],"payout_status": ["scheduled", "processing", "paid", "failed", "pharmacy_owes"],"prescription_check": ["medicine_and_dosage", "patient_name_and_age", "prescriber_name_and_signature", "dose_suits_patient_age"],"reservation_status": ["pending", "approved", "ready_for_pickup", "out_for_delivery", "completed", "declined", "expired", "cancelled"],"staff_role": ["owner", "manager", "pharmacist", "assistant"],"wallet_tx_kind": ["top_up", "payment", "refund", "adjustment"]
+            "actor_kind": ["customer", "staff", "system"],"appearance": ["system", "light", "dark"],"fulfilment": ["pickup", "delivery"],"medicine_form": ["tablet", "capsule", "syrup", "suspension", "injection", "inhaler", "cream", "drops", "sachet", "other"],"notification_type": ["new_reservation", "reservation_approved", "reservation_declined", "reservation_ready", "out_for_delivery", "reservation_completed", "reservation_expired", "reservation_cancelled", "pickup_30_min_left", "pickup_15_min_left", "refund_issued", "new_message", "payout_sent", "low_stock"],"order_kind": ["otc", "prescription"],"payment_method": ["wallet", "card", "bank_transfer", "at_pharmacy"],"payment_status": ["pending", "succeeded", "failed", "refunded"],"payout_status": ["scheduled", "processing", "paid", "failed", "pharmacy_owes"],"pharmacy_application_status": ["draft", "submitted", "approved", "rejected"],"pharmacy_document_kind": ["premises_licence", "superintendent_licence", "cac_certificate", "shop_front"],"prescription_check": ["medicine_and_dosage", "patient_name_and_age", "prescriber_name_and_signature", "dose_suits_patient_age"],"reservation_status": ["pending", "approved", "ready_for_pickup", "out_for_delivery", "completed", "declined", "expired", "cancelled"],"staff_role": ["owner", "manager", "pharmacist", "assistant"],"wallet_tx_kind": ["top_up", "payment", "refund", "adjustment"]
           }
         }
 } as const

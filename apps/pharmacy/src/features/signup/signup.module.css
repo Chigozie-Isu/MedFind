@@ -1,0 +1,487 @@
+/* Pharmacy sign up (Figma "Sign up step 1–4" and "Submitted", 1440 wide): step rail on the
+   left, the step's form on the right. */
+
+.page {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 24px;
+  min-height: 100vh;
+  padding: 24px 24px 24px 48px;
+  box-sizing: border-box;
+  background: var(--mf-surface-default);
+}
+
+.rail {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 24px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.dot {
+  width: 42px;
+  height: 42px;
+  border-radius: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--mf-text-tertiary);
+  color: var(--mf-text-heading);
+  background: var(--mf-surface-default);
+}
+
+.dot[data-status='current'] {
+  background: var(--mf-brand-default);
+  border-color: var(--mf-brand-default);
+  color: var(--mf-text-on-brand);
+}
+
+.dot[data-status='done'] {
+  background: var(--mf-text-success);
+  border-color: var(--mf-text-success);
+  color: #ffffff;
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 0;
+}
+
+.help {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 12px;
+  border-radius: 24px;
+  background: var(--mf-brand-subtle);
+}
+
+.helpLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mf-text-brand);
+  text-decoration: none;
+}
+
+.railArt {
+  display: flex;
+  justify-content: center;
+  padding-left: 80px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 16px 0 24px;
+  min-width: 0;
+  max-width: 1038px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 12px;
+}
+
+.sectionTitle {
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 18px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.map {
+  position: relative;
+  height: 420px;
+  border-radius: 32px;
+  overflow: hidden;
+  border: 1px solid var(--mf-surface-border);
+  background: var(--mf-surface-muted);
+  z-index: 0;
+}
+
+.mapHint {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 500;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--mf-surface-raised);
+  color: var(--mf-text-heading);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.mapError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mf-input-helper-error);
+}
+
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px 0;
+}
+
+.actionsEnd {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px 0;
+}
+
+/* Step 2 */
+.progressCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 12px;
+  border-radius: 24px;
+  border: 1px solid var(--mf-text-tertiary);
+}
+
+.progressRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--mf-surface-border);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--mf-brand-default);
+  transition: width 0.2s ease;
+}
+
+.docRow {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px 20px;
+  padding: 16px 12px;
+}
+
+.docIcon {
+  color: var(--mf-text-heading);
+}
+
+.docIcon[data-state='uploaded'] {
+  color: var(--mf-text-success);
+}
+
+.docIcon[data-state='uploading'] {
+  color: var(--mf-text-brand);
+}
+
+.docIcon[data-state='error'] {
+  color: var(--mf-text-error);
+}
+
+.docText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.docTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.docBar {
+  max-width: 336px;
+}
+
+.photoBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  border-radius: 24px;
+  background: var(--mf-brand-subtle);
+  text-align: center;
+}
+
+.photoButtons {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.photo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: var(--mf-surface-raised);
+  border: 1px solid var(--mf-surface-border);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 24px;
+  background: var(--mf-brand-subtle);
+  color: var(--mf-text-brand);
+}
+
+.hidden {
+  display: none;
+}
+
+/* Step 3 */
+.banner {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 24px;
+  background: var(--mf-tone-error-bg);
+  color: var(--mf-tone-error-text);
+}
+
+.bannerClose {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  padding: 4px;
+  align-self: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 12px;
+  border-radius: 24px;
+  border: 1px solid var(--mf-surface-border);
+  background: var(--mf-surface-raised);
+}
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mf-text-heading);
+}
+
+.select {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--mf-input-value);
+  font: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.selectBox {
+  position: relative;
+}
+
+.selectChevron {
+  pointer-events: none;
+  color: var(--mf-text-heading);
+}
+
+/* Step 4 */
+.reviewCard {
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  border: 1px solid var(--mf-surface-border);
+  background: var(--mf-surface-raised);
+  padding: 8px 12px 16px;
+}
+
+.reviewHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0 12px;
+  border-bottom: 1px solid var(--mf-surface-border);
+  margin-bottom: 8px;
+}
+
+.reviewRow {
+  display: grid;
+  grid-template-columns: 262px 1fr;
+  gap: 16px;
+  padding: 8px 0;
+  align-items: center;
+}
+
+.ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Submitted */
+.submittedCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 24px 32px;
+  border-radius: 24px;
+  border: 1px solid var(--mf-surface-border);
+  background: var(--mf-surface-raised);
+  text-align: center;
+}
+
+.nextSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.nextStep {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.num {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mf-brand-subtle);
+  color: var(--mf-text-brand);
+}
+
+.passcode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1px dashed var(--mf-brand-default);
+  background: var(--mf-brand-subtle);
+}
+
+.passcodeDigits {
+  font-family: var(--font-poppins), 'Poppins', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 36px;
+  letter-spacing: 10px;
+  color: var(--mf-text-primary);
+}
+
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  max-width: 420px;
+}
+
+@media (max-width: 1100px) {
+  .page {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .rail {
+    position: static;
+  }
+  .railArt,
+  .help {
+    display: none;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .docRow {
+    grid-template-columns: 40px 1fr;
+  }
+  .reviewRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

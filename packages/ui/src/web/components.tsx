@@ -112,7 +112,9 @@ export function Button({
   iconLeft,
   disabled,
   loading,
+  loadingLabel,
   fullWidth,
+  type = 'button',
   onPress,
   accessibilityLabel,
   forceState,
@@ -122,22 +124,26 @@ export function Button({
   const iconSize = iconOnly ? dims.iconOnlyIcon : dims.icon;
   return (
     <button
-      type="button"
+      type={type}
       className="mf-btn mf-focusable"
       data-variant={variant}
       data-size={size}
       data-state={forceState && forceState !== 'default' ? forceState : undefined}
       data-icon-only={iconOnly && variant !== 'text' ? '' : undefined}
       data-full-width={fullWidth ? '' : undefined}
-      disabled={disabled || loading}
+      disabled={disabled || (loading && !loadingLabel)}
+      aria-disabled={loading && loadingLabel ? true : undefined}
       aria-busy={loading || undefined}
       aria-label={accessibilityLabel ?? (iconOnly ? label : undefined)}
-      onClick={onPress}
+      onClick={(e) => {
+        if (loading) return e.preventDefault();
+        onPress?.();
+      }}
     >
-      {loading && <span className="mf-spinner" aria-hidden />}
-      <span className="mf-btn-content" data-hidden={loading ? '' : undefined}>
+      {loading && !loadingLabel && <span className="mf-spinner" aria-hidden />}
+      <span className="mf-btn-content" data-hidden={loading && !loadingLabel ? '' : undefined}>
         {iconLeft && <Icon name={iconLeft} size={iconSize} />}
-        {label}
+        {loading && loadingLabel ? loadingLabel : label}
         {icon && <Icon name={icon} size={iconSize} />}
       </span>
     </button>
@@ -159,6 +165,7 @@ export function TextField({
   secure,
   size = 'mobile',
   keyboard = 'default',
+  autoComplete,
   forceState,
 }: import('../types.ts').TextFieldProps) {
   const id = useId();
@@ -184,6 +191,7 @@ export function TextField({
           className="mf-input"
           type={type}
           inputMode={keyboard === 'number' ? 'numeric' : undefined}
+          autoComplete={autoComplete}
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChangeText?.(e.target.value)}

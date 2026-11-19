@@ -29,8 +29,15 @@ export interface ButtonProps {
   iconLeft?: IconName;
   disabled?: boolean;
   loading?: boolean;
+  /**
+   * While `loading`, show this label (e.g. "Signing in…") in the normal colours instead of a
+   * spinner, as the Figma loading states do.
+   */
+  loadingLabel?: string;
   fullWidth?: boolean;
   onPress?: () => void;
+  /** Web only: `submit` submits the surrounding form. */
+  type?: 'button' | 'submit';
   /** Accessible name; required for icon-only buttons. */
   accessibilityLabel?: string;
   forceState?: InteractionState;
@@ -54,6 +61,9 @@ export interface TextFieldProps {
   /** `web` uses the taller 51px box from the web variant. */
   size?: 'mobile' | 'web';
   keyboard?: 'default' | 'email' | 'phone' | 'number';
+  /** Lets password managers and SMS autofill help. */
+  autoComplete?: 'email' | 'username' | 'current-password' | 'new-password' | 'tel' | 'one-time-code' | 'name' | 'off';
+  onSubmitEditing?: () => void;
   forceState?: FieldState;
 }
 
