@@ -16,7 +16,9 @@ import {
   pickupDeadline,
   reservationTotals,
   type DemoApprovedPayload,
+  type DemoCollectedPayload,
   type DemoDeclinedPayload,
+  type DemoPaymentMethod,
   type DemoPlacedPayload,
   type Fulfilment,
   type ReservationTotals,
@@ -42,6 +44,22 @@ export interface DemoReservation {
   placedAt: Date;
   readyAt?: Date;
   declineReason?: string;
+  /** How the customer pays. */
+  payment: DemoPaymentMethod;
+  /** Card used, e.g. "1456". */
+  cardLast4?: string;
+  /** Delivery address line. */
+  addressLine?: string;
+  rx: boolean;
+  collectedAt?: Date;
+  cancelledAt?: Date;
+  cancelReason?: string;
+  /** Stars (1–5) after collection. */
+  rating?: number;
+  /** Extra minutes bought with "Extend 30 mins". */
+  extendedMinutes: number;
+  /** Payment reference shown on receipts, e.g. "MF-48233". */
+  paymentRef: string;
 }
 
 const day = 86_400_000;
@@ -53,10 +71,29 @@ function code(): string {
   return s;
 }
 
-function make(inventoryId: string, quantity: number, fulfilment: Fulfilment, status: DemoStatus, placedAt: Date): DemoReservation {
+export interface PlaceOptions {
+  payment?: DemoPaymentMethod;
+  cardLast4?: string;
+  addressLine?: string;
+}
+
+function make(
+  inventoryId: string,
+  quantity: number,
+  fulfilment: Fulfilment,
+  status: DemoStatus,
+  placedAt: Date,
+  opts: PlaceOptions = {},
+): DemoReservation {
   const inv = findInventory(inventoryId);
   const med = findMedicine(inv.medicineId);
   return {
+    payment: opts.payment ?? 'pharmacy',
+    cardLast4: opts.cardLast4,
+    addressLine: opts.addressLine,
+    rx: !!med.rx,
+    extendedMinutes: 0,
+    paymentRef: `MF-${48000 + Math.floor(Math.random() * 999)}`,
     id: `r${++counter}`,
     medicineId: med.id,
     medicineName: medicineName(med),
@@ -74,11 +111,18 @@ function make(inventoryId: string, quantity: number, fulfilment: Fulfilment, sta
 
 const now = Date.now();
 /** History as in "My reservations – all" (Figma 538:26148). */
+const past = (r: DemoReservation, change: Partial<DemoReservation>): DemoReservation => ({ ...r, ...change });
 let reservations: DemoReservation[] = [
-  make('fuasi:diclofenac', 1, 'pickup', 'collected', new Date(now - 1 * day)),
-  make('caduces:gestid', 1, 'pickup', 'collected', new Date(now - 2 * day)),
-  make('mediguy:amoxil', 1, 'pickup', 'cancelled', new Date(now - 3 * day)),
-  make('mediguy:paracetamol', 1, 'pickup', 'collected', new Date(now - 4 * day)),
+  past(make('fuasi:diclofenac', 1, 'pickup', 'collected', new Date(now - 1 * day)), { collectedAt: new Date(now - 1 * day), rating: 5 }),
+  past(make('caduces:gestid', 1, 'pickup', 'collected', new Date(now - 2 * day)), { collectedAt: new Date(now - 2 * day) }),
+  past(make('mediguy:amoxil', 1, 'pickup', 'cancelled', new Date(now - 3 * day), { payment: 'card', cardLast4: '1456' }), {
+    cancelledAt: new Date(now - 3 * day),
+    cancelReason: 'Too far',
+  }),
+  past(make('mediguy:paracetamol', 1, 'pickup', 'collected', new Date(now - 4 * day)), { collectedAt: new Date(now - 4 * day) }),
+  past(make('fuasi:amoxil', 1, 'pickup', 'declined', new Date(now - 5 * day)), {
+    declineReason: 'Hi Grace, the signature on this prescription is incomplete and the name doesn’t match yours.',
+  }),
 ];
 
 const listeners = new Set<() => void>();
@@ -88,8 +132,9 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-function update(id: string, change: Partial<DemoReservation>): void {
-  reservations = reservations.map((r) => (r.id === id && r.status === 'waiting' ? { ...r, ...change } : r));
+/** Changes a reservation that is still in one of `from` (waiting by default). */
+function update(id: string, change: Partial<DemoReservation>, from: DemoStatus[] = ['waiting']): void {
+  reservations = reservations.map((r) => (r.id === id && from.includes(r.status) ? { ...r, ...change } : r));
   emit();
 }
 
@@ -106,11 +151,12 @@ function placedPayload(r: DemoReservation): DemoPlacedPayload {
     medicineName: r.medicineName,
     quantity: r.quantity,
     fulfilment: r.fulfilment,
-    kind: 'prescription',
+    kind: r.rx ? 'prescription' : 'otc',
     totalKobo: r.totals.totalKobo,
     pharmacyName: r.pharmacyName,
     placedAt: r.placedAt.toISOString(),
     pickupCode: r.pickupCode,
+    paymentMethod: r.payment,
   };
 }
 
@@ -132,6 +178,11 @@ function connect(): Promise<void> | null {
       const id = localId(p.id);
       if (id) update(id, { status: 'declined', declineReason: p.reason });
     })
+    .on('broadcast', { event: DEMO_EVENTS.collected }, ({ payload }) => {
+      const p = payload as DemoCollectedPayload;
+      const id = localId(p.id);
+      if (id) update(id, { status: 'collected', collectedAt: new Date(p.collectedAt) }, ['ready']);
+    })
     .on('broadcast', { event: DEMO_EVENTS.sync }, () => {
       for (const r of reservations) if (r.status === 'waiting') send(DEMO_EVENTS.placed, placedPayload(r));
     });
@@ -146,8 +197,16 @@ function send(event: string, payload: object): void {
 /** How long the demo waits before "confirming" when Supabase isn't set up. */
 const OFFLINE_CONFIRM_MS = 4000;
 
-export function placeReservation(inventoryId: string, quantity: number, fulfilment: Fulfilment): DemoReservation {
-  const r = make(inventoryId, quantity, fulfilment, 'waiting', new Date());
+/** True when the pharmacy demo can hear us (Supabase Realtime is set up). */
+export const isLive = () => !!supabase;
+
+export function placeReservation(
+  inventoryId: string,
+  quantity: number,
+  fulfilment: Fulfilment,
+  opts: PlaceOptions = {},
+): DemoReservation {
+  const r = make(inventoryId, quantity, fulfilment, 'waiting', new Date(), opts);
   reservations = [r, ...reservations];
   emit();
   const live = connect();
@@ -167,6 +226,32 @@ setInterval(() => {
 
 connect();
 
+/** Customer cancels (Figma "Pickup code – cancel reservation"). */
+export function cancelReservation(id: string, reason: string): void {
+  const r = reservations.find((x) => x.id === id);
+  update(id, { status: 'cancelled', cancelledAt: new Date(), cancelReason: reason }, ['waiting', 'ready']);
+  if (r) send(DEMO_EVENTS.cancelled, { id: wireId(r), reason });
+}
+
+/** Collected at the counter, or handed over by the rider. */
+export function markCollected(id: string): void {
+  update(id, { status: 'collected', collectedAt: new Date() }, ['ready']);
+}
+
+export function rateReservation(id: string, rating: number): void {
+  update(id, { rating }, ['collected']);
+}
+
+/** "Extend 30 mins · ₦800". */
+export function extendPickup(id: string, minutes = 30): void {
+  const r = reservations.find((x) => x.id === id);
+  if (r) update(id, { extendedMinutes: r.extendedMinutes + minutes }, ['ready']);
+}
+
+export function getReservation(id: string): DemoReservation | undefined {
+  return reservations.find((r) => r.id === id);
+}
+
 export function useReservations(): DemoReservation[] {
   return useSyncExternalStore(subscribe, () => reservations);
 }
@@ -176,4 +261,5 @@ export function useReservation(id: string | undefined): DemoReservation | undefi
 }
 
 export const isActive = (r: DemoReservation) => r.status === 'waiting' || r.status === 'ready';
-export const deadlineOf = (r: DemoReservation) => (r.readyAt ? pickupDeadline(r.readyAt) : undefined);
+export const deadlineOf = (r: DemoReservation) =>
+  r.readyAt ? new Date(pickupDeadline(r.readyAt).getTime() + r.extendedMinutes * 60_000) : undefined;
