@@ -48,3 +48,7 @@ Most changes come from the project rule that text contrast must be at least 4.5:
 | Found screen without a place name | Always "You're near GRA Phase 2" | "We found your location" when the phone can't name the area | Reverse geocoding can fail (no network, or on the web). |
 | Address screen on the web | Suggestions list | A note that search works in the app | The free geocoder that comes with expo-location only runs on phones. |
 | Illustration and text position | 37px under a 47px status bar | 36px (space.xl + space.xxs) under the safe area | Nearest spacing tokens. |
+
+## Buttons
+
+- **Native button labels** use a line box 1.5 times the font size instead of Figma's 100%, with an equal negative margin, so the button height is unchanged. At 100%, phones clip the bottoms of letters like g, y and p in one-line labels. The pharmacy (web) buttons already showed them in full and are unchanged.

@@ -9,6 +9,18 @@ import { useTheme } from './ThemeProvider.tsx';
 
 const labelToken = { large: mobileText.button1, medium: mobileText.button2, small: mobileText.button3 } as const;
 
+/**
+ * Figma sets button labels at 100% line height. A one-line native label is clipped to its line box,
+ * which cuts off descenders (g, y, p). So the label gets a taller line box, and an equal negative
+ * margin keeps the button the same height as in Figma.
+ */
+function labelStyle(size: keyof typeof labelToken) {
+  const token = labelToken[size];
+  const lineHeight = Math.ceil(token.size * 1.5);
+  const trim = (lineHeight - token.lineHeight) / 2;
+  return [textStyle(token), { lineHeight, marginVertical: -trim }];
+}
+
 export function Button({
   label,
   variant = 'primary',
@@ -69,7 +81,7 @@ export function Button({
             <View style={[styles.content, loading && styles.hidden]}>
             {iconLeft && <Icon name={iconLeft} size={iconSize} color={c.text} />}
             {label && (
-              <Text style={[textStyle(labelToken[size]), { color: c.text }]} numberOfLines={1}>
+              <Text style={[...labelStyle(size), { color: c.text }]} numberOfLines={1}>
                 {label}
               </Text>
             )}
