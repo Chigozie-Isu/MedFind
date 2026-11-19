@@ -101,6 +101,23 @@ export function setAccount(change: Partial<Account> | ((a: Account) => Partial<A
 export const getAccount = () => state;
 
 /** Settings > Reset demo data: puts Grace's account back to how the demo starts. */
+export function startNewCustomerAccount(): void {
+  state = {
+    ...seed(),
+    walletKobo: 0,
+    wallet: [],
+    cards: [],
+    defaultCardId: '',
+    addresses: [],
+    defaultAddressId: '',
+    saved: [],
+    recentSearches: [],
+    unreadNotifications: 0,
+    stockAlerts: [],
+  };
+  listeners.forEach((l) => l());
+}
+
 export function resetAccount(): void {
   state = seed();
   listeners.forEach((l) => l());
