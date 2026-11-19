@@ -1,0 +1,6 @@
+/* Theme variables and component styles come from themeCss() in layout.tsx. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
