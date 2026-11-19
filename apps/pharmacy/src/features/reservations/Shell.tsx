@@ -9,7 +9,7 @@ import { updateWorkspace, useWorkspace } from '../workspace/Workspace';
 const hrefs: Record<string, string> = { dashboard: '/dashboard', inventory: '/inventory', reservations: '/reservations', activity: '/activity', earnings: '/earnings', profile: '/profile' };
 
 /** Side nav, bell and sun/moon toggle shared by the pharmacy demo screens (Figma "Dashboard" 167:2472). */
-export function Shell({ active, heading, children }: { active: 'dashboard' | 'reservations' | 'inventory' | 'activity' | 'earnings' | 'profile'; heading: ReactNode; children: ReactNode }) {
+export function Shell({ active, heading, children }: { active: string; heading: ReactNode; children: ReactNode }) {
   const waiting = useReservations().filter((r) => r.status === 'review').length;
   const workspace = useWorkspace();
   const items = pharmacyNavItems.map((item) => ({
