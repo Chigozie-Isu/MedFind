@@ -4,6 +4,7 @@ import { APPROVAL_WINDOW_MINUTES } from '@medfind/core';
 import { Badge, Button, Icon, InsightCard, Text, cssVar } from '@medfind/ui/web';
 import { useRouter } from 'next/navigation';
 import { Shell } from './Shell';
+import { useWorkspace } from '../workspace/Workspace';
 import { staff, useNow, useReservations } from './store';
 import s from './reservations.module.css';
 
@@ -31,6 +32,7 @@ const runningLow = [
 /** Dashboard (Figma 167:2472). The waiting card counts live reservations. */
 export function Dashboard() {
   const router = useRouter();
+  const workspace = useWorkspace();
   const tick = useNow();
   const now = new Date(tick);
   const waiting = useReservations()
@@ -46,7 +48,7 @@ export function Dashboard() {
       heading={
         <div className={s.headingBlock}>
           <Text variant="h3" as="h1" color={cssVar.text.heading}>
-            {greeting(now)}, {staff.firstName}
+            {greeting(now)}, {workspace.staffName.split(' ')[0] || staff.firstName}
           </Text>
           <Text variant="body2" color={cssVar.text.secondary}>
             {DAYS[now.getDay()]} {now.getDate()} {MONTHS[now.getMonth()]} · {String(now.getHours()).padStart(2, '0')}:
@@ -111,7 +113,7 @@ export function Dashboard() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 16 }}>
                 <Badge label={t.stock[0]} tone={t.stock[1]} dot="left" />
-                <Button label={t.action} variant="text" size="small" iconLeft={t.action === 'Add stock' ? 'add' : undefined} icon={t.action === 'Restock' ? 'chevron-right' : undefined} />
+                <Button label={t.action} variant="text" size="small" iconLeft={t.action === 'Add stock' ? 'add' : undefined} icon={t.action === 'Restock' ? 'chevron-right' : undefined} onPress={() => router.push('/inventory')} />
               </div>
             </div>
           ))}
