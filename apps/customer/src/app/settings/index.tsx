@@ -55,7 +55,7 @@ export default function Settings() {
           <View style={styles.flex}>
             <View style={kit.row}>
               <Text variant="h4" style={styles.flex}>
-                {p.displayName}
+                {p.displayName || p.fullName || 'New customer'}
               </Text>
               <Pressable onPress={() => router.push('/settings/profile')} accessibilityRole="button" style={kit.row}>
                 <ExtraIcon name="edit" size={16} color={colors.text.brand} />
@@ -84,7 +84,7 @@ export default function Settings() {
       </Text>
       <LinkRow extraIcon="user" title="Personal" subtitle="Email, Phone number, Health" onPress={() => router.push('/settings/profile')} />
       <LinkRow icon="wallet" title="Payments" subtitle="Cards, wallet and bank transfers" onPress={() => router.push('/settings/payments')} />
-      <LinkRow icon="location" title="Addresses" subtitle={addr.line.slice(0, 14) + '...'} onPress={() => router.push('/settings/addresses')} />
+      <LinkRow icon="location" title="Addresses" subtitle={addr ? addr.line.slice(0, 14) + '...' : 'Add your first address'} onPress={() => router.push('/settings/addresses')} />
       <Text variant="label1" color="secondary">
         Preferences
       </Text>
