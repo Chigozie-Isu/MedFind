@@ -27,7 +27,7 @@ export function HomeShell({ staff, onSignOut }: { staff: StaffState | null; onSi
           </Text>
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
             <ThemeToggle />
-            <Button label="Sign out" variant="inline" size="medium" onPress={onSignOut} />
+            <Button label="Sign out" variant="destructive-inline" size="medium" onPress={onSignOut} />
           </div>
         </div>
         {!approved && (
