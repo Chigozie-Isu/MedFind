@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { space } from '@medfind/ui';
 import { Button, Text, TextField } from '@medfind/ui/native';
 import { resetDemoProfile, saveDemoProfile, useDemoProfile } from '../../features/demo/profile';
+import { resetSavedMedicines } from '../../features/demo/saved';
 import { setDemoSignedIn, supabase } from '../../lib/supabase';
 
 export default function ProfileSettings() {
@@ -33,7 +34,7 @@ export default function ProfileSettings() {
         {!!message && <Text variant="body2">{message}</Text>}
         <Button label="Appearance" variant="outline" fullWidth onPress={() => router.push('/settings/appearance')} />
         <Button label="Sign out" variant="outline" fullWidth onPress={async () => { if (supabase) await supabase.auth.signOut(); else await setDemoSignedIn(false); router.replace('/welcome'); }} />
-        <Button label="Reset demo profile" variant="text" fullWidth onPress={async () => { await resetDemoProfile(); setName(null); setEmail(null); setPhone(null); setMessage('Demo profile reset.'); }} />
+        <Button label="Reset demo profile and saved medicines" variant="text" fullWidth onPress={async () => { await resetDemoProfile(); await resetSavedMedicines(); setName(null); setEmail(null); setPhone(null); setMessage('Demo profile reset.'); }} />
       </ScrollView>
     </SafeAreaView>
   );
