@@ -22,6 +22,7 @@ export function Shell({ active, heading, children }: { active: 'dashboard' | 're
       <SideNav
         items={items}
         activeKey={active}
+        takingReservations={workspace.accepting}
         onTakingReservationsChange={(accepting) => updateWorkspace({ accepting }, accepting ? 'Started taking reservations' : 'Paused reservations')}
         header={<Logo height={48} />}
         footer={
