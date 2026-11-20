@@ -179,6 +179,6 @@ export function rememberSearch(q: string): void {
   setAccount((a) => ({ recentSearches: [word, ...a.recentSearches.filter((s) => s.toLowerCase() !== word.toLowerCase())].slice(0, 3) }));
 }
 
-export const defaultCard = (a: Account) => a.cards.find((c) => c.id === a.defaultCardId) ?? a.cards[0];
-export const defaultAddress = (a: Account) => a.addresses.find((x) => x.id === a.defaultAddressId) ?? a.addresses[0];
+export const defaultCard = (a: Account): DemoCard | undefined => a.cards.find((c) => c.id === a.defaultCardId) ?? a.cards[0];
+export const defaultAddress = (a: Account): DemoAddress | undefined => a.addresses.find((x) => x.id === a.defaultAddressId) ?? a.addresses[0];
 export const cardLabel = (c: DemoCard) => `${c.brand} •••• ${c.last4}`;

@@ -34,15 +34,18 @@ export default function Reserve() {
 
   const saveCheckout = () =>
     setAccount({
-      checkout: { inventoryId: inv.id, quantity, fulfilment, payOnline, addressId: address.id, prescriptionAttached: false },
+      checkout: { inventoryId: inv.id, quantity, fulfilment, payOnline, addressId: address?.id ?? '', prescriptionAttached: false },
       method: null,
     });
 
+  const needsAddress = delivery && !address;
+
   const next = () => {
     saveCheckout();
+    if (needsAddress) return router.push('/settings/add-address');
     if (rx) return router.push('/prescription');
     if (payOnline) return router.push('/payment');
-    const r = placeReservation(inv.id, quantity, fulfilment, { payment: 'pharmacy', addressLine: delivery ? address.line : undefined });
+    const r = placeReservation(inv.id, quantity, fulfilment, { payment: 'pharmacy', addressLine: delivery ? address?.line : undefined });
     router.replace(delivery ? `/reservation/${r.id}` : `/reserved/${r.id}`);
   };
 
@@ -62,7 +65,9 @@ export default function Reserve() {
     );
   };
 
-  const cta = rx
+  const cta = needsAddress
+    ? 'Add a delivery address'
+    : rx
     ? 'Continue to add prescription'
     : payOnline
       ? 'Continue to payment'
@@ -108,7 +113,16 @@ export default function Reserve() {
         {pharmacy.offersDelivery && segment('delivery', `Delivery · ${formatNaira(DELIVERY_FEE_KOBO)}`)}
       </View>
 
-      {delivery && (
+      {needsAddress && (
+        <CalloutCard
+          icon="location"
+          title="Where should we deliver?"
+          body="You haven’t saved an address yet. Add one and the rider will bring your order there in 45–60 minutes."
+          buttonLabel="Add address"
+          onPress={() => (saveCheckout(), router.push('/settings/add-address'))}
+        />
+      )}
+      {delivery && address && (
         <View style={[styles.address, { backgroundColor: colors.surface.raised }]}>
           <Icon name="home-2" size={sizes.icon.md} color={colors.text.brand} />
           <View style={styles.flex}>

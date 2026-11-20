@@ -28,8 +28,8 @@ export function placeFromCheckout(payment: DemoPaymentMethod): DemoReservation |
   if (payment === 'wallet') walletMove(t.med.name, -t.totals.totalKobo, 'payment');
   const r = placeReservation(t.c.inventoryId, t.c.quantity, t.c.fulfilment, {
     payment,
-    cardLast4: payment === 'card' ? defaultCard(a).last4 : undefined,
-    addressLine: t.c.fulfilment === 'delivery' ? address.line : undefined,
+    cardLast4: payment === 'card' ? defaultCard(a)?.last4 : undefined,
+    addressLine: t.c.fulfilment === 'delivery' ? address?.line : undefined,
   });
   setAccount({ checkout: null, method: null });
   last = { r, at: Date.now() };

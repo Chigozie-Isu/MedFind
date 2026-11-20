@@ -22,7 +22,7 @@ export default function AddAddress() {
     const line = [street.trim(), area.trim(), city.trim(), state.trim()].filter(Boolean).join(', ');
     setAccount((a: Account) => ({
       addresses: [...a.addresses, { id, label, line }],
-      defaultAddressId: makeDefault ? id : a.defaultAddressId,
+      defaultAddressId: makeDefault || !a.addresses.length ? id : a.defaultAddressId,
       checkout: a.checkout ? { ...a.checkout, addressId: id } : null,
     }));
     showFlash('Address saved');

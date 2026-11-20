@@ -38,7 +38,7 @@ export default function Prescription() {
   const next = () => {
     if (checkout.payOnline) return router.push('/payment');
     const c = getAccount().checkout!;
-    const addr = c.fulfilment === 'delivery' ? (getAccount().addresses.find((a) => a.id === c.addressId) ?? defaultAddress(getAccount())).line : undefined;
+    const addr = c.fulfilment === 'delivery' ? (getAccount().addresses.find((a) => a.id === c.addressId) ?? defaultAddress(getAccount()))?.line : undefined;
     const r = placeReservation(c.inventoryId, c.quantity, c.fulfilment, { payment: 'pharmacy', addressLine: addr });
     router.replace(c.fulfilment === 'delivery' ? `/reservation/${r.id}` : `/reserved/${r.id}`);
   };

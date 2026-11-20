@@ -72,15 +72,24 @@ export default function Payment() {
           Your wallet is short by {formatNaira(totals.totalKobo - account.walletKobo)}. Top up or pick another way to pay.
         </Note>
       )}
-      <OptionRow
-        title={`Card •••• ${card.last4}`}
-        description={`Expires ${card.expiry}`}
-        icon="card"
-        selected={method === 'card'}
-        onPress={() => pick('card')}
-        actionLabel="Change"
-        onAction={() => router.push('/payment/card')}
-      />
+      {card ? (
+        <OptionRow
+          title={`Card •••• ${card.last4}`}
+          description={`Expires ${card.expiry}`}
+          icon="card"
+          selected={method === 'card'}
+          onPress={() => pick('card')}
+          actionLabel="Change"
+          onAction={() => router.push('/payment/card')}
+        />
+      ) : (
+        <OptionRow
+          title="Add a card"
+          description="Debit or credit card. Nothing is charged in the demo"
+          icon="card"
+          onPress={() => router.push('/settings/add-card')}
+        />
+      )}
       <OptionRow
         title="Bank transfer"
         description="To a one-time account number"
@@ -88,7 +97,7 @@ export default function Payment() {
         selected={method === 'transfer'}
         onPress={() => pick('transfer')}
       />
-      <Note icon="shield">Only charged once the pharmacist confirms. Paying with {cardLabel(card)} or a transfer is a hold until then.</Note>
+      <Note icon="shield">Only charged once the pharmacist confirms. Paying with {card ? cardLabel(card) : 'a card'} or a transfer is a hold until then.</Note>
     </Screen>
   );
 }

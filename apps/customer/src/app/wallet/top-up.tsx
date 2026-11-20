@@ -24,13 +24,13 @@ export default function TopUp() {
   const go = () => {
     if (error) return;
     if (!withdraw && via === 'transfer') return router.push('/wallet/transfer');
-    router.replace({ pathname: '/wallet/done', params: { mode: withdraw ? 'withdraw' : 'topup', kobo: String(kobo), from: withdraw ? withdrawAccount : cardLabel(card) } });
+    router.replace({ pathname: '/wallet/done', params: { mode: withdraw ? 'withdraw' : 'topup', kobo: String(kobo), from: withdraw ? withdrawAccount : card ? cardLabel(card) : 'your card' } });
   };
 
   return (
     <Screen
       title={withdraw ? 'Withdraw' : 'Add money'}
-      footer={<Button label={`${withdraw ? 'Withdraw' : 'Add'} ${formatNaira(kobo)}`} fullWidth disabled={!!error} onPress={go} />}
+      footer={<Button label={`${withdraw ? 'Withdraw' : 'Add'} ${formatNaira(kobo)}`} fullWidth disabled={!!error || (!withdraw && via === 'card' && !card)} onPress={go} />}
     >
       <View style={kit.between}>
         <Text variant="label1" color="secondary">
@@ -60,7 +60,11 @@ export default function TopUp() {
         </>
       ) : (
         <>
-          <OptionRow title={`Card •••• ${card.last4}`} description="Lands instantly" icon="card" selected={via === 'card'} onPress={() => setVia('card')} />
+          {card ? (
+            <OptionRow title={`Card •••• ${card.last4}`} description="Lands instantly" icon="card" selected={via === 'card'} onPress={() => setVia('card')} />
+          ) : (
+            <OptionRow title="Add a card" description="Then top up from it instantly" icon="card" onPress={() => router.push('/settings/add-card')} />
+          )}
           <OptionRow
             title="Bank transfer"
             description="Send money to your own wallet account number"
