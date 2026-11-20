@@ -233,7 +233,7 @@ export function Profile() {
                     {DAY_LABELS[d]}
                   </Text>
                   <Text variant="body3" color={cssVar.text.secondary}>
-                    {hoursText(w.hours[d])}
+                    {w.isNewPharmacy && !w.hoursConfigured ? 'Not set' : hoursText(w.hours[d])}
                   </Text>
                 </div>
               ))}
@@ -422,7 +422,7 @@ function EditProfile({ w, onClose }: { w: WorkspaceState; onClose: () => void })
 function OpeningHours({ w, onClose }: { w: WorkspaceState; onClose: () => void }) {
   const [hours, setHours] = useState(w.hours);
   const set = (d: DayKey, ch: Partial<DayHours>) => setHours((h) => ({ ...h, [d]: { ...h[d], ...ch } }));
-  const bad = DAYS.filter((d) => !hours[d].allDay && hours[d].close <= hours[d].open);
+  const bad = DAYS.filter((d) => !hours[d].allDay && (!hours[d].open || !hours[d].close || hours[d].close <= hours[d].open));
   const save = () => {
     if (bad.length) return;
     const changed = DAYS.filter((d) => JSON.stringify(hours[d]) !== JSON.stringify(w.hours[d]));
@@ -462,6 +462,7 @@ function OpeningHours({ w, onClose }: { w: WorkspaceState; onClose: () => void }
               {DAY_LABELS[d]}
             </Text>
             <select className={`${c.select} mf-t-label2`} aria-label={`${DAY_LABELS[d]} opens`} value={hours[d].open} disabled={hours[d].allDay} onChange={(e) => set(d, { open: e.target.value })}>
+              <option value="">Select time</option>
               {TIMES.map((t) => (
                 <option key={t}>{t}</option>
               ))}
@@ -480,7 +481,7 @@ function OpeningHours({ w, onClose }: { w: WorkspaceState; onClose: () => void }
         <Text variant="caption1">
           {bad.length
             ? `${DAY_LABELS[bad[0]]} closes before it opens. Pick a later closing time.`
-            : `Pick the time you stop serving. Reservations stop 2 hours before closing (Saturday: ${hours.saturday.allDay ? 'open 24 hours' : stopTime(hours.saturday.close)}).`}
+            : `Pick the time you stop serving. Reservations stop 2 hours before closing (Saturday: ${hours.saturday.allDay ? 'open 24 hours' : hours.saturday.close ? stopTime(hours.saturday.close) : 'not set'}).`}
         </Text>
       </span>
     </Modal>
