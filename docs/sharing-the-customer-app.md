@@ -23,3 +23,22 @@ that touches the customer app or shared packages (and on demand from the Actions
 Expo access token saved as the `EXPO_TOKEN` repository secret; without it the job does nothing.
 No Supabase variables are needed: the update uses the empty EAS `preview` environment, so the app
 runs the local demo.
+
+## Is the phone on the latest version?
+
+The bottom of Profile (Settings) shows which code is running: "Update 20 Nov, 11:44" means an
+update was loaded; "Built-in version (no update loaded yet)" means the phone is still on the code
+the APK was built with. Updates download when the app opens and load the next time it opens, so
+close and reopen the app twice after a merge.
+
+If an installed APK never shows an update, it was built before updates were set up (before
+19 Nov, 20:42). Build a new one from the Actions tab: **Customer Android app build** › Run workflow
+(`.github/workflows/customer-android-build.yml`, same as `eas build -p android --profile preview`).
+Then open the build page on expo.dev on the phone and install it.
+
+## Who can use the Expo Go link?
+
+Anyone with internet, anywhere; it doesn't need the same Wi-Fi. On Android, testers install
+Expo Go and scan the QR code on the update's Preview page. On iPhone, Expo Go may only open the
+project for people signed in to an Expo account that's a member of the project, so the APK (Android)
+or the web link (iPhone) is simpler for outside testers.
