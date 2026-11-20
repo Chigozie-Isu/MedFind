@@ -52,6 +52,58 @@ export function Dashboard() {
   if (!tick) return null;
   const waitedMins = oldest ? Math.floor((now.getTime() - oldest.placedAt.getTime()) / 60_000) : 0;
 
+  if (workspace.isNewPharmacy) {
+    const steps = [
+      { title: 'Create your account', description: 'Your pharmacy details are saved.', done: !!workspace.pharmacy, href: '/profile' },
+      { title: 'Submit licence and documents', description: 'Your submitted documents are being reviewed.', done: false, href: '/sign-up' },
+      { title: 'Add a payout account', description: 'Where your online earnings go every second Friday.', done: !!workspace.payoutLast4, href: '/profile' },
+      { title: 'Add your medicines', description: 'Patients can only find what is in your inventory.', done: workspace.items.length > 0, href: '/inventory/add', action: 'Add stock' },
+      { title: 'Set your opening hours', description: 'So patients know when they can collect.', done: workspace.hoursConfigured === true, href: '/profile', action: 'Set hours' },
+    ];
+    const completed = steps.filter(step => step.done).length;
+    return (
+      <Shell active="dashboard" heading={<div className={s.headingBlock}>
+        <Text variant="h3" as="h1" color={cssVar.text.heading}>{greeting(now)}, {workspace.staffName.split(' ')[0] || 'there'}</Text>
+        <Text variant="body2" color={cssVar.text.secondary}>Let's get {workspace.pharmacy || 'your pharmacy'} ready for patients.</Text>
+      </div>}>
+        <section className={s.panel} style={{ maxWidth: 880, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className={s.between}>
+            <div>
+              <Text variant="h3" as="h2" color={cssVar.text.heading}>Get ready to go live</Text>
+              <Text variant="body2" color={cssVar.text.secondary}>{completed} of 5 steps done</Text>
+            </div>
+            <Text variant="h3" color={cssVar.text.heading}>{Math.round(completed / 5 * 100)}%</Text>
+          </div>
+          <div style={{ height: 8, background: '#E5E7EB', borderRadius: 8, overflow: 'hidden' }}>
+            <div style={{ width: `${completed / 5 * 100}%`, height: '100%', background: 'var(--mf-brand-default)', borderRadius: 8 }} />
+          </div>
+          {steps.map((step, index) => (
+            <div key={step.title} className={s.between} style={{ padding: '16px 0', borderBottom: '1px solid var(--mf-surface-border)', gap: 20 }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <span style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--mf-surface-border)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  {step.done ? <Icon name="check-circle" size={20} /> : index + 1}
+                </span>
+                <div>
+                  <Text variant="h5" color={cssVar.text.heading}>{step.title}</Text>
+                  <Text variant="body2" color={cssVar.text.secondary}>{step.description}</Text>
+                </div>
+              </div>
+              {step.action && !step.done ? <Button label={step.action} size="small" variant="secondary" onPress={() => router.push(step.href)} /> :
+                <Badge label={step.done ? 'Done' : index === 1 ? 'In review' : 'To do'} tone={step.done ? 'success' : 'info'} />}
+            </div>
+          ))}
+          <div className={s.between} style={{ gap: 20, paddingTop: 16 }}>
+            <div>
+              <Text variant="h5" color={cssVar.text.heading}>Add employees · optional</Text>
+              <Text variant="body2" color={cssVar.text.secondary}>Add employees and generate codes so you can know who does what.</Text>
+            </div>
+            <Button label="Add employees" variant="secondary" onPress={() => router.push('/profile')} />
+          </div>
+        </section>
+      </Shell>
+    );
+  }
+
   return (
     <Shell
       active="dashboard"
