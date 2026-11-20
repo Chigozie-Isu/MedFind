@@ -3,10 +3,11 @@
 import { APPROVAL_WINDOW_MINUTES } from '@medfind/core';
 import { Badge, Button, Icon, InsightCard, Text, cssVar } from '@medfind/ui/web';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { Shell } from './Shell';
-import { stockStatus, useWorkspace } from '../workspace/store';
+import { stockStatus, useWorkspace, updateWorkspace } from '../workspace/store';
 import { Skeleton, useFirstLoad } from '../common/ui';
-import { staff, useNow, useReservations } from './store';
+import { staff, useNow, useReservations, scheduleNewPharmacyDemoReservation } from './store';
 import s from './reservations.module.css';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -35,6 +36,14 @@ export function Dashboard() {
   const router = useRouter();
   const workspace = useWorkspace();
   const tick = useNow();
+  useEffect(() => {
+    if (!workspace.isNewPharmacy || workspace.verificationApproved) return;
+    const timer = window.setTimeout(() => {
+      updateWorkspace({ verificationApproved: true });
+      scheduleNewPharmacyDemoReservation();
+    }, 30000);
+    return () => window.clearTimeout(timer);
+  }, [workspace.isNewPharmacy, workspace.verificationApproved]);
   const now = new Date(tick);
   const waiting = useReservations()
     .filter((r) => r.status === 'review')
@@ -55,7 +64,7 @@ export function Dashboard() {
   if (workspace.isNewPharmacy) {
     const steps = [
       { title: 'Create your account', description: 'Your pharmacy details are saved.', done: !!workspace.pharmacy, href: '/profile' },
-      { title: 'Submit licence and documents', description: 'Your submitted documents are being reviewed.', done: false, href: '/sign-up' },
+      { title: 'Submit licence and documents', description: 'Your submitted documents are being reviewed.', done: !!workspace.verificationApproved, href: '/sign-up' },
       { title: 'Add a payout account', description: 'Where your online earnings go every second Friday.', done: !!workspace.payoutLast4, href: '/profile' },
       { title: 'Add your medicines', description: 'Patients can only find what is in your inventory.', done: workspace.items.length > 0, href: '/inventory/add', action: 'Add stock' },
       { title: 'Set your opening hours', description: 'So patients know when they can collect.', done: workspace.hoursConfigured === true, href: '/profile', action: 'Set hours' },
@@ -78,13 +87,13 @@ export function Dashboard() {
             <div style={{ width: `${completed / 5 * 100}%`, height: '100%', background: 'var(--mf-brand-default)', borderRadius: 8 }} />
           </div>
           {steps.map((step, index) => (
-            <div key={step.title} className={s.between} style={{ padding: '16px 0', borderBottom: '1px solid var(--mf-surface-border)', gap: 20 }}>
-              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <div key={step.title} className={s.between} style={{ padding: '16px 0', borderBottom: '1px solid var(--mf-surface-border)', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center', flex: '1 1 320px', minWidth: 0 }}>
                 <span style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--mf-surface-border)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                   {step.done ? <Icon name="shield-tick" size={20} /> : index + 1}
                 </span>
                 <div>
-                  <Text variant="h5" color={cssVar.text.heading}>{step.title}</Text>
+                  <Text variant="body2" color={cssVar.text.heading}>{step.title}</Text>
                   <Text variant="body2" color={cssVar.text.secondary}>{step.description}</Text>
                 </div>
               </div>
@@ -92,7 +101,7 @@ export function Dashboard() {
                 <Badge label={step.done ? 'Done' : index === 1 ? 'In review' : 'To do'} tone={step.done ? 'success' : 'info'} />}
             </div>
           ))}
-          <div className={s.between} style={{ gap: 20, paddingTop: 16 }}>
+          <div className={s.between} style={{ gap: 20, paddingTop: 16, flexWrap: 'wrap' }}>
             <div>
               <Text variant="h5" color={cssVar.text.heading}>Add employees · optional</Text>
               <Text variant="body2" color={cssVar.text.secondary}>Add employees and generate codes so you can know who does what.</Text>
