@@ -81,7 +81,7 @@ export function Dashboard() {
             <div key={step.title} className={s.between} style={{ padding: '16px 0', borderBottom: '1px solid var(--mf-surface-border)', gap: 20 }}>
               <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                 <span style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--mf-surface-border)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  {step.done ? <Icon name="check-circle" size={20} /> : index + 1}
+                  {step.done ? <Icon name="shield-tick" size={20} /> : index + 1}
                 </span>
                 <div>
                   <Text variant="h5" color={cssVar.text.heading}>{step.title}</Text>
