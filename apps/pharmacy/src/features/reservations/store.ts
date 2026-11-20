@@ -133,9 +133,7 @@ function isFreshPharmacy() {
 export function scheduleNewPharmacyDemoReservation() {
   if (typeof window === 'undefined') return;
   const key = 'medfind.pharmacy.demo.incoming.v1';
-  if (window.localStorage.getItem(key) === '1') return;
-  window.localStorage.setItem(key, '1');
-  window.setTimeout(() => {
+  {
     const medicine = getWorkspace().items[0];
     const r = sample({ id: 'demo-new-001', customerName: 'Ada Okafor', medicineName: medicine?.brand || 'Paracetamol 500 mg', quantity: 1, naira: medicine ? medicine.priceKobo / 100 : 1500, minutesAgo: 0, payment: 'counter' }, Date.now());
     if (reservations.some(x => x.id === r.id)) return;
@@ -143,7 +141,7 @@ export function scheduleNewPharmacyDemoReservation() {
     emit();
     announce(r);
     notify('New demo reservation', 'Ada Okafor has placed a reservation for review.');
-  }, 12000);
+  }
 }
 
 export function startNewPharmacyReservations() {
