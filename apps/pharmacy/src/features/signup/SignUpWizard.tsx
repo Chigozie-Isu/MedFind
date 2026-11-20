@@ -20,10 +20,12 @@ import {
   type PharmacySignupStep,
 } from '@medfind/core';
 import { useToast } from '../auth/parts';
+import { supabase } from '../../lib/supabase';
 import {
   createOwnerAccount,
   emailInUse,
   loadApplication,
+  resetDemoSignup,
   saveDetails,
   signedInEmail,
   submitApplication,
@@ -210,6 +212,12 @@ export function SignUpWizard({
   useEffect(() => {
     if (demo) return;
     (async () => {
+      if (!supabase && new URLSearchParams(window.location.search).get('new') === '1') {
+        resetDemoSignup();
+        window.history.replaceState(null, '', '/sign-up');
+        patch({ step: 'details', details: { ...EMPTY_DETAILS }, email: null, app: null, passcode: null });
+        return setReady(true);
+      }
       const email = await signedInEmail();
       if (!email) return setReady(true);
       const app = await loadApplication();
@@ -355,7 +363,12 @@ export function SignUpWizard({
           onSubmit={submit}
         />
       )}
-      {st.step === 'submitted' && <Submitted email={st.app?.pharmacy.email ?? st.email ?? ''} passcode={st.passcode} onDashboard={onDashboard} />}
+      {st.step === 'submitted' && <Submitted email={st.app?.pharmacy.email ?? st.email ?? ''} passcode={st.passcode} onDashboard={onDashboard} onCreateAnother={() => {
+        if (supabase) return;
+        resetDemoSignup();
+        patch({ step: 'details', details: { ...EMPTY_DETAILS }, errors: {}, app: null, email: null, passcode: null, editing: false });
+        window.scrollTo({ top: 0 });
+      }} />}
     </SignupPage>
   );
 }
