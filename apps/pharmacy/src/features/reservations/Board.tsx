@@ -277,7 +277,7 @@ export function Board() {
     >
       {loading ? (
         <Skeleton rows={4} cards={3} />
-      ) : review.length + ready.length === 0 && !handed ? (
+      ) : all.length === 0 && lines.length === 0 ? (
         <section className={s.panel}>
           <EmptyState
             icon="ticket"
