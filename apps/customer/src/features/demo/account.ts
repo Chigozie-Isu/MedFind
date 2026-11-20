@@ -89,12 +89,15 @@ const seed = (): Account => ({
 let state: Account = seed();
 
 const ACCOUNT_KEY = 'medfind.customer.account.v2';
+const OWNER_KEY = 'medfind.customer.account.owner.v2';
+let activeOwner = 'demo-grace';
 let hydrated = false;
 export async function hydrateAccount(): Promise<void> {
   if (hydrated) return;
   hydrated = true;
   try {
-    const raw = await AsyncStorage.getItem(ACCOUNT_KEY);
+    const [raw, owner] = await Promise.all([AsyncStorage.getItem(ACCOUNT_KEY), AsyncStorage.getItem(OWNER_KEY)]);
+    if (owner) activeOwner = owner;
     if (!raw) return;
     const stored = JSON.parse(raw) as Account;
     state = {
@@ -105,7 +108,7 @@ export async function hydrateAccount(): Promise<void> {
   } catch { /* use default demo state if storage is unavailable */ }
 }
 function persistAccount() {
-  void AsyncStorage.setItem(ACCOUNT_KEY, JSON.stringify(state)).catch(() => {});
+  void Promise.all([AsyncStorage.setItem(ACCOUNT_KEY, JSON.stringify(state)), AsyncStorage.setItem(OWNER_KEY, activeOwner)]).catch(() => {});
 }
 const listeners = new Set<() => void>();
 const subscribe = (l: () => void) => {
@@ -122,23 +125,41 @@ export function setAccount(change: Partial<Account> | ((a: Account) => Partial<A
 export const getAccount = () => state;
 
 /** Settings > Reset demo data: puts Grace's account back to how the demo starts. */
-export function startNewCustomerAccount(): void {
-  state = {
+function emptyAccount(): Account {
+  return {
     ...seed(),
     profile: { ...profileSeed, fullName: '', displayName: '', email: '', phone: '', maskedPhone: '', dob: { d: '', m: '', y: '' }, allergies: '' },
-    walletKobo: 0,
-    wallet: [],
-    cards: [],
-    defaultCardId: '',
-    addresses: [],
-    defaultAddressId: '',
-    saved: [],
-    recentSearches: [],
-    unreadNotifications: 0,
-    stockAlerts: [],
+    walletKobo: 0, wallet: [], cards: [], defaultCardId: '',
+    addresses: [], defaultAddressId: '', saved: [], recentSearches: [],
+    unreadNotifications: 0, stockAlerts: [], checkout: null, method: null,
   };
+}
+
+/** Keep independent browser-local demo profiles for each email or phone. */
+export async function switchDemoAccount(owner: string, fresh = false): Promise<void> {
+  const nextOwner = owner.trim().toLowerCase() || 'demo-grace';
+  if (nextOwner === activeOwner && !fresh) return;
+  try {
+    await AsyncStorage.setItem('medfind.customer.account.snapshot.' + activeOwner, JSON.stringify(state));
+    const raw = fresh ? null : await AsyncStorage.getItem('medfind.customer.account.snapshot.' + nextOwner);
+    if (raw) {
+      const stored = JSON.parse(raw) as Account;
+      state = { ...seed(), ...stored, saved: (stored.saved ?? []).map(s => ({ ...s, savedAt: new Date(s.savedAt) })) };
+    } else {
+      state = nextOwner === 'demo-grace' ? seed() : emptyAccount();
+    }
+  } catch {
+    state = nextOwner === 'demo-grace' ? seed() : emptyAccount();
+  }
+  activeOwner = nextOwner;
   persistAccount();
-  listeners.forEach((l) => l());
+  listeners.forEach(l => l());
+}
+
+export function startNewCustomerAccount(): void {
+  state = emptyAccount();
+  persistAccount();
+  listeners.forEach(l => l());
 }
 
 export function resetAccount(): void {
