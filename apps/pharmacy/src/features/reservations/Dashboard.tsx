@@ -40,6 +40,13 @@ export function Dashboard() {
     .filter((r) => r.status === 'review')
     .sort((a, b) => a.placedAt.getTime() - b.placedAt.getTime());
   const oldest = waiting[0];
+  const todaySales = workspace.transactions.filter(t => t.method !== 'Payout' && new Date(t.at).toDateString() === now.toDateString());
+  const salesValue = todaySales.reduce((sum, t) => sum + t.paidKobo, 0);
+  const cards = workspace.isNewPharmacy ? [
+    { title: 'Collected today', value: String(todaySales.length), insight: 'Completed reservations', href: '/activity' },
+    { title: 'Sales today', value: `₦${(salesValue / 100).toLocaleString('en-NG')}`, insight: `${todaySales.length} completed sales`, href: '/earnings' },
+    { title: 'Avg reply time', value: '—', insight: 'No reservations yet', href: '/reservations' },
+  ] : insights;
   const loading = useFirstLoad('dashboard');
   const low = workspace.items.filter((i) => stockStatus(i) !== 'in').slice(0, 3);
   if (!tick) return null;
@@ -62,7 +69,7 @@ export function Dashboard() {
     >
       {loading ? <Skeleton rows={3} cards={3} /> : <>
       <div className={s.insights}>
-        {insights.map((c) => (
+        {cards.map((c) => (
           <div key={c.title} role="link" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => router.push(c.href)} onKeyDown={(e) => e.key === 'Enter' && router.push(c.href)}>
             <InsightCard title={c.title} value={c.value} insight={c.insight} />
           </div>
