@@ -7,6 +7,7 @@
  */
 import { normaliseEmail, type PharmacySignInFailure } from '@medfind/core';
 import { attempt, client, myStaffState, OFFLINE, supabase, type ApiResult } from '../../lib/supabase';
+import { loadApplication, signedInEmail } from '../signup/api';
 
 export type SignInOutcome = 'dashboard' | 'resume_sign_up';
 
@@ -16,7 +17,12 @@ export function isSignInFailure(reason: string): reason is PharmacySignInFailure
 
 export async function signIn(rawEmail: string, password: string, passcode: string): Promise<ApiResult<SignInOutcome>> {
   const email = normaliseEmail(rawEmail);
-  if (!supabase && !passcode.replace(/\s/g, '')) return { ok: false, reason: 'passcode_required' };
+  if (!supabase) {
+    const existing = await loadApplication();
+    const owner = await signedInEmail();
+    if (existing && owner === email && existing.pharmacy.application_status === 'draft') return { ok: true, value: 'resume_sign_up' };
+    if (!passcode.replace(/\s/g, '')) return { ok: false, reason: 'passcode_required' };
+  }
   return attempt(async () => {
     const sb = client();
     const { data: pre, error: preError } = await sb.rpc('sign_in_precheck', { p_identifier: email });
