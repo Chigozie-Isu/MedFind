@@ -124,6 +124,20 @@ const KEMI: SampleInit = {
 };
 
 let reservations: PharmacyReservation[] = initialReservations();
+const NEW_RESERVATIONS_KEY = 'medfind.pharmacy.reservations.fresh.v1';
+function isFreshPharmacy() {
+  if (typeof window === 'undefined') return false;
+  try { return window.localStorage.getItem(NEW_RESERVATIONS_KEY) === '1'; } catch { return false; }
+}
+export function startNewPharmacyReservations() {
+  try { window.localStorage.setItem(NEW_RESERVATIONS_KEY, '1'); } catch { /* memory only */ }
+  reservations = [];
+  today = [];
+  todayCount = 0;
+  incoming = null;
+  emit();
+}
+if (isFreshPharmacy()) reservations = [];
 
 /** Recent lines for "Activity today" on the board (Figma 196:3840). */
 export interface TodayLine {
@@ -139,8 +153,8 @@ const SEED_TODAY: TodayLine[] = [
   { name: 'Sarah Mensah', detail: 'Amlodipine 5mg . 14:00', label: 'Collected', tone: 'success' },
   { name: 'Daniel Okoro', detail: 'Metformin 500mg . 12:00', label: 'Expired', tone: 'error' },
 ];
-let today: TodayLine[] = SEED_TODAY;
-let todayCount = 25;
+let today: TodayLine[] = isFreshPharmacy() ? [] : SEED_TODAY;
+let todayCount = isFreshPharmacy() ? 0 : 25;
 
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
@@ -298,7 +312,7 @@ function startTimers() {
   connect();
   // Kemi's OTC delivery order arrives a little after the app opens (Figma "Overlay – new reservation toast").
   setTimeout(() => {
-    if (reservations.some((r) => r.id === KEMI.id)) return;
+    if (isFreshPharmacy() || reservations.some((r) => r.id === KEMI.id)) return;
     const k = sample(KEMI, Date.now());
     reservations = [...reservations, k];
     emit();
@@ -317,9 +331,9 @@ function startTimers() {
 
 /** Puts every reservation back to how the demo starts (Profile › Reset demo). */
 export function resetReservations() {
-  reservations = initialReservations();
-  today = SEED_TODAY;
-  todayCount = 25;
+  reservations = isFreshPharmacy() ? [] : initialReservations();
+  today = isFreshPharmacy() ? [] : SEED_TODAY;
+  todayCount = isFreshPharmacy() ? 0 : 25;
   incoming = null;
   emit();
 }
@@ -338,8 +352,8 @@ export function useReservation(id: string): PharmacyReservation | undefined {
 }
 
 export function useToday(): { lines: TodayLine[]; count: number } {
-  const lines = useSyncExternalStore(subscribe, () => today, () => SEED_TODAY);
-  const count = useSyncExternalStore(subscribe, () => todayCount, () => 25);
+  const lines = useSyncExternalStore(subscribe, () => today, () => []);
+  const count = useSyncExternalStore(subscribe, () => todayCount, () => 0);
   return { lines, count };
 }
 
