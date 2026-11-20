@@ -242,7 +242,7 @@ export function decline(id: string, reason: string): void {
   const r = find(id)!;
   pushToday(r, 'Declined', 'error');
   logActivity({ kind: 'reservation', text: `Declined ${r.ref} · ${r.medicineName} × ${r.quantity} · “${reason.trim()}”`, statuses: [{ label: 'Declined', tone: 'error' }] });
-  notify(`${r.customerName}’s reservation declined`, `${firstName(r.customerName)} sees your reason and is refunded to their MedFind wallet.`, 'info');
+  notify('Reservation declined', `${r.ref} · ${r.customerName}. Reason: ${reason.trim()}. The customer will see the decline reason.`, 'error');
   if (r.live) send(DEMO_EVENTS.declined, { id, reason: reason.trim() } satisfies DemoDeclinedPayload);
 }
 
