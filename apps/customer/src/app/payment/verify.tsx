@@ -5,7 +5,7 @@ import { formatNaira } from '@medfind/core';
 import { Button, CodeInput, Text } from '@medfind/ui/native';
 import { defaultCard, useAccount } from '../../features/demo/account';
 import { checkoutTotals, placeFromCheckout } from '../../features/demo/checkout';
-import { goBack, Screen, kit } from '../../features/demo/kit';
+import { Note, goBack, Screen, kit } from '../../features/demo/kit';
 
 /**
  * Card – verify with your bank (Figma 2031:19066). Any 6 digits confirm the payment;
@@ -30,7 +30,7 @@ export default function VerifyCard() {
     setBusy(true);
     setTimeout(() => {
       setBusy(false);
-      if (code === '000000') return router.replace({ pathname: '/payment/failed', params: { last4: card.last4 } });
+      if (code === '000000') return router.replace({ pathname: '/payment/failed', params: { last4: card?.last4 ?? '' } });
       const r = placeFromCheckout('card');
       if (r) router.replace({ pathname: '/payment/success', params: { id: r.id, via: 'card' } });
     }, 1200);
@@ -50,7 +50,7 @@ export default function VerifyCard() {
       <Text variant="body3" color="secondary">
         GTBank sent a 6-digit code to {account.profile.maskedPhone} to confirm {formatNaira(t.totals.totalKobo)} to MedFind.
       </Text>
-      <CodeInput length={6} groupSize={3} value={code} onChangeText={setCode} accessibilityLabel="6-digit bank code" />
+      <CodeInput length={6} groupSize={3} value={code} onChangeText={setCode} accessibilityLabel="6-digit bank code" autoFocus />
       <View style={kit.row}>
         <Text variant="caption1" color="secondary">
           Didn’t get a code?
@@ -63,6 +63,7 @@ export default function VerifyCard() {
           onPress={() => setLeft(42)}
         />
       </View>
+      <Note icon="info-circle">Demo payment: no money moves. Any 6 digits confirm it, and 000000 shows a declined card.</Note>
     </Screen>
   );
 }
