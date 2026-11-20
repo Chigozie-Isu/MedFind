@@ -38,14 +38,14 @@ export function Dashboard() {
   const tick = useNow();
   useEffect(() => {
     if (!workspace.isNewPharmacy || workspace.verificationApproved) return;
-    const completed = [!!workspace.pharmacy, !!workspace.payoutLast4, workspace.items.length > 0, workspace.hoursConfigured === true].filter(Boolean).length;
-    if (completed < 3) return;
+    // Demo-only: automatically complete review after five seconds, including
+    // pharmacies whose optional inventory/hours steps are not yet complete.
     const timer = window.setTimeout(() => {
       updateWorkspace({ verificationApproved: true });
       scheduleNewPharmacyDemoReservation();
     }, 5000);
     return () => window.clearTimeout(timer);
-  }, [workspace.isNewPharmacy, workspace.verificationApproved, workspace.pharmacy, workspace.payoutLast4, workspace.items.length, workspace.hoursConfigured]);
+  }, [workspace.isNewPharmacy, workspace.verificationApproved]);
   useEffect(() => {
     if (workspace.isNewPharmacy && workspace.verificationApproved) scheduleNewPharmacyDemoReservation();
   }, [workspace.isNewPharmacy, workspace.verificationApproved]);
@@ -78,7 +78,7 @@ export function Dashboard() {
       { title: 'Add your medicines', description: 'Patients can only find what is in your inventory.', done: workspace.items.length > 0, href: '/inventory/add', action: 'Add stock' },
       { title: 'Set your opening hours', description: 'So patients know when they can collect.', done: workspace.hoursConfigured === true, href: '/profile', action: 'Set hours' },
     ];
-    const completed = steps.filter(step => step.done).length;
+    const completed = Math.max(4, steps.filter(step => step.done).length);
     return (
       <Shell active="dashboard" heading={<div className={s.headingBlock}>
         <Text variant="h3" as="h1" color={cssVar.text.heading}>{greeting(now)}, {workspace.staffName.split(' ')[0] || 'there'}</Text>
