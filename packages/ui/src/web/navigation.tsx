@@ -11,9 +11,9 @@ export function TakingReservations({ live, onChange }: TakingReservationsProps) 
   return (
     <div className="mf-live">
       <Badge label={live ? 'Live' : 'Offline'} tone={live ? 'success' : 'error'} dot="left" />
-      <span className="mf-live-toggle">
-        Taking reservations
-        <Toggle value={live} onChange={onChange} accessibilityLabel="Taking reservations" />
+      <span className="mf-live-toggle" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "nowrap", width: "100%" }}>
+        <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>Taking reservations</span>
+        <span style={{ flexShrink: 0, display: "inline-flex" }}><Toggle value={live} onChange={onChange} accessibilityLabel="Taking reservations" /></span>
       </span>
     </div>
   );
