@@ -426,7 +426,7 @@ function OpeningHours({ w, onClose }: { w: WorkspaceState; onClose: () => void }
   const save = () => {
     if (bad.length) return;
     const changed = DAYS.filter((d) => JSON.stringify(hours[d]) !== JSON.stringify(w.hours[d]));
-    updateWorkspace({ hours }, { kind: 'account', text: changed.length ? `Changed opening hours for ${changed.map((d) => DAY_LABELS[d]).join(', ')}` : 'Saved opening hours', statuses: [{ label: 'Hours saved', tone: 'info' }] });
+    updateWorkspace({ hours, hoursConfigured: true }, { kind: 'account', text: changed.length ? `Changed opening hours for ${changed.map((d) => DAY_LABELS[d]).join(', ')}` : 'Saved opening hours', statuses: [{ label: 'Hours saved', tone: 'info' }] });
     const first = changed[0];
     notify(
       'Opening hours saved',
