@@ -45,7 +45,9 @@ export interface Application {
 }
 
 export async function signedInEmail(): Promise<string | null> {
-  if (!supabase) return null;
+  if (!supabase) {
+    try { return window.localStorage.getItem(DEMO_EMAIL_KEY); } catch { return null; }
+  }
   const { data } = await supabase.auth.getSession();
   return data.session?.user.email ?? null;
 }
@@ -55,13 +57,23 @@ export async function signedInEmail(): Promise<string | null> {
  * progress (documents, payout, submit) shows up in the next one just as it would from the database.
  */
 let demoApp: Application | null = null;
+const DEMO_APP_KEY = 'medfind.pharmacy.signup.application.v1';
+const DEMO_EMAIL_KEY = 'medfind.pharmacy.signup.email.v1';
+function persistDemoApp() {
+  if (typeof window === 'undefined') return;
+  try { if (demoApp) window.localStorage.setItem(DEMO_APP_KEY, JSON.stringify(demoApp)); } catch { /* storage unavailable */ }
+}
+
 
 function demoDocument(kind: PharmacyDocumentKind, file: File, path: string): ApplicationDocument {
   return { id: `demo-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, file_name: file.name, size_bytes: file.size, storage_path: path };
 }
 
 export async function loadApplication(): Promise<Application | null> {
-  if (!supabase) return demoApp ? { ...demoApp, documents: [...demoApp.documents] } : null;
+  if (!supabase) {
+    try { const raw = window.localStorage.getItem(DEMO_APP_KEY); if (raw) demoApp = JSON.parse(raw) as Application; } catch { /* keep memory */ }
+    return demoApp ? { ...demoApp, documents: [...demoApp.documents] } : null;
+  }
   const { data } = await supabase.rpc('my_pharmacy_application');
   return (data as Application | null) ?? null;
 }
@@ -78,6 +90,9 @@ export async function emailInUse(email: string): Promise<ApiResult<boolean>> {
 
 /** Creates the owner's sign-in. Owners aren't customers (the database checks account_type). */
 export async function createOwnerAccount(email: string, password: string, fullName: string): Promise<ApiResult> {
+  if (!supabase) {
+    try { window.localStorage.setItem(DEMO_EMAIL_KEY, normaliseEmail(email)); } catch { /* memory only */ }
+  }
   return attempt(async () => {
     const { data, error } = await client().auth.signUp({
       email: normaliseEmail(email),
@@ -116,6 +131,7 @@ export async function saveDetails(details: DetailsPayload): Promise<ApiResult<st
       documents: demoApp?.documents ?? [],
       payout: demoApp?.payout ?? null,
     };
+    persistDemoApp();
   }
   return attempt(async () => {
     const { data, error } = await client().rpc('save_pharmacy_details', { p_details: details as never });
@@ -157,6 +173,7 @@ export function uploadDocument(
         // A new licence replaces the old one of the same kind; shop-front photos add up.
         const others = kind === 'shop_front' ? demoApp.documents : demoApp.documents.filter((d) => d.kind !== kind);
         demoApp = { ...demoApp, documents: [...others, doc] };
+        persistDemoApp();
       }
       return { ok: true, value: doc.id };
     }
@@ -200,7 +217,10 @@ export function uploadDocument(
 }
 
 export async function removeDocument(id: string): Promise<ApiResult> {
-  if (!supabase && demoApp) demoApp = { ...demoApp, documents: demoApp.documents.filter((d) => d.id !== id) };
+  if (!supabase && demoApp) {
+    demoApp = { ...demoApp, documents: demoApp.documents.filter((d) => d.id !== id) };
+    persistDemoApp();
+  }
   return attempt(async () => {
     const { error } = await client().rpc('remove_pharmacy_document', { p_document_id: id });
     return error ? { ok: false, reason: OFFLINE } : { ok: true, value: undefined };
@@ -240,6 +260,7 @@ export async function resolveAccount(bank: Bank, accountNumber: string): Promise
       ...demoApp,
       payout: { bank_name: bank.name, bank_code: bank.code, account_number: accountNumber.replace(/\s/g, ''), account_name: `${demoPharmacyName.toUpperCase()} LTD`, verified: true },
     };
+    persistDemoApp();
   }
   return attempt(async () => {
     const { data, error } = await client().functions.invoke('paystack-resolve-account', {
@@ -265,6 +286,7 @@ export async function resolveAccount(bank: Bank, accountNumber: string): Promise
 export async function submitApplication(): Promise<ApiResult<string>> {
   if (!supabase && demoApp) {
     demoApp = { ...demoApp, pharmacy: { ...demoApp.pharmacy, application_status: 'submitted', submitted_at: new Date().toISOString() } };
+    persistDemoApp();
   }
   return attempt(async () => {
     const { data, error } = await client().rpc('submit_pharmacy_application');
