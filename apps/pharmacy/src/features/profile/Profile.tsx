@@ -51,9 +51,9 @@ export function Profile() {
   const left = Math.max(0, shiftEnd - now);
   const activeStaff = w.employees.filter((e) => e.active);
   const mine = w.activity.filter((a) => a.employee === w.staffName);
-  const fulfilled = 20 + mine.filter((a) => a.statuses.some((x) => ['Collected', 'Delivered', 'Accepted'].includes(x.label))).length - 3;
-  const declined = 4 + mine.filter((a) => a.statuses.some((x) => x.label === 'Declined')).length - 2;
-  const stockEdits = 7 + mine.filter((a) => a.kind === 'stock').length;
+  const fulfilled = (w.isNewPharmacy ? 0 : 17) + mine.filter((a) => a.statuses.some((x) => ['Collected', 'Delivered', 'Accepted'].includes(x.label))).length;
+  const declined = (w.isNewPharmacy ? 0 : 2) + mine.filter((a) => a.statuses.some((x) => x.label === 'Declined')).length;
+  const stockEdits = (w.isNewPharmacy ? 0 : 7) + mine.filter((a) => a.kind === 'stock').length;
 
   return (
     <Shell
@@ -82,7 +82,7 @@ export function Profile() {
                     <Text variant="h4" as="h2" color={cssVar.text.heading}>
                       {w.pharmacy}
                     </Text>
-                    <Badge label="Verified" tone="success" dot="left" />
+                    <Badge label={w.isNewPharmacy ? "Pending verification" : "Verified"} tone={w.isNewPharmacy ? "warning" : "success"} dot="left" />
                   </span>
                   <Button label="Edit Profile" variant="secondary" size="medium" iconLeft="setting" onPress={() => setEditing(true)} />
                 </div>
@@ -101,18 +101,18 @@ export function Profile() {
                   <Text variant="caption1" color={cssVar.text.secondary}>
                     PCN premises licence
                   </Text>
-                  <Badge label="Approved until 30-12-2027" tone="success" dot="left" />
+                  {w.isNewPharmacy ? <Text variant="caption1" color={cssVar.text.secondary}>Application pending review</Text> : <Badge label="Approved until 30-12-2027" tone="success" dot="left" />}
                   <Text variant="caption1" color={cssVar.text.secondary}>
                     Superintendent pharmacist
                   </Text>
                   <Text variant="caption1" color={cssVar.text.heading}>
-                    Yusuf Bilal · PCN 0081 4472
+                    {w.staffName}{w.superintendentPcn ? ` · PCN ${w.superintendentPcn}` : ''}
                   </Text>
                   <Text variant="caption1" color={cssVar.text.secondary}>
                     Payout account
                   </Text>
                   <Text variant="caption1" color={cssVar.text.heading}>
-                    Sterling Bank •••• 2345
+                    {w.payoutBank ? `${w.payoutBank} •••• ${w.payoutLast4}` : w.isNewPharmacy ? 'Not added yet' : 'Sterling Bank •••• 2345'}
                   </Text>
                 </div>
               </div>
@@ -195,10 +195,10 @@ export function Profile() {
                 <Button label="Earnings" variant="text" size="small" icon="chevron-right" onPress={() => router.push('/earnings')} />
               </div>
               <span className="mf-t-h2" style={{ color: cssVar.text.heading }}>
-                ₦42,900
+                {`₦${(w.transactions.filter(t => t.method !== 'Payout').reduce((sum, t) => sum + t.paidKobo, 0) / 100).toLocaleString('en-NG')}`}
               </span>
               <Text variant="caption1" color={cssVar.text.secondary}>
-                in sales · ₦28,600 online, ₦14,300 at the counter
+                {`${w.transactions.filter(t => t.method !== 'Payout').length} completed transactions`}
               </Text>
               <div className={s.divider} />
               <div className={c.between}>
