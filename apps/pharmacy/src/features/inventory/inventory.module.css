@@ -16,3 +16,8 @@
 .price { display: inline-flex; align-items: center; gap: 4px; height: 40px; padding: 0 12px; border-radius: 20px; border: 1px solid var(--mf-input-border); color: var(--mf-text-heading); max-width: 120px; box-sizing: border-box; }
 .price[data-error] { border-color: var(--mf-input-border-error); }
 .price input { width: 100%; border: 0; outline: none; background: none; color: inherit; }
+
+/* Catalogue lookup is a compact field, not a full-width page search. */
+.catalogueSearch { width: 100%; max-width: 440px; position: relative; }
+.catalogueSearch input { height: 44px; min-height: 44px; box-sizing: border-box; font-size: 14px; }
+@media (max-width: 600px) { .catalogueSearch { max-width: 100%; } }
