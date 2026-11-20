@@ -66,6 +66,20 @@ function persistDemoApp() {
 }
 
 
+/** Start a separate, blank pharmacy application when Create account is explicitly selected. */
+export function resetDemoSignup(): void {
+  if (supabase) return;
+  demoApp = null;
+  demoPharmacyName = '';
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.removeItem(DEMO_APP_KEY);
+      window.localStorage.removeItem(DEMO_EMAIL_KEY);
+    } catch { /* storage unavailable */ }
+  }
+  startNewPharmacyWorkspace('', '', '', '');
+}
+
 function demoDocument(kind: PharmacyDocumentKind, file: File, path: string): ApplicationDocument {
   return { id: `demo-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, file_name: file.name, size_bytes: file.size, storage_path: path };
 }
