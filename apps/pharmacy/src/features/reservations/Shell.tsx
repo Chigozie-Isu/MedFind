@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Icon, Logo, SideNav, Text, ThemeToggle, cssVar, pharmacyNavItems } from '@medfind/ui/web';
 import { dismissIncoming, useIncoming, useReservations } from './store';
 import { stockStatus, updateWorkspace, useWorkspace } from '../workspace/store';
-import { BannerStack, notify } from '../common/ui';
+import { notify } from '../common/ui';
 import s from './reservations.module.css';
 
 const hrefs: Record<string, string> = {
@@ -83,7 +83,7 @@ export function Shell({ active, heading, actions, children }: { active: NavKey; 
       </main>
       {bellOpen && <Notifications onClose={() => setBellOpen(false)} />}
       <IncomingToast />
-      <BannerStack />
+
     </div>
   );
 }
