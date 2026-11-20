@@ -1,7 +1,7 @@
 .top { display: grid; grid-template-columns: minmax(0, 448fr) minmax(0, 566fr); gap: 24px; align-items: stretch; }
 .leftCol { display: flex; flex-direction: column; gap: 24px; }
 .payout { position: relative; background: var(--mf-brand-subtle); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
-.payoutIcon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 96px; height: 96px; border-radius: 48px; display: grid; place-items: center; background: var(--mf-tone-error-bg); color: var(--mf-text-brand); }
+.payoutIcon { position: absolute; right: 16px; top: 24px; transform: none; width: 48px; height: 48px; border-radius: 24px; display: grid; place-items: center; background: var(--mf-tone-error-bg); color: var(--mf-text-brand); }
 .key { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 .chart { display: flex; gap: 12px; height: 260px; }
 .yAxis { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 28px; }
