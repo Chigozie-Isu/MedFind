@@ -52,8 +52,8 @@ function EarningsScreen() {
   const [tab, setTab] = useState<Tab>('all');
   const [hover, setHover] = useState<number | null>(null);
   const sales = w.transactions.filter((t) => t.method !== 'Payout');
-  const online = BASE_ONLINE + sales.filter(isOnline).reduce((t, x) => t + x.paidKobo, 0);
-  const counter = BASE_COUNTER + sales.filter((x) => x.method === 'Counter').reduce((t, x) => t + x.paidKobo, 0);
+  const online = (w.isNewPharmacy ? 0 : BASE_ONLINE) + sales.filter(isOnline).reduce((t, x) => t + x.paidKobo, 0);
+  const counter = (w.isNewPharmacy ? 0 : BASE_COUNTER) + sales.filter((x) => x.method === 'Counter').reduce((t, x) => t + x.paidKobo, 0);
   const total = online + counter;
   const fee = commissionKobo(total);
   const payoutDay = new Date(`${nextPayoutDate(new Date())}T12:00:00`);
@@ -61,7 +61,7 @@ function EarningsScreen() {
   const rows = w.transactions.filter((t) => (tab === 'all' ? true : tab === 'online' ? isOnline(t) : tab === 'counter' ? t.method === 'Counter' : t.method === 'Payout'));
   const paged = usePaged(rows, tab);
   const dates = weekDates();
-  const week = WEEK.map((d, i) => (i === 6 ? { ...d, online: d.online + sales.filter(isOnline).slice(0, 3).reduce((t, x) => t + x.paidKobo, 0) } : d));
+  const week = (w.isNewPharmacy ? WEEK.map(d => ({ ...d, online: 0, counter: 0 })) : WEEK).map((d, i) => (i === 6 ? { ...d, online: d.online + sales.filter(isOnline).slice(0, 3).reduce((t, x) => t + x.paidKobo, 0) } : d));
 
   return (
     <Shell
@@ -72,7 +72,7 @@ function EarningsScreen() {
             Earnings
           </Text>
           <Text variant="body3" color={cssVar.text.secondary}>
-            Paid every second Friday to Sterling Bank •••• 2345
+            {w.payoutBank ? `Paid every second Friday to ${w.payoutBank} •••• ${w.payoutLast4}` : w.isNewPharmacy ? 'Add your payout account to receive earnings' : 'Paid every second Friday to Sterling Bank •••• 2345'}
           </Text>
         </div>
       }
@@ -83,7 +83,7 @@ function EarningsScreen() {
           size="medium"
           iconLeft="upload"
           onPress={() =>
-            downloadCsv('fuasi-earnings.csv', [
+            downloadCsv(`${w.pharmacy.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'pharmacy'}-earnings.csv`, [
               ['Date', 'Time', 'Item', 'Payment method', 'Code', 'Paid (NGN)', 'Fee (NGN)'],
               ...rows.map((t) => [dmyOf(t.at), hhmmOf(t.at), t.item, t.method, t.code, t.paidKobo / 100, t.method === 'Payout' ? 0 : commissionKobo(t.paidKobo) / 100]),
             ])
@@ -138,7 +138,7 @@ function EarningsScreen() {
                     {formatNaira(online)}
                   </span>
                   <Text variant="caption1" color={cssVar.text.secondary}>
-                    Paid through MedFind · {61 + sales.filter(isOnline).length - 4} orders
+                    Paid through MedFind · {(w.isNewPharmacy ? 0 : 57) + sales.filter(isOnline).length} orders
                   </Text>
                 </section>
                 <section className={c.panel}>
@@ -149,7 +149,7 @@ function EarningsScreen() {
                     {formatNaira(counter)}
                   </span>
                   <Text variant="caption1" color={cssVar.text.secondary}>
-                    Marked paid by {w.pharmacy.split(' ')[0]} · {38 + sales.filter((x) => x.method === 'Counter').length - 3} orders
+                    Marked paid by {w.pharmacy.split(' ')[0]} · {(w.isNewPharmacy ? 0 : 35) + sales.filter((x) => x.method === 'Counter').length} orders
                   </Text>
                 </section>
               </div>
