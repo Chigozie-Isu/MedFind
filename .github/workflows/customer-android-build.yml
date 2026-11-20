@@ -1,0 +1,34 @@
+# Builds a new installable Android app (APK) for the customer app in Expo's cloud, on demand.
+# Run it from the Actions tab ("Customer Android app build" > Run workflow). The build page link
+# appears on expo.dev; open it on an Android phone to install. Free tier; needs EXPO_TOKEN.
+# Only needed when the installed APK is too old to receive updates; normal changes reach it
+# through the "Customer app Expo update" workflow.
+name: Customer Android app build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Start the Android build
+        working-directory: apps/customer
+        run: eas build --platform android --profile preview --non-interactive --no-wait

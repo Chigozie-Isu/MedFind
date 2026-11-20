@@ -10,6 +10,7 @@ import { ConfirmSheet, LinkRow, Screen, avatarGrace, kit, useFlash } from '../..
 import { ExtraIcon } from '../../features/demo/icons';
 import { demoAuth, setDemoSignedIn, supabase } from '../../lib/supabase';
 import { resetWebLocation } from '../../lib/deviceLocation';
+import { appVersionLabel } from '../../lib/appVersion';
 
 /** Puts the whole customer demo back to its starting data. */
 function resetDemo() {
@@ -96,10 +97,20 @@ export default function Settings() {
       <LinkRow icon="message" title="Help and Support" subtitle="Questions, chat and calls" onPress={() => router.push('/settings/help')} />
       <LinkRow extraIcon="refresh" title="Reset demo data" subtitle="Start the demo again from the beginning" onPress={() => setConfirm('reset')} />
 
-      <Button label="Sign Out" variant="destructive-secondary" iconLeft="chevron-left" fullWidth onPress={() => setConfirm('signout')} />
-      <Button label="Delete account" variant="destructive-inline" size="large" onPress={() => setConfirm('delete')} />
+      <View style={styles.danger}>
+        {/* Each button sits in its own View so the column can centre it (Button aligns itself to the start). */}
+        <View>
+          <Button label="Sign Out" variant="destructive-secondary" onPress={() => setConfirm('signout')} />
+        </View>
+        <View>
+          <Button label="Delete account" variant="destructive-inline" size="large" onPress={() => setConfirm('delete')} />
+        </View>
+      </View>
       <Text variant="caption2" color="tertiary" style={kit.center}>
         MedFind v.1.2.0 · LEGAL · CONTACT US
+      </Text>
+      <Text variant="caption2" color="tertiary" style={kit.center}>
+        {appVersionLabel()}
       </Text>
 
       <ConfirmSheet
@@ -136,6 +147,7 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
+  danger: { alignItems: 'center', gap: space.xs },
   flex: { flex: 1 },
   profile: { padding: space.md, borderRadius: radii.xl, gap: space.md },
   avatar: { width: 64, height: 64, borderRadius: radii.pill },
