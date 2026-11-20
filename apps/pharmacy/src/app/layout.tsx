@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Manrope, Poppins } from 'next/font/google';
 import { themeCss, themeInitScript } from '@medfind/ui/web';
 import './globals.css';
+import { BannerStack } from '../features/common/ui';
 
 // Headings use Poppins; body copy and buttons use Manrope.
 const poppins = Poppins({ variable: '--font-poppins', weight: ['600'], subsets: ['latin'] });
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <style dangerouslySetInnerHTML={{ __html: themeCss() }} />
       </head>
-      <body>{children}</body>
+      <body>{children}<BannerStack /></body>
     </html>
   );
 }
