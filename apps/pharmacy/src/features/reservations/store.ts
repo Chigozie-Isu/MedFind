@@ -172,7 +172,7 @@ let today: TodayLine[] = isFreshPharmacy() ? [] : SEED_TODAY;
 let todayCount = isFreshPharmacy() ? 0 : 25;
 
 const listeners = new Set<() => void>();
-const emit = () => listeners.forEach((l) => l());
+const emit = () => { persistDemoReservations(); listeners.forEach((l) => l()); };
 const subscribe = (l: () => void) => {
   listeners.add(l);
   return () => listeners.delete(l);
