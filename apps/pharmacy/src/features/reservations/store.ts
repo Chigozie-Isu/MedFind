@@ -194,7 +194,8 @@ function connect(): void {
       if (!r) return;
       update(p.id, { status: 'cancelled', doneAt: new Date() });
       pushToday(r, 'Cancelled', 'error');
-      notify(`${firstName(r.customerName)} cancelled ${r.ref}`, p.reason ? `Reason: ${p.reason}` : 'The medicine goes back into stock.', 'info');
+      logActivity({ kind: 'reservation', text: `${r.customerName} cancelled ${r.ref}${p.reason ? ` · Reason: ${p.reason}` : ''}`, statuses: [{ label: 'Cancelled', tone: 'error' }] });
+      notify('Reservation cancelled', `${r.customerName} cancelled ${r.ref}.${p.reason ? ` Reason: ${p.reason}` : ' The medicine goes back into stock.'}`, 'error');
     })
     .subscribe((status) => {
       // Ask the customer app for anything placed before this page opened.
