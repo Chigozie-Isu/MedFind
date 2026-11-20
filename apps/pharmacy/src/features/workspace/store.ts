@@ -273,6 +273,11 @@ export function addTransaction(t: Omit<Transaction, 'id' | 'at'>) {
   save({ ...state, transactions: [{ id: `t${Date.now()}`, at: new Date().toISOString(), ...t }, ...state.transactions] });
 }
 
+/** Blank pharmacy workspace for a newly registered demo owner. */
+export function startNewPharmacyWorkspace(pharmacy: string, staffName: string, address: string, phone: string) {
+  save({ ...initialState(), pharmacy, staffName, address, phone, items: [], activity: [], employees: [], shifts: [], transactions: [], notificationsRead: true, clockedInAt: new Date().toISOString() });
+}
+
 export function resetWorkspace() {
   save(initialState());
 }
