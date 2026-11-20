@@ -158,6 +158,7 @@ export function VerifyPhoneFlow({
       />
       <View style={styles.code}>
         <CodeInput
+          autoFocus
           length={OTP_LENGTH}
           value={s.code}
           onChangeText={(code) => setS((p) => ({ ...p, code, error: outOfTries ? p.error : null }))}

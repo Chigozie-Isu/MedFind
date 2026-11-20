@@ -177,3 +177,12 @@ The customer Saved, Notifications, Profile/Settings, Wallet, online payment, can
 | Medicine photos and mascots | Full resolution | 1x exports (Augmentin, Gestid, Grace, 4 mascots); other medicines keep the icon | Only the images in the linked frames were exported. |
 | Refunds | Every refund to the MedFind wallet | Wallet payments refund to the wallet; a card or transfer hold is shown as "released" because it was never charged | The demo only places holds until the pharmacist confirms. |
 
+
+## Customer Home – new user (Figma 363:7759)
+
+| Where | Figma | Code | Why |
+| --- | --- | --- | --- |
+| Greeting | "Grace" | The new customer's first name, taken from the start of their email (sign up doesn't ask for a name), or "there" | Sign up has only email, phone and password. |
+| Second button | "Take photo your of medication" | "Take a photo of your medication" (runs the demo pack scan) | Typo. |
+| Popular cards | "Actifed 50ml", "Kidswelll" | "Actifed" and "Kidswell" (added to the demo medicines); tapping searches for it | The demo stocks Actifed 100ml; "Kidswelll" is a typo. Photos are 1x exports. |
+| Verification code boxes | Tap a box to type | The code field opens the keyboard by itself and fills from the SMS on iPhone | Some Android phones wouldn't focus the old hidden field, so the code couldn't be typed. |

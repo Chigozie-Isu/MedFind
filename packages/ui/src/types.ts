@@ -87,6 +87,8 @@ export interface CodeInputProps {
   error?: boolean;
   secure?: boolean;
   accessibilityLabel?: string;
+  /** Open the keyboard as soon as the screen shows. */
+  autoFocus?: boolean;
 }
 
 export interface RadioProps {

@@ -169,6 +169,7 @@ export function CodeInput({
   error,
   secure,
   accessibilityLabel = 'Code',
+  autoFocus,
 }: CodeInputProps) {
   const { colors } = useTheme();
   const ref = useRef<ComponentRef<typeof TextInput>>(null);
@@ -180,7 +181,7 @@ export function CodeInput({
   for (let i = 0; i < length; i += g) groups.push(boxes.slice(i, i + g));
 
   return (
-    <Pressable onPress={() => ref.current?.focus()} accessibilityLabel={accessibilityLabel} style={styles.codeRow}>
+    <View style={styles.codeRow}>
       {groups.map((group, gi) => (
         <View key={gi} style={styles.codeRow}>
           {gi > 0 && (
@@ -208,10 +209,16 @@ export function CodeInput({
         onChangeText={(t) => onChangeText?.(t.replace(/\D/g, '').slice(0, length))}
         keyboardType="number-pad"
         maxLength={length}
-        style={styles.hiddenInput}
+        // The real input covers the boxes, so tapping any box opens the keyboard on every phone
+        // (a 1px off-screen input often won't take focus on Android).
+        style={[styles.hiddenInput, { color: 'transparent' }]}
+        caretHidden
+        autoFocus={autoFocus}
+        textContentType="oneTimeCode"
+        autoComplete="sms-otp"
         accessibilityLabel={accessibilityLabel}
       />
-    </Pressable>
+    </View>
   );
 }
 
@@ -249,5 +256,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  hiddenInput: { position: 'absolute', opacity: 0, width: 1, height: 1 },
+  hiddenInput: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.02, fontSize: 1 },
 });
