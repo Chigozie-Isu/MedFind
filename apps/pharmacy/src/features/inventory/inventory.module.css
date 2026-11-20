@@ -21,3 +21,8 @@
 .catalogueSearch { width: 100%; max-width: 440px; position: relative; }
 .catalogueSearch input { height: 44px; min-height: 44px; box-sizing: border-box; font-size: 14px; }
 @media (max-width: 600px) { .catalogueSearch { max-width: 100%; } }
+
+/* Keep the catalogue search a single compact row inside the vertical stack. */
+.catalogueSearch > label { flex: 0 0 44px; width: 100%; max-width: 440px; min-height: 44px; align-self: flex-start; }
+.catalogueSearch > label input { height: 42px; min-height: 0; }
+.catalogueSearch > label svg { width: 20px; height: 20px; flex-shrink: 0; }
