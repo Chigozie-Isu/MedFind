@@ -4,6 +4,7 @@
 import { normaliseEmail, type PharmacyApplicationStatus, type PharmacyDocumentKind } from '@medfind/core';
 import { attempt, client, OFFLINE, supabase, supabaseAnonKey, supabaseUrl, type ApiResult } from '../../lib/supabase';
 import { startNewPharmacyWorkspace, updateWorkspace } from '../workspace/store';
+import { startNewPharmacyReservations } from '../reservations/store';
 
 export interface ApplicationPharmacy {
   id: string;
@@ -78,6 +79,7 @@ export function resetDemoSignup(): void {
     } catch { /* storage unavailable */ }
   }
   startNewPharmacyWorkspace('', '', '', '');
+  startNewPharmacyReservations();
 }
 
 function demoDocument(kind: PharmacyDocumentKind, file: File, path: string): ApplicationDocument {
@@ -108,6 +110,7 @@ export async function createOwnerAccount(email: string, password: string, fullNa
   if (!supabase) {
     try { window.localStorage.setItem(DEMO_EMAIL_KEY, normaliseEmail(email)); } catch { /* memory only */ }
     startNewPharmacyWorkspace('', fullName.trim(), '', '');
+    startNewPharmacyReservations();
   }
   return attempt(async () => {
     const { data, error } = await client().auth.signUp({
