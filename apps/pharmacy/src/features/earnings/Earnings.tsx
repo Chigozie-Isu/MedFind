@@ -126,7 +126,7 @@ function EarningsScreen() {
                   </div>
                 </div>
                 <span className={s.payoutIcon}>
-                  <Icon name="wallet" size={48} />
+                  <Icon name="wallet" size={24} />
                 </span>
               </section>
               <div className={c.grid2}>
