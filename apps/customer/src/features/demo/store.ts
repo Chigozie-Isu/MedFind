@@ -126,12 +126,15 @@ const seedReservations = (now = Date.now()): DemoReservation[] => [
 ];
 let reservations = seedReservations();
 const RESERVATIONS_KEY = 'medfind.customer.reservations.v2';
+const RESERVATIONS_OWNER_KEY = 'medfind.customer.reservations.owner.v2';
+let activeReservationsOwner = 'demo-grace';
 let hydrated = false;
 export async function hydrateReservations(): Promise<void> {
   if (hydrated) return;
   hydrated = true;
   try {
-    const raw = await AsyncStorage.getItem(RESERVATIONS_KEY);
+    const [raw, owner] = await Promise.all([AsyncStorage.getItem(RESERVATIONS_KEY), AsyncStorage.getItem(RESERVATIONS_OWNER_KEY)]);
+    if (owner) activeReservationsOwner = owner;
     if (!raw) return;
     const stored = JSON.parse(raw) as DemoReservation[];
     reservations = stored.map(r => ({ ...r, placedAt: new Date(r.placedAt), readyAt: r.readyAt ? new Date(r.readyAt) : undefined, collectedAt: r.collectedAt ? new Date(r.collectedAt) : undefined, cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined }));
@@ -140,7 +143,7 @@ export async function hydrateReservations(): Promise<void> {
   } catch { /* fallback to seeded demo reservations */ }
 }
 function persistReservations() {
-  void AsyncStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations)).catch(() => {});
+  void Promise.all([AsyncStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations)), AsyncStorage.setItem(RESERVATIONS_OWNER_KEY, activeReservationsOwner)]).catch(() => {});
 }
 
 const listeners = new Set<() => void>();
@@ -154,6 +157,35 @@ const subscribe = (l: () => void) => {
 export function startNewCustomerReservations(): void {
   reservations = [];
   counter = 0;
+  persistReservations();
+  emit();
+}
+
+/** Restore the reservation history for the current demo identity only. */
+export async function switchDemoReservations(owner: string, fresh = false): Promise<void> {
+  const nextOwner = owner.trim().toLowerCase() || 'demo-grace';
+  if (nextOwner === activeReservationsOwner && !fresh) return;
+  try {
+    await AsyncStorage.setItem('medfind.customer.reservations.snapshot.' + activeReservationsOwner, JSON.stringify(reservations));
+    const raw = fresh ? null : await AsyncStorage.getItem('medfind.customer.reservations.snapshot.' + nextOwner);
+    if (raw) {
+      const stored = JSON.parse(raw) as DemoReservation[];
+      reservations = stored.map(r => ({
+        ...r,
+        placedAt: new Date(r.placedAt),
+        readyAt: r.readyAt ? new Date(r.readyAt) : undefined,
+        collectedAt: r.collectedAt ? new Date(r.collectedAt) : undefined,
+        cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined,
+      }));
+    } else {
+      reservations = nextOwner === 'demo-grace' ? seedReservations() : [];
+    }
+    counter = Math.max(0, ...reservations.map(r => Number(/^r(\d+)$/.exec(r.id)?.[1] ?? 0)));
+  } catch {
+    reservations = nextOwner === 'demo-grace' ? seedReservations() : [];
+    counter = 0;
+  }
+  activeReservationsOwner = nextOwner;
   persistReservations();
   emit();
 }
