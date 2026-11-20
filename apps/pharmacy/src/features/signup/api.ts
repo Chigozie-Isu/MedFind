@@ -148,7 +148,7 @@ export async function saveDetails(details: DetailsPayload): Promise<ApiResult<st
       payout: demoApp?.payout ?? null,
     };
     persistDemoApp();
-    updateWorkspace({ pharmacy: details.name, address: [details.street, details.area, details.city, details.state].filter(Boolean).join(', '), phone: details.phone, staffName: details.superintendent_name });
+    updateWorkspace({ pharmacy: details.name, address: [details.street, details.area, details.city, details.state].filter(Boolean).join(', '), phone: details.phone, staffName: details.superintendent_name, superintendentPcn: details.pcn_number });
   }
   return attempt(async () => {
     const { data, error } = await client().rpc('save_pharmacy_details', { p_details: details as never });
@@ -278,6 +278,7 @@ export async function resolveAccount(bank: Bank, accountNumber: string): Promise
       payout: { bank_name: bank.name, bank_code: bank.code, account_number: accountNumber.replace(/\s/g, ''), account_name: `${demoPharmacyName.toUpperCase()} LTD`, verified: true },
     };
     persistDemoApp();
+    updateWorkspace({ payoutBank: bank.name, payoutLast4: accountNumber.replace(/\s/g, '').slice(-4) });
   }
   return attempt(async () => {
     const { data, error } = await client().functions.invoke('paystack-resolve-account', {
