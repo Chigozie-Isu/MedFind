@@ -104,7 +104,7 @@ export function StepReview({
 }
 
 /** "Application submitted", with the owner's staff passcode shown once. */
-export function Submitted({ email, passcode, onDashboard }: { email: string; passcode: string | null; onDashboard: () => void }) {
+export function Submitted({ email, passcode, onDashboard, onCreateAnother }: { email: string; passcode: string | null; onDashboard: () => void; onCreateAnother?: () => void }) {
   const steps = [
     ['We check your licence and documents', 'Usually within 24 hours'],
     ['We email you the result', `At ${email}`],
@@ -142,6 +142,7 @@ export function Submitted({ email, passcode, onDashboard }: { email: string; pas
       </div>
       <div>
         <Button label="Go to dashboard" onPress={onDashboard} />
+        {onCreateAnother && <div style={{ marginTop: 12 }}><Button label="Create a new pharmacy account" variant="secondary" onPress={onCreateAnother} /></div>}
       </div>
     </div>
   );
