@@ -38,11 +38,16 @@ export function Dashboard() {
   const tick = useNow();
   useEffect(() => {
     if (!workspace.isNewPharmacy || workspace.verificationApproved) return;
+    const completed = [!!workspace.pharmacy, !!workspace.payoutLast4, workspace.items.length > 0, workspace.hoursConfigured === true].filter(Boolean).length;
+    if (completed < 3) return;
     const timer = window.setTimeout(() => {
       updateWorkspace({ verificationApproved: true });
       scheduleNewPharmacyDemoReservation();
-    }, 30000);
+    }, 5000);
     return () => window.clearTimeout(timer);
+  }, [workspace.isNewPharmacy, workspace.verificationApproved, workspace.pharmacy, workspace.payoutLast4, workspace.items.length, workspace.hoursConfigured]);
+  useEffect(() => {
+    if (workspace.isNewPharmacy && workspace.verificationApproved) scheduleNewPharmacyDemoReservation();
   }, [workspace.isNewPharmacy, workspace.verificationApproved]);
   const now = new Date(tick);
   const allReservations = useReservations();
@@ -65,7 +70,7 @@ export function Dashboard() {
   if (!tick) return null;
   const waitedMins = oldest ? Math.floor((now.getTime() - oldest.placedAt.getTime()) / 60_000) : 0;
 
-  if (workspace.isNewPharmacy && allReservations.length === 0) {
+  if (workspace.isNewPharmacy && !workspace.verificationApproved) {
     const steps = [
       { title: 'Create your account', description: 'Your pharmacy details are saved.', done: !!workspace.pharmacy, href: '/profile' },
       { title: 'Submit licence and documents', description: 'Your submitted documents are being reviewed.', done: !!workspace.verificationApproved, href: '/sign-up' },
