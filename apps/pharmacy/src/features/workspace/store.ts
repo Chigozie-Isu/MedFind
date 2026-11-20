@@ -83,6 +83,10 @@ export interface DayHours {
 
 export interface WorkspaceState {
   pharmacy: string;
+  isNewPharmacy?: boolean;
+  superintendentPcn?: string;
+  payoutBank?: string;
+  payoutLast4?: string;
   staffName: string;
   staffRole: Role;
   staffCode: string;
@@ -275,7 +279,7 @@ export function addTransaction(t: Omit<Transaction, 'id' | 'at'>) {
 
 /** Blank pharmacy workspace for a newly registered demo owner. */
 export function startNewPharmacyWorkspace(pharmacy: string, staffName: string, address: string, phone: string) {
-  save({ ...initialState(), pharmacy, staffName, address, phone, items: [], activity: [], employees: [], shifts: [], transactions: [], notificationsRead: true, clockedInAt: new Date().toISOString() });
+  save({ ...initialState(), pharmacy, staffName, address, phone, isNewPharmacy: true, superintendentPcn: '', payoutBank: '', payoutLast4: '', services: [], hours: { weekdays: { open: '09:00', close: '17:00', allDay: false }, saturday: { open: '09:00', close: '17:00', allDay: false }, sunday: { open: '09:00', close: '17:00', allDay: false }, holidays: { open: '09:00', close: '17:00', allDay: false } }, accepting: false, items: [], activity: [], employees: [], shifts: [], transactions: [], notificationsRead: true, clockedInAt: new Date().toISOString() });
 }
 
 export function resetWorkspace() {
