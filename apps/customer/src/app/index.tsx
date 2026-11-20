@@ -5,6 +5,7 @@ import { radii, sizes, space } from '@medfind/ui';
 import { Button, Icon, SearchField, Text, useTheme } from '@medfind/ui/native';
 import { currentCustomerId } from '../lib/supabase';
 import { ReservationRow, TabScreen } from '../features/demo/parts';
+import { NewUserHome } from '../features/demo/NewUserHome';
 import { ActiveCard } from '../features/demo/ActiveCard';
 import { isActive, useReservations } from '../features/demo/store';
 import { rememberSearch, setAccount, useAccount } from '../features/demo/account';
@@ -46,6 +47,14 @@ export default function Home() {
   const active = all.filter(isActive);
   const history = all.filter((r) => !isActive(r));
 
+  // Demo scan: "reads" a Paracetamol pack, then searches for it.
+  const scan = () => {
+    showFlash('Scanned: Paracetamol 500mg pack', 'success');
+    setTimeout(() => search('Paracetamol'), 900);
+  };
+  const firstName =
+    account.profile.fullName?.trim().split(/\s+/)[0] || nameFromEmail(account.profile.email) || 'there';
+
   const search = (q: string) => {
     if (!q.trim()) return router.push('/search');
     rememberSearch(q);
@@ -60,7 +69,7 @@ export default function Home() {
             <Text variant="label1" color="secondary">
               {greeting()}
             </Text>
-            <Text variant="h1">{account.profile.fullName?.trim().split(/\s+/)[0] || 'there'}</Text>
+            <Text variant="h1">{firstName}</Text>
           </View>
           <View style={styles.headerIcons}>
             <Pressable accessibilityLabel="Notifications" accessibilityRole="button" onPress={() => router.push('/notifications')}>
@@ -85,11 +94,7 @@ export default function Home() {
           <Pressable
             accessibilityLabel="Scan a medicine pack"
             accessibilityRole="button"
-            onPress={() => {
-              // Demo scan: "reads" a Paracetamol pack, then searches for it.
-              showFlash('Scanned: Paracetamol 500mg pack', 'success');
-              setTimeout(() => search('Paracetamol'), 900);
-            }}
+            onPress={scan}
             style={[styles.scan, { borderColor: colors.text.body }]}
           >
             <Icon name="camera" size={sizes.icon.lg} color={colors.icon.default} />
@@ -139,6 +144,9 @@ export default function Home() {
                 ))}
               </View>
             )}
+            {history.length === 0 && active.length === 0 ? (
+              <NewUserHome onSearch={search} onScan={scan} />
+            ) : (
             <View style={styles.history}>
               <SectionTitle action={history.length ? 'View all' : undefined} onAction={() => router.navigate('/reservations')}>
                 History
@@ -154,6 +162,7 @@ export default function Home() {
                 history.slice(0, 3).map((r) => <ReservationRow key={r.id} r={r} />)
               )}
             </View>
+            )}
           </>
         )}
       </ScrollView>
@@ -162,6 +171,12 @@ export default function Home() {
   );
 }
 
+
+/** A new customer hasn't given a name yet, so "grace.okafor@…" greets them as Grace. */
+function nameFromEmail(email: string | undefined): string {
+  const word = (email ?? '').split('@')[0].split(/[._\-+\d]/)[0];
+  return word.length > 1 ? word[0].toUpperCase() + word.slice(1).toLowerCase() : '';
+}
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },

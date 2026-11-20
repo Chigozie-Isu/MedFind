@@ -64,6 +64,8 @@ export const medicines: DemoMedicine[] = [
   { id: 'ors', name: 'Emzor ORS sachets', short: 'Emzor ORS' },
   { id: 'ventolin', name: 'Ventolin Inhaler 100mcg', short: 'Ventolin Inhaler' },
   { id: 'flagyl', name: 'Flagyl 400mg', short: 'Flagyl', rx: true },
+  // "What others are searching for" on Home – new user (Figma 363:7759).
+  { id: 'kidswell', name: 'Kidswell multivitamin gummies', short: 'Kidswell' },
 ];
 
 const stock = (pharmacyId: string, medicineId: string, naira: number, quantityInStock = 20): DemoInventory => ({
@@ -91,6 +93,7 @@ const prices: [string, number | null, number | null, number | null][] = [
   ['ors', 1000, 1050, 1000],
   ['ventolin', 5000, 4800, null],
   ['flagyl', null, 1800, 1850],
+  ['kidswell', 4500, 4300, null],
 ];
 
 /** Low stock as drawn in Figma (Mediguy has 3 Augmentin) and in the seed. */

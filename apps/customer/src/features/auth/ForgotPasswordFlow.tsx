@@ -167,6 +167,7 @@ export function ForgotPasswordFlow({
         />
         <View style={styles.code}>
           <CodeInput
+            autoFocus
             length={OTP_LENGTH}
             value={s.code}
             onChangeText={(code) => patch({ code, codeError: outOfTries ? s.codeError : null })}
