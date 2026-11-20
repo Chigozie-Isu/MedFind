@@ -45,14 +45,18 @@ export function Dashboard() {
     return () => window.clearTimeout(timer);
   }, [workspace.isNewPharmacy, workspace.verificationApproved]);
   const now = new Date(tick);
-  const waiting = useReservations()
+  const allReservations = useReservations();
+  const waiting = allReservations
     .filter((r) => r.status === 'review')
     .sort((a, b) => a.placedAt.getTime() - b.placedAt.getTime());
   const oldest = waiting[0];
   const todaySales = workspace.transactions.filter(t => t.method !== 'Payout' && new Date(t.at).toDateString() === now.toDateString());
   const salesValue = todaySales.reduce((sum, t) => sum + t.paidKobo, 0);
+  const completedToday = allReservations.filter(r => ['collected', 'delivered'].includes(r.status) && r.doneAt?.toDateString() === now.toDateString()).length;
+  const onlineSales = todaySales.filter(t => t.method.startsWith('Online')).reduce((sum, t) => sum + t.paidKobo, 0);
+  const counterSales = todaySales.filter(t => t.method === 'Counter').reduce((sum, t) => sum + t.paidKobo, 0);
   const cards = workspace.isNewPharmacy ? [
-    { title: 'Collected today', value: String(todaySales.length), insight: 'Completed reservations', href: '/activity' },
+    { title: 'Collected today', value: String(completedToday), insight: 'Completed reservations', href: '/activity' },
     { title: 'Sales today', value: `₦${(salesValue / 100).toLocaleString('en-NG')}`, insight: `${todaySales.length} completed sales`, href: '/earnings' },
     { title: 'Avg reply time', value: '—', insight: 'No reservations yet', href: '/reservations' },
   ] : insights;
@@ -61,7 +65,7 @@ export function Dashboard() {
   if (!tick) return null;
   const waitedMins = oldest ? Math.floor((now.getTime() - oldest.placedAt.getTime()) / 60_000) : 0;
 
-  if (workspace.isNewPharmacy) {
+  if (workspace.isNewPharmacy && allReservations.length === 0) {
     const steps = [
       { title: 'Create your account', description: 'Your pharmacy details are saved.', done: !!workspace.pharmacy, href: '/profile' },
       { title: 'Submit licence and documents', description: 'Your submitted documents are being reviewed.', done: !!workspace.verificationApproved, href: '/sign-up' },
@@ -167,7 +171,7 @@ export function Dashboard() {
               What patients within 5 km searched for in the last 7 days
             </Text>
           </div>
-          {trending.map((t) => (
+          {trending.map((t) => { const match = workspace.items.find(i => `${i.brand} ${i.generic} ${i.dosage}`.toLowerCase().includes(t.name.split(' ')[0].toLowerCase())); const label = !match ? 'Not stocked' : match.quantity === 0 ? 'Out of stock' : match.quantity <= 10 ? 'Low stock' : 'In stock'; const tone = !match || match.quantity === 0 ? 'error' : match.quantity <= 10 ? 'warning' : 'success'; return (
             <div key={t.name} className={s.row}>
               <span className={s.thumb}>
                 <Icon name="box" />
@@ -186,11 +190,11 @@ export function Dashboard() {
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 16 }}>
-                <Badge label={t.stock[0]} tone={t.stock[1]} dot="left" />
-                <Button label={t.action} variant="text" size="small" iconLeft={t.action === 'Add stock' ? 'add' : undefined} icon={t.action === 'Restock' ? 'chevron-right' : undefined} onPress={() => router.push(t.action === 'Add stock' ? '/inventory/add' : '/inventory?tab=low')} />
+                <Badge label={label} tone={tone} dot="left" />
+                <Button label={match ? 'Restock' : 'Add stock'} variant="text" size="small" iconLeft={!match ? 'add' : undefined} icon={match ? 'chevron-right' : undefined} onPress={() => router.push(match ? '/inventory?tab=low' : '/inventory/add')} />
               </div>
             </div>
-          ))}
+          ); })}
         </section>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -201,14 +205,14 @@ export function Dashboard() {
                   Today so far
                 </span>
                 <Text variant="h2" color={cssVar.text.heading}>
-                  ₦42,900
+                  {workspace.isNewPharmacy ? `₦${(salesValue / 100).toLocaleString('en-NG')}` : '₦42,900'}
                 </Text>
                 <Text variant="label1" color={cssVar.text.secondary}>
-                  in sales · ₦28,600 online, ₦14,300 at the counter
+                  {workspace.isNewPharmacy ? `in sales · ₦${(onlineSales / 100).toLocaleString('en-NG')} online, ₦${(counterSales / 100).toLocaleString('en-NG')} at the counter` : 'in sales · ₦28,600 online, ₦14,300 at the counter'}
                 </Text>
                 <span className={s.row} style={{ gap: 8, color: cssVar.text.secondary }}>
                   <Icon name="wallet" size={16} />
-                  <Text variant="label1">Next payout Friday 27 Nov · ₦196,950</Text>
+                  <Text variant="label1">{workspace.isNewPharmacy ? `Next payout · ₦${(salesValue * 0.95 / 100).toLocaleString('en-NG')}` : 'Next payout Friday 27 Nov · ₦196,950'}</Text>
                 </span>
               </div>
               <Button label="Earnings" variant="text" size="small" icon="chevron-right" onPress={() => router.push('/earnings')} />
