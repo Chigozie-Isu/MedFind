@@ -14,6 +14,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 /** Null in demo mode, so every call below takes its demo path. */
 const supabase = demoAuth ? null : realSupabase;
 
+/** True when codes are simulated (no Supabase, or the hosted web demo): no real SMS or email is sent. */
+export const codesAreSimulated = !supabase;
+/** The code the simulated SMS "sends". Any 6 digits are accepted. */
+export const DEMO_CODE = '123456';
+
 export type ApiResult<T = void> = { ok: true; value: T } | { ok: false; reason: string; lockedSeconds?: number };
 
 const NOT_SET_UP = 'MedFind isn’t connected yet. Add the Supabase settings in apps/customer/.env.local.';

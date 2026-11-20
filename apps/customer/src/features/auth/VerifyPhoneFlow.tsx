@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   formatPhoneInternational,
@@ -11,7 +11,7 @@ import {
 } from '@medfind/core';
 import { sizes, space } from '@medfind/ui';
 import { Button, CodeInput, Icon, Text, useTheme } from '@medfind/ui/native';
-import { sendEmailCode, sendPhoneCode, signedUpEmail, verifyEmailCode, verifyPhoneCode } from './authApi';
+import { codesAreSimulated, DEMO_CODE, sendEmailCode, sendPhoneCode, signedUpEmail, verifyEmailCode, verifyPhoneCode } from './authApi';
 import { AuthHeader, AuthScreen, authStyles, BackButton, CodeError, StepBar, TimerPill, UnderlineLink, useCountdown, useToast } from './parts';
 
 export interface VerifyState {
@@ -62,11 +62,26 @@ export function VerifyPhoneFlow({
   const outOfTries = s.triesUsed >= OTP_MAX_TRIES;
   const destination = s.channel === 'email' && s.email ? maskEmail(s.email) : formatPhoneInternational(phone);
 
+  // Simulated SMS: there's no real text message in the demo, so the code arrives on screen
+  // and fills itself in. Typing any 6 digits still works.
+  useEffect(() => {
+    if (!codesAreSimulated || demo || s.verified) return;
+    const t = setTimeout(() => {
+      setS((p) => (p.code ? p : { ...p, code: DEMO_CODE }));
+      showToast(`Demo text message: your MedFind code is ${DEMO_CODE}`, 'info');
+    }, 1500);
+    return () => clearTimeout(t);
+    // Runs again when a new code is "sent" (channel or tries reset).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.channel, s.resendIn]);
+
   const verify = async () => {
-    if (!isCompleteCode(s.code) || outOfTries || demo) return;
-    setS((p) => ({ ...p, verifying: true, error: null }));
+    // In the demo, Verify always moves on, even if the boxes couldn't be typed into.
+    const code = codesAreSimulated && !demo && !isCompleteCode(s.code) ? DEMO_CODE : s.code;
+    if (!isCompleteCode(code) || outOfTries || demo) return;
+    setS((p) => ({ ...p, code, verifying: true, error: null }));
     const res =
-      s.channel === 'email' && s.email ? await verifyEmailCode(s.email, s.code) : await verifyPhoneCode(phone, s.code);
+      s.channel === 'email' && s.email ? await verifyEmailCode(s.email, code) : await verifyPhoneCode(phone, code);
     if (res.ok) return setS((p) => ({ ...p, verifying: false, verified: true }));
     if (res.reason === 'bad_code') {
       const triesUsed = s.triesUsed + 1;
