@@ -85,6 +85,7 @@ export interface WorkspaceState {
   pharmacy: string;
   isNewPharmacy?: boolean;
   hoursConfigured?: boolean;
+  verificationApproved?: boolean;
   superintendentPcn?: string;
   payoutBank?: string;
   payoutLast4?: string;
@@ -244,7 +245,7 @@ function hydrate() {
       const application = JSON.parse(applicationRaw) as { pharmacy?: { name?: string; phone?: string; street?: string; area?: string; city?: string; state?: string; superintendent_name?: string; pcn_number?: string }; payout?: { bank_name?: string; account_number?: string } };
       const p = application.pharmacy;
       if (p?.name && (!state.isNewPharmacy || state.pharmacy !== p.name)) {
-        state = { ...initialState(), pharmacy: p.name, staffName: p.superintendent_name || '', superintendentPcn: p.pcn_number || '', address: [p.street, p.area, p.city, p.state].filter(Boolean).join(', '), phone: p.phone || '', isNewPharmacy: true, hoursConfigured: false, payoutBank: application.payout?.bank_name || '', payoutLast4: application.payout?.account_number?.slice(-4) || '', services: [], accepting: false, hours: { weekdays: { open: '', close: '', allDay: false }, saturday: { open: '', close: '', allDay: false }, sunday: { open: '09:00', close: '17:00', allDay: false }, holidays: { open: '09:00', close: '17:00', allDay: false } }, items: [], activity: [], employees: [], shifts: [], transactions: [], notificationsRead: true, clockedInAt: new Date().toISOString() };
+        state = { ...initialState(), pharmacy: p.name, staffName: p.superintendent_name || '', superintendentPcn: p.pcn_number || '', address: [p.street, p.area, p.city, p.state].filter(Boolean).join(', '), phone: p.phone || '', isNewPharmacy: true, hoursConfigured: false, payoutBank: application.payout?.bank_name || '', payoutLast4: application.payout?.account_number?.slice(-4) || '', services: [], accepting: false, hours: { weekdays: { open: '', close: '', allDay: false }, saturday: { open: '', close: '', allDay: false }, sunday: { open: '', close: '', allDay: false }, holidays: { open: '', close: '', allDay: false } }, items: [], activity: [], employees: [], shifts: [], transactions: [], notificationsRead: true, clockedInAt: new Date().toISOString() };
         window.localStorage.setItem(KEY, JSON.stringify(state));
       }
     }
