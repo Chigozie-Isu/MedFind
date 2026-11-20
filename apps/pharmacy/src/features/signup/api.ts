@@ -3,6 +3,7 @@
 /** Supabase calls for the 4 pharmacy sign-up steps. Rules live in @medfind/core and the database. */
 import { normaliseEmail, type PharmacyApplicationStatus, type PharmacyDocumentKind } from '@medfind/core';
 import { attempt, client, OFFLINE, supabase, supabaseAnonKey, supabaseUrl, type ApiResult } from '../../lib/supabase';
+import { startNewPharmacyWorkspace, updateWorkspace } from '../workspace/store';
 
 export interface ApplicationPharmacy {
   id: string;
@@ -92,6 +93,7 @@ export async function emailInUse(email: string): Promise<ApiResult<boolean>> {
 export async function createOwnerAccount(email: string, password: string, fullName: string): Promise<ApiResult> {
   if (!supabase) {
     try { window.localStorage.setItem(DEMO_EMAIL_KEY, normaliseEmail(email)); } catch { /* memory only */ }
+    startNewPharmacyWorkspace('', fullName.trim(), '', '');
   }
   return attempt(async () => {
     const { data, error } = await client().auth.signUp({
@@ -132,6 +134,7 @@ export async function saveDetails(details: DetailsPayload): Promise<ApiResult<st
       payout: demoApp?.payout ?? null,
     };
     persistDemoApp();
+    updateWorkspace({ pharmacy: details.name, address: [details.street, details.area, details.city, details.state].filter(Boolean).join(', '), phone: details.phone, staffName: details.superintendent_name });
   }
   return attempt(async () => {
     const { data, error } = await client().rpc('save_pharmacy_details', { p_details: details as never });
