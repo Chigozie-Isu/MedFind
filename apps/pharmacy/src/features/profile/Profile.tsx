@@ -77,14 +77,14 @@ export function Profile() {
             <section className={s.card}>
               <Cover w={w} />
               <div className={s.cardBody}>
-                <div className={c.between}>
-                  <span className={c.row8} style={{ gap: 16 }}>
-                    <Text variant="h4" as="h2" color={cssVar.text.heading}>
+                <div className={c.between} style={{ gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <span className={c.row8} style={{ gap: 8, flexWrap: "wrap", minWidth: 0 }}>
+                    <Text variant="body1" as="h2" color={cssVar.text.heading}>
                       {w.pharmacy}
                     </Text>
-                    <Badge label={w.isNewPharmacy ? "Pending verification" : "Verified"} tone={w.isNewPharmacy ? "warning" : "success"} dot="left" />
+                    <span style={{ fontSize: 12, lineHeight: "18px" }}><Badge label={w.isNewPharmacy && !w.verificationApproved ? "Pending verification" : "Verified"} tone={w.isNewPharmacy && !w.verificationApproved ? "warning" : "success"} dot="left" /></span>
                   </span>
-                  <Button label="Edit Profile" variant="secondary" size="medium" iconLeft="setting" onPress={() => setEditing(true)} />
+                  <span style={{ flexShrink: 0 }}><Button label="Edit Profile" variant="secondary" size="small" iconLeft="setting" onPress={() => setEditing(true)} /></span>
                 </div>
                 <Text variant="caption1" color={cssVar.text.secondary}>
                   {w.address} · {w.phone}
