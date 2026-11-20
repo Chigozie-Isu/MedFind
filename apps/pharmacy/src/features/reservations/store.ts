@@ -135,13 +135,14 @@ export function scheduleNewPharmacyDemoReservation() {
   if (typeof window === 'undefined' || demoInfluxScheduled) return;
   demoInfluxScheduled = true;
   const names = ['Ada Okafor', 'Chinedu Obi', 'Zainab Musa', 'Tomi Adeyemi', 'Ngozi Eze', 'Ibrahim Bello'];
-  const medicines = ['Paracetamol 500 mg', 'Cetirizine 10 mg', 'Amoxicillin 500 mg', 'Amlodipine 5 mg', 'Metformin 500 mg', 'Loratadine 10 mg'];
+  const medicines = ['Paracetamol 500 mg', 'Amoxicillin 500 mg', 'Amlodipine 5 mg', 'Cetirizine 10 mg', 'Metformin 500 mg', 'Loratadine 10 mg'];
   names.forEach((customerName, index) => {
     window.setTimeout(() => {
       const id = 'demo-new-' + String(index + 1).padStart(3, '0');
       if (reservations.some(r => r.id === id)) return;
       const stocked = getWorkspace().items[index % Math.max(1, getWorkspace().items.length)];
-      const r = sample({ id, customerName, medicineName: stocked ? stocked.brand + ' ' + stocked.dosage : medicines[index], quantity: 1 + index % 2, naira: stocked ? stocked.priceKobo / 100 : 1200 + index * 450, minutesAgo: 0, payment: index % 2 ? 'online' : 'counter', fulfilment: index % 3 === 0 ? 'delivery' : 'pickup' }, Date.now());
+      const prescription = index === 1 || index === 2 || index === 4;
+      const r = sample({ id, customerName, medicineName: prescription ? medicines[index] : stocked ? stocked.brand + ' ' + stocked.dosage : medicines[index], kind: prescription ? 'prescription' : 'otc', patient: prescription ? 'Prescription submitted for pharmacist review' : undefined, quantity: 1 + index % 2, naira: stocked ? stocked.priceKobo / 100 : 1200 + index * 450, minutesAgo: 0, payment: index % 2 ? 'online' : 'counter', fulfilment: index % 3 === 0 ? 'delivery' : 'pickup' }, Date.now());
       reservations = [r, ...reservations];
       emit();
       announce(r);
