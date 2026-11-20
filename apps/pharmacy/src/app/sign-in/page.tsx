@@ -38,7 +38,7 @@ export default function SignInPage() {
         <ShiftEnded />
       </Suspense>
       <SignInFlow
-        onSignedIn={(outcome) => router.replace(outcome === 'resume_sign_up' ? '/sign-up' : supabase ? '/' : '/dashboard')}
+        onSignedIn={(outcome) => router.replace(outcome === 'resume_sign_up' ? '/sign-up' : '/dashboard')}
         onForgotPassword={() => router.push('/forgot-password')}
       />
     </>
