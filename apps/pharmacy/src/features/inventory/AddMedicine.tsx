@@ -8,6 +8,7 @@ import { Shell } from '../reservations/Shell';
 import { getWorkspace, updateWorkspace } from '../workspace/store';
 import { PageHeading, SearchBox, notify } from '../common/ui';
 import c from '../common/common.module.css';
+import s from './inventory.module.css';
 
 /** The MedFind catalogue the search box looks in (demo list). */
 const CATALOGUE = [
@@ -102,7 +103,7 @@ export function AddMedicine() {
           </Text>
           <Button label="Bulk add" variant="secondary" size="small" iconLeft="add" onPress={() => router.push('/inventory/bulk')} />
         </div>
-        <div className={c.stack8} style={{ maxWidth: 680, position: 'relative' }}>
+        <div className={`${c.stack8} ${s.catalogueSearch}`}>
           <Text variant="h5" as="h2" color={cssVar.text.heading}>
             Find it in the catalogue
           </Text>
@@ -111,7 +112,7 @@ export function AddMedicine() {
             Pick a match and we fill in the pack sizes and whether it needs a prescription.
           </Text>
           {q.trim().length >= 2 && (
-            <div className={c.menu} style={{ top: 84, left: 0, right: 'auto', width: '100%', maxWidth: 520 }}>
+            <div className={c.menu} style={{ top: 84, left: 0, right: 0, width: '100%' }}>
               {matches.length ? (
                 matches.map((m) => (
                   <button
