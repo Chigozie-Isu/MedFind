@@ -10,6 +10,8 @@
 import { parseLoginIdentifier, type LoginIdentifier } from '@medfind/core';
 import { demoAuth, setDemoSignedIn, supabase as realSupabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { switchDemoAccount } from '../demo/account';
+import { switchDemoReservations } from '../demo/store';
 
 /** Null in demo mode, so every call below takes its demo path. */
 const supabase = demoAuth ? null : realSupabase;
@@ -63,7 +65,11 @@ export function isLogInFailure(reason: string): reason is LogInFailure {
 export async function logIn(rawIdentifier: string, password: string): Promise<ApiResult> {
   const id = parseLoginIdentifier(rawIdentifier);
   if (!id) return { ok: false, reason: 'phone_not_found' };
-  if (!supabase) await setDemoSignedIn(true);
+  if (!supabase) {
+    await switchDemoAccount(id.value);
+    await switchDemoReservations(id.value);
+    await setDemoSignedIn(true);
+  }
   return attempt(async () => {
     const sb = client();
     const { data: pre, error: preError } = await sb.rpc('sign_in_precheck', { p_identifier: id.value });
