@@ -172,6 +172,26 @@ let today: TodayLine[] = isFreshPharmacy() ? [] : SEED_TODAY;
 let todayCount = isFreshPharmacy() ? 0 : 25;
 
 const listeners = new Set<() => void>();
+const HISTORY_KEY = 'medfind.pharmacy.demo.history.v3';
+function persistDemoReservations() {
+  if (typeof window === 'undefined' || !isFreshPharmacy()) return;
+  try { window.localStorage.setItem(HISTORY_KEY, JSON.stringify(reservations)); } catch { /* optional storage */ }
+}
+function restoreDemoReservations() {
+  if (typeof window === 'undefined' || !isFreshPharmacy()) return;
+  try {
+    const stored = window.localStorage.getItem(HISTORY_KEY);
+    if (!stored) return;
+    reservations = (JSON.parse(stored) as PharmacyReservation[]).map(r => ({
+      ...r,
+      placedAt: new Date(r.placedAt),
+      readyAt: r.readyAt ? new Date(r.readyAt) : undefined,
+      doneAt: r.doneAt ? new Date(r.doneAt) : undefined,
+      outAt: r.outAt ? new Date(r.outAt) : undefined,
+    }));
+  } catch { /* optional storage */ }
+}
+restoreDemoReservations();
 const emit = () => { persistDemoReservations(); listeners.forEach((l) => l()); };
 const subscribe = (l: () => void) => {
   listeners.add(l);
