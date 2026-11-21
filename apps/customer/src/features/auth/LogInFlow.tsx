@@ -44,7 +44,7 @@ export function LogInFlow({
   demo?: boolean;
   /** Demo only: Google or Apple signs straight in as the demo customer. */
   onSocial?: (provider: 'Google' | 'Apple') => void;
-  onLoggedIn: () => void;
+  onLoggedIn: (identifier: string) => void;
   onSignUp: () => void;
   onForgotPassword: () => void;
 }) {
@@ -71,7 +71,7 @@ export function LogInFlow({
     if (demo) return;
     setS((p) => ({ ...p, loading: true, errors: {} }));
     const res = await logIn(s.identifier, s.password);
-    if (res.ok) return onLoggedIn();
+    if (res.ok) return onLoggedIn(s.identifier);
     if (isLogInFailure(res.reason)) {
       setS((p) => ({
         ...p,
